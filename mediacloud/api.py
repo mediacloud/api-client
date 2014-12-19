@@ -126,12 +126,16 @@ class MediaCloud(object):
                  'rows': rows
                 }) 
 
-    def story(self, stories_id, raw_1st_download=False, corenlp=False):
+    def story(self, stories_id, raw_1st_download=False, corenlp=False, text=False, sentences=False):
         '''
         Details about one story
         '''
         return self._queryForJson(self.V2_API_URL+'stories/single/'+str(stories_id),
-                {'raw_1st_download': 1 if raw_1st_download else 0, 'corenlp': 1 if corenlp else 0} )[0]
+                {'raw_1st_download': 1 if raw_1st_download else 0,
+                 'corenlp': 1 if corenlp else 0,
+                 'text': 1 if text else 0,
+                 'sentences': 1 if sentences else 0
+                })[0]
 
     def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20, 
                   raw_1st_download=False, corenlp=False, show_sentences=True, show_text=True):
