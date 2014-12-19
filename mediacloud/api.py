@@ -126,12 +126,16 @@ class MediaCloud(object):
                  'rows': rows
                 }) 
 
-    def story(self, stories_id, raw_1st_download=False, corenlp=False):
+    def story(self, stories_id, raw_1st_download=False, corenlp=False, text=False, sentences=False):
         '''
         Details about one story
         '''
         return self._queryForJson(self.V2_API_URL+'stories/single/'+str(stories_id),
-                {'raw_1st_download': 1 if raw_1st_download else 0, 'corenlp': 1 if corenlp else 0} )[0]
+                {'raw_1st_download': 1 if raw_1st_download else 0,
+                 'corenlp': 1 if corenlp else 0,
+                 'text': 1 if text else 0,
+                 'sentences': 1 if sentences else 0
+                })[0]
 
     def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20, 
                   raw_1st_download=False, corenlp=False, show_sentences=True, show_text=True):
@@ -320,9 +324,10 @@ class MediaCloud(object):
         if r.status_code is not 200:
             self._logger.error('Bad HTTP response to '+r.url +' : '+str(r.status_code)  + ' ' +  str( r.reason) )
             self._logger.error('\t' + r.content )
-            msg = 'Error - got a HTTP status code of %s with the message "%s"' % (
+            msg = 'Error - got a HTTP status code of %s with the message "%s", body: %s' % (
                 str(r.status_code)
                 , str(r.reason)
+                , str(r.text)
             )
             raise mediacloud.error.MCException(msg, r.status_code)
         return r
