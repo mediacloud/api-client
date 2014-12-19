@@ -320,9 +320,10 @@ class MediaCloud(object):
         if r.status_code is not 200:
             self._logger.error('Bad HTTP response to '+r.url +' : '+str(r.status_code)  + ' ' +  str( r.reason) )
             self._logger.error('\t' + r.content )
-            msg = 'Error - got a HTTP status code of %s with the message "%s"' % (
+            msg = 'Error - got a HTTP status code of %s with the message "%s", body: %s' % (
                 str(r.status_code)
                 , str(r.reason)
+                , str(r.text)
             )
             raise mediacloud.error.MCException(msg, r.status_code)
         return r
