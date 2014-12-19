@@ -1,9 +1,9 @@
 language: python
 python:
     - "2.7"
-    - "3.2"
-    - "3.3"
-    - "3.4"
+    # - "3.2"
+    # - "3.3"
+    # - "3.4"
 env:
     global:
         - secure: "B+x0vkhdhEmE+U+c6FrHAmAcq20KWz+cVgk58yKSpGIFam2FTatrXVO1VD1rBnOzmSU7GJwmbkUA5wzO+LhZOLd7eiU5S8cqQdIjGjh1JmmM50td/DLNU7kPGsEVurgAWh924/S8rUEVP+wMCgqYmu/P6uQlafArai+isBU5eFA="
