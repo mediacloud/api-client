@@ -12,7 +12,7 @@ before_install:
     - cp mc-client.config.template mc-client.config
     - sed -i "s/api_v2_key/$MC_API_KEY/" mc-client.config
 install:
-    - pip install .
-    - pip install -r requirements.txt
+    - pip install --allow-external pypubsub .
+    - pip install --allow-external pypubsub -r requirements.txt
 script:
     - python test.py
