@@ -1,4 +1,4 @@
 requests
 pypubsub
 pymongo
-couchdb-python
+couchdb
