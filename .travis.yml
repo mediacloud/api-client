@@ -8,6 +8,12 @@ env:
     global:
         - secure: "B+x0vkhdhEmE+U+c6FrHAmAcq20KWz+cVgk58yKSpGIFam2FTatrXVO1VD1rBnOzmSU7GJwmbkUA5wzO+LhZOLd7eiU5S8cqQdIjGjh1JmmM50td/DLNU7kPGsEVurgAWh924/S8rUEVP+wMCgqYmu/P6uQlafArai+isBU5eFA="
 before_install:
+    # Install MongoDB for storage tests
+    - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+    - echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list
+    - sudo apt-get update
+    - sudo apt-get install -y mongodb-org
+    # Set up test configuration
     - cp mc-client.config.template mc-client.config
     - sed -i "s/api_v2_key/$MC_API_KEY/" mc-client.config
 install:
