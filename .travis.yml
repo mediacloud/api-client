@@ -7,7 +7,7 @@ python:
     # - "3.4"
 env:
     global:
-        - secure: "B+x0vkhdhEmE+U+c6FrHAmAcq20KWz+cVgk58yKSpGIFam2FTatrXVO1VD1rBnOzmSU7GJwmbkUA5wzO+LhZOLd7eiU5S8cqQdIjGjh1JmmM50td/DLNU7kPGsEVurgAWh924/S8rUEVP+wMCgqYmu/P6uQlafArai+isBU5eFA="
+        - secure: "1FKYs8WYCo9Wzvnvb5qQ+8sNn/UGbLyaqkYdzVQPYSyFSaAPi88sGEki7au7OsMNkxlvPyjTcjRyoa+GuEOQ5bKPFshGwmBMbanjqV2Cl7anwB9cM51mmHmTffAAazTkxrXxdQviuVu6vcJ77OUrkuCvTstj9kHIbKbTN3573VA="
 before_install:
     # Install MongoDB for storage tests
     - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
