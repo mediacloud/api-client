@@ -97,7 +97,7 @@ class ApiMediaHealthTest(ApiBaseTest):
         mediaHealth = self._mc.mediaHealth(2)
         self.assertEqual(mediaHealth['media_id'],'2')
         self.assertEqual(mediaHealth['is_healthy'],1)
-        self.assertEqual(mediaHealth['coverage_gaps'],str(len(mediaHealth['coverage_gaps_list'])))
+        self.assertEqual(mediaHealth['coverage_gaps'],len(mediaHealth['coverage_gaps_list']))
         self.assertTrue('start_date' in mediaHealth)
         self.assertTrue('end_date' in mediaHealth)
 
@@ -109,7 +109,6 @@ class ApiMediaTest(ApiBaseTest):
         self.assertEqual(media['media_id'],1)
         self.assertEqual(media['name'],'New York Times')
         self.assertTrue(len(media['media_source_tags'])>0)
-        self.assertTrue(len(media['media_sets'])>0)
 
     def testMediaListWithName(self):
         matchingList = self._mc.mediaList(name_like='new york times')
@@ -352,6 +351,10 @@ class ApiStoriesTest(ApiBaseTest):
         for story in results:
             self.assertTrue('bitly_click_count' in story)
 
+    def testStoryCount(self):
+        results = self._mc.storyCount(self.QUERY, self.FILTER_QUERY)
+        self.assertEqual(results['count'],3804)
+
 class AdminApiSentencesTest(AdminApiBaseTest):
 
     def testSentenceListSortingAscending(self):
@@ -395,23 +398,23 @@ class AdminApiSentencesTest(AdminApiBaseTest):
     def testSentenceList(self):
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY)
         self.assertEqual(int(results['responseHeader']['status']),0)
-        self.assertEqual(int(results['response']['numFound']),6713)
+        self.assertEqual(int(results['response']['numFound']),6749)
         self.assertEqual(len(results['response']['docs']), 1000)
 
     def testSentenceListPaging(self):
         # test limiting rows returned
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY,0,100)
-        self.assertEqual(int(results['response']['numFound']), 6713)
+        self.assertEqual(int(results['response']['numFound']), 6749)
         self.assertEqual(len(results['response']['docs']), 100)
         # test starting offset
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY,6700)
-        self.assertEqual(int(results['response']['numFound']), 6713)
-        self.assertEqual(len(results['response']['docs']), 13)
+        self.assertEqual(int(results['response']['numFound']), 6749)
+        self.assertEqual(len(results['response']['docs']), 49)
 
 class ApiSentencesTest(ApiBaseTest):
 
     def testSentence(self):
-        sentence_id = '3841125325'
+        sentence_id = 3841125325
         sentence = self._mc.sentence(sentence_id)
         self.assertEqual(sentence['story_sentences_id'],sentence_id)
         self.assertEqual(sentence['stories_id'],321728712)
