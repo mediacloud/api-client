@@ -118,6 +118,14 @@ class MediaCloud(object):
         '''
         return self._queryForJson(self.V2_API_URL+'stories_public/single/'+str(stories_id))[0]
 
+    def storyCount(self, solr_query='', solr_filter=''):
+        '''
+        The call returns the number of stories returned by Solr for the specified query
+        '''
+        return self._queryForJson(self.V2_API_URL+'stories_public/count',
+                {'q': solr_query,
+                 'fq': solr_filter
+                }) 
 
     def storyPublicList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20):
         '''
