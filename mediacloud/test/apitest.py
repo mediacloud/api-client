@@ -561,6 +561,32 @@ class AdminApiTaggingContentTest(AdminApiBaseTest):
         tags_on_story = [t for t in story['story_tags'] if t['tag_set']==tag_set_name]
         self.assertEqual(len(tags_on_story),len(desired_tags))
 
+    def testChunkify(self):
+        chunk_size = 50
+        data = [x for x in range(0,507)]
+        chunked = self._mc._chunkify(data,chunk_size)
+        self.assertEqual(11,len(chunked))
+        for x in range(0,10):
+            self.assertEqual(chunk_size,len(chunked[x]))
+        self.assertEqual(7,len(chunked[10]))
+
+    def testTagTonsOfSentences(self):
+        test_story_id = 435914244
+        test_tag_id1 = '9172171' # mc-api-test@media.mit.edu:test_tag1
+        test_tag_id2 = '9172168' # mc-api-test@media.mit.edu:test_tag2
+        tag_set_name = TEST_USER_EMAIL
+        # grab some sentence_ids to test with
+        orig_story = self._mc.story(test_story_id,sentences=True)
+        self.assertTrue( 'story_sentences' in orig_story )
+        self.assertTrue( len(orig_story['story_sentences']) > 2 )
+        sentence_ids = [ s['story_sentences_id'] for s in orig_story['story_sentences'][0:2] ]
+        # make a list of a ton of tags
+        desired_tags = []
+        for x in range(0, 80):
+            desired_tags = desired_tags + [ mediacloud.api.SentenceTag(sid, tag_set_name, 'test_tag1') for sid in sentence_ids ]
+        response = self._mc.tagSentences(desired_tags)
+        self.assertEqual(len(response),len(desired_tags)) 
+
     def testTagSentences(self):
         test_story_id = 435914244
         test_tag_id1 = '9172171' # mc-api-test@media.mit.edu:test_tag1

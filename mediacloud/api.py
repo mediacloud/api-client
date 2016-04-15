@@ -428,13 +428,17 @@ class AdminMediaCloud(MediaCloud):
         params = {}
         if clear_others is True:
             params['clear_tags'] = 1
-        custom_tags = []
-        for tag in tags:
-            if tag.__class__ is not SentenceTag:
-                raise ValueError('To use tagSentences you must send in a list of SentenceTag objects')
-            custom_tags.append( '{},{}:{}'.format( tag.story_sentences_id, tag.tag_set_name, tag.tag_name ) )
-        params['sentence_tag'] = custom_tags
-        return self._queryForJson( self.V2_API_URL+'sentences/put_tags', params, 'PUT')
+        # bath into smaller requests so we don't hit the 414 Request-URI Too Large error
+        results = []
+        for tag_chunk in self._chunkify(tags,50):
+            custom_tags = []
+            for tag in tag_chunk:
+                if tag.__class__ is not SentenceTag:
+                    raise ValueError('To use tagSentences you must send in a list of SentenceTag objects')
+                custom_tags.append( '{},{}:{}'.format( tag.story_sentences_id, tag.tag_set_name, tag.tag_name ) )
+            params['sentence_tag'] = custom_tags
+            results = results + self._queryForJson( self.V2_API_URL+'sentences/put_tags', params, 'PUT')
+        return results
 
     def updateTag(self, tags_id,name,label,description):
         params = {}
@@ -456,4 +460,8 @@ class AdminMediaCloud(MediaCloud):
             params['description'] = description
         return self._queryForJson( (self.V2_API_URL+'tag_sets/update/%d') % tag_sets_id, params, 'PUT')
 
-
+    def _chunkify(self, data, chunk_size):
+        '''
+        Helper method to break an array into a set of smaller arrays
+        '''
+        return [data[x:x+chunk_size] for x in xrange(0, len(data), chunk_size)]
