@@ -409,7 +409,7 @@ class AdminApiSentencesTest(AdminApiBaseTest):
         # test starting offset
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY,6700)
         self.assertEqual(int(results['response']['numFound']), 6784)
-        self.assertEqual(len(results['response']['docs']), 49)
+        self.assertEqual(len(results['response']['docs']), 84)
 
 class ApiSentencesTest(ApiBaseTest):
 
