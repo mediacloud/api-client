@@ -632,3 +632,78 @@ class AdminApiTaggingContentTest(AdminApiBaseTest):
             if s['story_sentences_id'] in sentence_ids:
                 self.assertTrue(test_tag_id1 in s['tags'])
                 self.assertFalse(test_tag_id2 in s['tags'])
+
+class AdminTopicStoryListTest(AdminApiBaseTest):
+    TOPIC_ID = 1
+
+    def testTopicStoryList(self):
+        topic_id = 1
+        response = self._mc.topicStoryList(1)
+        self.assertEqual(len(response),10)
+
+    def testTopicStoryListLimit(self):
+        response = self._mc.topicStoryList(self.TOPIC_ID)
+        self.assertEqual(len(response),10)
+        response = self._mc.topicStoryList(self.TOPIC_ID,limit=76)
+        self.assertEqual(len(response),76)
+        response = self._mc.topicStoryList(self.TOPIC_ID,limit=500)
+        self.assertEqual(len(response),500)
+
+    def testTopicStoryListSortSocial(self):
+        response = self._mc.topicStoryList(self.TOPIC_ID, limit=500, sort='social')
+        last_bitly_count = 1000000000000
+        for story in response:
+            self.assertTrue(story['bitly_click_count']<=last_bitly_count)
+            last_bitly_count = story['bitly_click_count']
+
+    def testTopicStoryListSortInlink(self):
+        response = self._mc.topicStoryList(self.TOPIC_ID, limit=500, sort='inlink')
+        last_inlink_count = 1000000000000
+        for story in response:
+            self.assertTrue(story['inlink_count']<=last_inlink_count)
+            last_inlink_count = story['inlink_count']
+
+class AdminTopicMediaListTest(AdminApiBaseTest):
+    TOPIC_ID = 1
+
+    def testTopicMediaList(self):
+        response = self._mc.topicMediaList(self.TOPIC_ID)
+        self.assertEqual(len(response),682)
+        for media in response:
+            self.assertTrue('media_id' in media)
+
+    def testTopicMediaListSortSocial(self):
+        response = self._mc.topicMediaList(self.TOPIC_ID, sort='social')
+        last_bitly_count = 1000000000000
+        for media in response:
+            self.assertTrue(media['bitly_click_count']<=last_bitly_count)
+            last_bitly_count = media['bitly_click_count']
+
+    def testTopicMediaListSortInlink(self):
+        response = self._mc.topicMediaList(self.TOPIC_ID, sort='inlink')
+        last_inlink_count = 1000000000000
+        for media in response:
+            self.assertTrue(media['inlink_count']<=last_inlink_count)
+            last_inlink_count = media['inlink_count']
+
+class AdminTopicWordCountTest(AdminApiBaseTest):
+    TOPIC_ID = 1
+
+    def testResults(self):
+        term_freq = self._mc.topicWordCount(self.TOPIC_ID)
+        self.assertEqual(len(term_freq),500)
+        self.assertEqual(term_freq[3]['term'],u'obama')
+
+    def testSort(self):
+        term_freq = self._mc.topicWordCount(self.TOPIC_ID)
+        # verify sorted in desc order
+        last_count = 10000000000
+        for freq in term_freq:
+            self.assertTrue( last_count >= freq['count'] )
+            last_count = freq['count']
+
+    def testNumWords(self):
+        term_freq = self._mc.topicWordCount(self.TOPIC_ID)
+        self.assertEqual(len(term_freq),500)
+        term_freq = self._mc.topicWordCount(self.TOPIC_ID, num_words=500)
+        self.assertEqual(len(term_freq),500)

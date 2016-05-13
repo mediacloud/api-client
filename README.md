@@ -98,12 +98,20 @@ Then run `python tests.py`. Notice you get a `mediacloud-api.log` that tells you
 4. Run `python setup.py sdist` to test out a version locally
 5. Then run `python setup.py sdist upload -r pypitest` to release a test version to PyPI's test server
 6. Run `pip install -i https://testpypi.python.org/pypi mediacloud` somewhere and then use it with Python to make sure the test release works.
-7. When you're ready to push to pypi run `python setup.py sdist upload -r pypi`
+7. When you're ready to push to pypi run `
+  storyTableTitleCol: { id: 'stories.col.title', defaultMessage: 'Title' },
+  storyTableMediaSourceCol: { id: 'stories.col.title', defaultMessage: 'Media Source' },
+  storyTableDateCol: { id: 'stories.col.title', defaultMessage: 'Publish Date' },
+  storyTableInlinksCol: { id: 'stories.col.title', defaultMessage: 'Inlinks' },
+  storyTableOutlinksCol: { id: 'stories.col.title', defaultMessage: 'Outlinks' },
+  storyTableClicksCol: { id: 'stories.col.title', defaultMessage: 'Clicks' },
+`
 8. Run `pip install mediacloud` somewhere and then try it to make sure it worked.
 
 Version History
 ---------------
 
+* __v2.27.0__: first topic endpoints
 * __v2.26.1__: chunk sentence tag calls to avoid URI length limit in PUT requests
 * __v2.26.0__: add storyCount endpoint, cleanup some failing test cases
 * __v2.25.0__: add mediaHealth endpoint, support `ap_stories_id` flag in storiesList, fix `controversy_dump_time_slices` endpoint, remove mediaSet and Dashboard endpoints

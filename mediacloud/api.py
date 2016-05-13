@@ -465,3 +465,46 @@ class AdminMediaCloud(MediaCloud):
         Helper method to break an array into a set of smaller arrays
         '''
         return [data[x:x+chunk_size] for x in xrange(0, len(data), chunk_size)]
+
+    def topicMediaList(self, topic_id, snapshot_id=None, timespan_id=None, sort=None):
+        params = {}
+        if sort is not None:
+            if sort in ['social','inlink']:
+                params['sort'] = sort
+            else:
+                raise ValueError('Sort must be either social or inlink')
+        if snapshot_id is not None:
+            params['snapshot'] = snapshot_id
+        if timespan_id is not None:
+            params['timeslice'] = timespan_id
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/media/list',params)['media']
+
+    def topicStoryList(self, topic_id, snapshot_id=None, timespan_id=None, sort=None, limit=10):
+        params = {'limit': limit}
+        if sort is not None:
+            if sort in ['social','inlink']:
+                params['sort'] = sort
+            else:
+                raise ValueError('Sort must be either social or inlink')
+        if snapshot_id is not None:
+            params['snapshot'] = snapshot_id
+        if timespan_id is not None:
+            params['timeslice'] = timespan_id
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/stories/list',params)['stories']
+
+    def topicWordCount(self, topic_id, solr_query='*', solr_filter='', languages='en', num_words=500, sample_size=1000, 
+                        include_stopwords=False, snapshot_id=None, timespan_id=None):
+        params = {
+            'q': solr_query,
+            'l': languages,
+            'num_words': num_words,
+            'sample_size': sample_size,
+            'include_stopwords': 1 if include_stopwords is True else 0
+        }
+        if snapshot_id is not None:
+            params['snapshot'] = snapshot_id
+        if timespan_id is not None:
+            params['timeslice'] = timespan_id
+        if len(solr_filter) > 0:
+            params['fq'] = solr_filter
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/wc/list', params)['words']

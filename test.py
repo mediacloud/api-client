@@ -16,7 +16,8 @@ test_classes = [
     AuthTokenTest,
     ApiAllFieldsOptionTest,
     PublishDateQueryTest,
-    AdminApiTaggingContentTest, AdminApiTaggingUpdateTest
+    AdminApiTaggingContentTest, AdminApiTaggingUpdateTest,
+    AdminTopicStoryListTest, AdminTopicMediaListTest, AdminTopicWordCountTest
 ]
 
 # set up all logging to DEBUG (cause we're running tests here!)
