@@ -267,7 +267,7 @@ class ApiFeedsTest(ApiBaseTest):
         self.assertEqual(len(second_list),20)
         self.assertEqual(first_list[19]['feeds_id'], second_list[0]['feeds_id'])
         longer_list = self._mc.feedList(1,0,200)
-        self.assertEqual(len(longer_list),141)
+        self.assertEqual(len(longer_list),142)
 
 class AdminApiStoriesTest(AdminApiBaseTest):
 
@@ -709,7 +709,7 @@ class AdminTopicWordCountTest(AdminApiBaseTest):
     def testResults(self):
         term_freq = self._mc.topicWordCount(self.TOPIC_ID)
         self.assertEqual(len(term_freq),500)
-        self.assertEqual(term_freq[3]['term'],u'obama')
+        self.assertEqual(term_freq[3]['term'],u'george')
 
     def testSort(self):
         term_freq = self._mc.topicWordCount(self.TOPIC_ID)
