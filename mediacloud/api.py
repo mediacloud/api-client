@@ -4,6 +4,8 @@ import xml.etree.ElementTree, requests
 import mediacloud, mediacloud.error
 import datetime
 
+MAX_HTTP_GET_CHARS = 4000   # experimentally determined for our main servers (conservative)
+
 class MediaCloud(object):
     '''
     Simple client library for the MediaCloud API v2
@@ -323,7 +325,7 @@ class MediaCloud(object):
             # switch to POST if request too long
             total_url_length = len(url)+sum([len(str(k)) for k in params.keys()])+sum([len(str(v)) for v in params.values()])
             try:
-                if total_url_length > 8000: # no official limit, so we go by Apache docs
+                if total_url_length > MAX_HTTP_GET_CHARS:
                     r = requests.post(url, data=params, headers={ 'Accept': 'application/json'} )
                 else :
                     r = requests.get(url, params=params, headers={ 'Accept': 'application/json'} )
