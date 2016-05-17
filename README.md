@@ -111,6 +111,7 @@ Then run `python tests.py`. Notice you get a `mediacloud-api.log` that tells you
 Version History
 ---------------
 
+* __v2.28.0__: add storyWordMatrix, support long queries via POST automatically
 * __v2.27.0__: first topic endpoints
 * __v2.26.1__: chunk sentence tag calls to avoid URI length limit in PUT requests
 * __v2.26.0__: add storyCount endpoint, cleanup some failing test cases

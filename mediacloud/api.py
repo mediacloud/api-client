@@ -155,6 +155,21 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'stories/corenlp',
             {'stories_id': story_id_list} )
 
+    def storyWordMatrix(self, solr_query='', solr_filter='', rows=1000, max_words=None, stopword_length=None ):
+        '''
+        Helpful to feed term-document-matrix driven analyses, like TF-IDF.
+        '''
+        params = {'q':solr_query, 'fq':solr_filter}
+        params['rows'] = rows
+        if max_words is not None:
+            params['max_words'] = max_words
+        if stopword_length is not None:
+            if stopword_length in ['tiny','short','long']:
+                params['stopword_length'] = stopword_length
+            else:
+                raise ValueError('Error - stopword_length must be "tiny", "short" or "long"')
+        return self._queryForJson(self.V2_API_URL+'stories_public/word_matrix/', params)
+
     def sentence(self,story_sentences_id):
         '''
         Return info about a single sentence
@@ -302,13 +317,18 @@ class MediaCloud(object):
             raise ValueError('Queries must include a dict of parameters')
         if 'key' not in params:
             params['key'] = self._auth_token
+        if self._all_fields:
+            params['all_fields'] = 1
         if http_method is 'GET':
-            if self._all_fields:
-                params['all_fields'] = 1
+            # switch to POST if request too long
+            total_url_length = len(url)+sum([len(str(k)) for k in params.keys()])+sum([len(str(v)) for v in params.values()])
             try:
-                r = requests.get(url, params=params, headers={ 'Accept': 'application/json'} )
+                if total_url_length > 8000: # no official limit, so we go by Apache docs
+                    r = requests.post(url, data=params, headers={ 'Accept': 'application/json'} )
+                else :
+                    r = requests.get(url, params=params, headers={ 'Accept': 'application/json'} )
             except Exception as e:
-                self._logger.error('Failed to GET url '+url+' because '+str(e))
+                self._logger.error('Failed to GET or POST to url '+url+' because '+str(e))
                 raise e
         elif http_method is 'PUT':
             try:

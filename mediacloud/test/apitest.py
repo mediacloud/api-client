@@ -23,6 +23,15 @@ class AdminApiBaseTest(unittest.TestCase):
         self._config.read('mc-client.config')
         self._mc = mediacloud.api.AdminMediaCloud( self._config.get('api','key') )
 
+class ApiBigQueryTest(ApiBaseTest):
+
+    def testBigQuery(self):
+        query_to_repeat = "(publish_date:[2016-05-16T00:00:00Z TO 2016-05-17T00:00:00Z]) AND (tags_id_media:(8875027))"
+        query_pieces = [ query_to_repeat for x in range(0,110) ]    # "110" was determined experimentally
+        big_query = " AND ".join(query_pieces)
+        results = self._mc.sentenceCount(big_query)
+        self.assertTrue(results['count']>0)            
+
 class ApiAllFieldsOptionTest(ApiBaseTest):
 
     def testAllFieldsOnMedia(self):
@@ -325,6 +334,14 @@ class AdminApiStoriesTest(AdminApiBaseTest):
             self.assertTrue('story_text' in story)
             self.assertTrue('is_fully_extracted' in story)
             self.assertFalse('corenlp' in story)
+
+class ApiStoriesWordMatrixTest(ApiBaseTest):
+
+    def testStoryWordMatrix(self):
+        results = self._mc.storyWordMatrix("obama",
+            "(publish_date:[2016-05-16T00:00:00Z TO 2016-05-17T00:00:00Z]) AND (tags_id_media:(8875027))")
+        self.assertTrue("word_matrix" in results)
+        self.assertTrue("word_list" in results)
 
 class ApiStoriesTest(ApiBaseTest):
 
