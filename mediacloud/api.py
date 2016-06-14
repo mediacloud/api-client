@@ -488,7 +488,7 @@ class AdminMediaCloud(MediaCloud):
         '''
         return [data[x:x+chunk_size] for x in xrange(0, len(data), chunk_size)]
 
-    def topicMediaList(self, topic_id, snapshot_id=None, timespan_id=None, sort=None):
+    def topicMediaList(self, topic_id, snapshot_id=None, timespan_id=None, sort=None, limit=None, continuation_id=None):
         params = {}
         if sort is not None:
             if sort in ['social','inlink']:
@@ -499,9 +499,13 @@ class AdminMediaCloud(MediaCloud):
             params['snapshot'] = snapshot_id
         if timespan_id is not None:
             params['timeslice'] = timespan_id
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/media/list',params)['media']
+        if limit is not None:
+            params['limit'] = limit
+        if continuation_id is not None:
+            params['continuation_id'] = continuation_id
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/media/list',params)
 
-    def topicStoryList(self, topic_id, snapshot_id=None, timespan_id=None, sort=None, limit=10):
+    def topicStoryList(self, topic_id, snapshot_id=None, timespan_id=None, sort=None, limit=None, continuation_id=None):
         params = {'limit': limit}
         if sort is not None:
             if sort in ['social','inlink']:
@@ -512,15 +516,20 @@ class AdminMediaCloud(MediaCloud):
             params['snapshot'] = snapshot_id
         if timespan_id is not None:
             params['timeslice'] = timespan_id
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/stories/list',params)['stories']
+        if limit is not None:
+            params['limit'] = limit
+        if continuation_id is not None:
+            params['continuation_id'] = continuation_id
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/stories/list',params)
 
     def topicWordCount(self, topic_id, solr_query='*', solr_filter='', languages='en', num_words=500, sample_size=1000, 
-                        include_stopwords=False, snapshot_id=None, timespan_id=None):
+                        include_stopwords=False, snapshot_id=None, timespan_id=None, include_stats=False):
         params = {
             'q': solr_query,
             'l': languages,
             'num_words': num_words,
             'sample_size': sample_size,
+            'include_stats': 1 if include_stats is True else 0,
             'include_stopwords': 1 if include_stopwords is True else 0
         }
         if snapshot_id is not None:
@@ -530,3 +539,20 @@ class AdminMediaCloud(MediaCloud):
         if len(solr_filter) > 0:
             params['fq'] = solr_filter
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/wc/list', params)['words']
+
+    def topicSentenceCount(self, topic_id, solr_query='*', solr_filter='',
+        split=False,split_start_date=None,split_end_date=None,split_daily=False,
+        snapshot_id=None, timespan_id=None, ):
+        params = {'q':solr_query, 'fq':solr_filter}
+        params['split'] = 1 if split is True else 0
+        params['split_daily'] = 1 if split_daily is True else 0
+        if split is True:
+            datetime.datetime.strptime(split_start_date, '%Y-%m-%d')    #will throw a ValueError if invalid
+            datetime.datetime.strptime(split_end_date, '%Y-%m-%d')    #will throw a ValueError if invalid
+            params['split_start_date'] = split_start_date
+            params['split_end_date'] = split_end_date
+        if snapshot_id is not None:
+            params['snapshot'] = snapshot_id
+        if timespan_id is not None:
+            params['timeslice'] = timespan_id
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/sentences/count', params)
