@@ -538,7 +538,7 @@ class AdminMediaCloud(MediaCloud):
             params['timeslice'] = timespan_id
         if len(solr_filter) > 0:
             params['fq'] = solr_filter
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/wc/list', params)['words']
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/wc/list', params)
 
     def topicSentenceCount(self, topic_id, solr_query='*', solr_filter='',
         split=False,split_start_date=None,split_end_date=None,split_daily=False,
