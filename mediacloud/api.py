@@ -1,8 +1,8 @@
-import re, logging, json, urllib, datetime, sys
-from collections import namedtuple
-import xml.etree.ElementTree, requests
-import mediacloud, mediacloud.error
+import logging
 import datetime
+from collections import namedtuple
+import requests
+import mediacloud, mediacloud.error
 
 MAX_HTTP_GET_CHARS = 4000   # experimentally determined for our main servers (conservative)
 
@@ -31,13 +31,13 @@ class MediaCloud(object):
         Specify the value of the all_fields param to use for all future requests
         '''
         self._all_fields = all_fields
-        
+
     def setAuthToken(self, auth_token):
         '''
         Specify the auth_token to use for all future requests
         '''
         self._auth_token = auth_token
-        
+
     def userAuthToken(self, username, password):
         '''
         Get a auth_token for future requests to use
@@ -73,10 +73,10 @@ class MediaCloud(object):
         '''
         Details about one media source
         '''
-        return self._queryForJson(self.V2_API_URL+'mediahealth/list', 
-            { 'media_id':media_id } )[0]
+        return self._queryForJson(self.V2_API_URL+'mediahealth/list',
+            {'media_id':media_id} )[0]
 
-    def mediaList(self, last_media_id=0, rows=20, name_like=None, 
+    def mediaList(self, last_media_id=0, rows=20, name_like=None,
                 controversy_dump_time_slices_id=None, controversy_mode=None, tags_id=None, q=None):
         '''
         Page through all media sources
@@ -104,8 +104,8 @@ class MediaCloud(object):
         '''
         Page through all the feeds of one media source
         '''
-        return self._queryForJson(self.V2_API_URL+'feeds/list', 
-            { 'media_id':media_id, 'last_feeds_id':last_feeds_id, 'rows':rows} )
+        return self._queryForJson(self.V2_API_URL+'feeds/list',
+            {'media_id':media_id, 'last_feeds_id':last_feeds_id, 'rows':rows} )
 
     def storyPublic(self, stories_id):
         '''
@@ -127,7 +127,7 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'stories_public/count',
                 {'q': solr_query,
                  'fq': solr_filter
-                }) 
+                })
 
     def storyPublicList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20):
         '''
@@ -144,15 +144,15 @@ class MediaCloud(object):
                  'fq': solr_filter,
                  'last_processed_stories_id': last_processed_stories_id,
                  'rows': rows
-                }) 
+                })
 
     def storyCoreNlpList(self, story_id_list):
         '''
-        The stories/corenlp call takes as many stories_id= parameters as you want to pass it, 
-        and it returns the corenlp for each.  
-        { stories_id => 1, corenlp => { <corenlp data> } }
+        The stories/corenlp call takes as many stories_id= parameters as you want to pass it,
+        and it returns the corenlp for each.
+        {stories_id => 1, corenlp => {<corenlp data> } }
         If no corenlp annotation is available for a given story, the json element for that story looks like:
-        { stories_id => 1, corenlp => 'story is not annotated' }
+        {stories_id => 1, corenlp => 'story is not annotated' }
         '''
         return self._queryForJson(self.V2_API_URL+'stories/corenlp',
             {'stories_id': story_id_list} )
@@ -244,7 +244,7 @@ class MediaCloud(object):
         List all the tag sets
         '''
         return self._queryForJson(self.V2_API_URL+'tag_sets/list',
-            { 'last_tag_sets_id': last_tag_sets_id, 'rows':rows })
+            {'last_tag_sets_id': last_tag_sets_id, 'rows':rows})
 
     def controversy(self, controversies_id):
         '''
@@ -259,7 +259,7 @@ class MediaCloud(object):
         args = {}
         if name is not None:
             args['name'] = name
-        return self._queryForJson(self.V2_API_URL+'controversies/list', args)    
+        return self._queryForJson(self.V2_API_URL+'controversies/list', args)
 
     def controversyDump(self, controversy_dumps_id):
         '''
@@ -274,7 +274,7 @@ class MediaCloud(object):
         args = {}
         if controversies_id is not None:
             args['controversies_id'] = controversies_id
-        return self._queryForJson(self.V2_API_URL+'controversy_dumps/list', args)    
+        return self._queryForJson(self.V2_API_URL+'controversy_dumps/list', args)
 
     def controversyDumpTimeSlice(self, controversy_dump_time_slices_id):
         '''
@@ -282,7 +282,7 @@ class MediaCloud(object):
         '''
         return self._queryForJson(self.V2_API_URL+'controversy_dump_time_slices/single/'+str(controversy_dump_time_slices_id))[0]
 
-    def controversyDumpTimeSliceList(self, controversy_dumps_id=None, tags_id=None, period=None, 
+    def controversyDumpTimeSliceList(self, controversy_dumps_id=None, tags_id=None, period=None,
                                      start_date=None, end_date=None):
         '''
         List all the controversy dumps time slices in a controversy dump
@@ -298,7 +298,7 @@ class MediaCloud(object):
             args['start_date'] = start_date
         if end_date is not None:
             args['end_date'] = end_date
-        return self._queryForJson(self.V2_API_URL+'controversy_dump_time_slices/list', args)    
+        return self._queryForJson(self.V2_API_URL+'controversy_dump_time_slices/list', args)
 
     def _queryForJson(self, url, params={}, http_method='GET'):
         '''
@@ -326,15 +326,15 @@ class MediaCloud(object):
             total_url_length = len(url)+sum([len(str(k)) for k in params.keys()])+sum([len(str(v)) for v in params.values()])
             try:
                 if total_url_length > MAX_HTTP_GET_CHARS:
-                    r = requests.post(url, data=params, headers={ 'Accept': 'application/json'} )
+                    r = requests.post(url, data=params, headers={'Accept': 'application/json'} )
                 else :
-                    r = requests.get(url, params=params, headers={ 'Accept': 'application/json'} )
+                    r = requests.get(url, params=params, headers={'Accept': 'application/json'} )
             except Exception as e:
                 self._logger.error('Failed to GET or POST to url '+url+' because '+str(e))
                 raise e
         elif http_method is 'PUT':
             try:
-                r = requests.put( url, params=params, headers={ 'Accept': 'application/json'} )
+                r = requests.put( url, params=params, headers={'Accept': 'application/json'} )
             except Exception as e:
                 self._logger.error('Failed to PUT url '+url+' because '+str(e))
                 raise e
@@ -383,7 +383,7 @@ SentenceTag = namedtuple('SentenceTag', ['story_sentences_id', 'tag_set_name', '
 
 class AdminMediaCloud(MediaCloud):
     '''
-    A MediaCloud API client that includes admin-only methods, including to writing back 
+    A MediaCloud API client that includes admin-only methods, including to writing back
     data to MediaCloud.
     '''
 
@@ -392,13 +392,13 @@ class AdminMediaCloud(MediaCloud):
         Full details about one story.  Handy shortcut to storyList if you want sentences broken out
         '''
         return self._queryForJson(self.V2_API_URL+'stories/single/'+str(stories_id),
-                {'raw_1st_download': 1 if raw_1st_download else 0, 
+                {'raw_1st_download': 1 if raw_1st_download else 0,
                  'corenlp': 1 if corenlp else 0,
                  'sentences': 1 if sentences else 0,
                  'text': 1 if text else 0
                 })[0]
 
-    def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20, 
+    def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
                   raw_1st_download=False, corenlp=False, sentences=False, text=False, ap_stories_id=0):
         '''
         Search for stories and page through results
@@ -408,12 +408,12 @@ class AdminMediaCloud(MediaCloud):
                  'fq': solr_filter,
                  'last_processed_stories_id': last_processed_stories_id,
                  'rows': rows,
-                 'raw_1st_download': 1 if raw_1st_download else 0, 
+                 'raw_1st_download': 1 if raw_1st_download else 0,
                  'corenlp': 1 if corenlp else 0,    # this is slow - use storyCoreNlList instead
                  'sentences': 1 if sentences else 0,
                  'text': 1 if text else 0,
                  'ap_stories_id': 1 if ap_stories_id else 0
-                }) 
+                })
 
     def sentenceList(self, solr_query, solr_filter='', start=0, rows=1000, sort=MediaCloud.SORT_PUBLISH_DATE_ASC):
         '''
@@ -425,7 +425,7 @@ class AdminMediaCloud(MediaCloud):
                  'start': start,
                  'rows': rows,
                  'sort': sort
-                }) 
+                })
 
     def tagStories(self, tags={}, clear_others=False):
         '''
@@ -522,7 +522,7 @@ class AdminMediaCloud(MediaCloud):
             params['continuation_id'] = continuation_id
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/stories/list', params)
 
-    def topicWordCount(self, topic_id, solr_query='*', solr_filter='', languages='en', num_words=500, sample_size=1000, 
+    def topicWordCount(self, topic_id, solr_query='*', solr_filter='', languages='en', num_words=500, sample_size=1000,
                         include_stopwords=False, snapshot_id=None, timespan_id=None, include_stats=False):
         params = {
             'q': solr_query,
