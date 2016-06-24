@@ -38,7 +38,7 @@ class MediaCloud(object):
         '''
         self._auth_token = auth_token
         
-    def userAuthToken(self,username,password):
+    def userAuthToken(self, username, password):
         '''
         Get a auth_token for future requests to use
         '''
@@ -46,7 +46,7 @@ class MediaCloud(object):
         response = self._queryForJson(self.V2_API_URL+'auth/single/',
             {'username':username, 'password':password})
         response = response[0]
-        if response['result']=='found':
+        if response['result'] == 'found':
             self._logger.debug(" new token is "+response['token'])
             return response['token']
         else:
@@ -133,7 +133,7 @@ class MediaCloud(object):
         '''
         Maintained for backwards compatability
         '''
-        return self.storyList(solr_query,solr_filter,last_processed_stories_id, rows)
+        return self.storyList(solr_query, solr_filter, last_processed_stories_id, rows)
 
     def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20):
         '''
@@ -166,19 +166,19 @@ class MediaCloud(object):
         if max_words is not None:
             params['max_words'] = max_words
         if stopword_length is not None:
-            if stopword_length in ['tiny','short','long']:
+            if stopword_length in ['tiny', 'short', 'long']:
                 params['stopword_length'] = stopword_length
             else:
                 raise ValueError('Error - stopword_length must be "tiny", "short" or "long"')
         return self._queryForJson(self.V2_API_URL+'stories_public/word_matrix/', params)
 
-    def sentence(self,story_sentences_id):
+    def sentence(self, story_sentences_id):
         '''
         Return info about a single sentence
         '''
         return self._queryForJson(self.V2_API_URL+'sentences/single/'+str(story_sentences_id))[0]
 
-    def sentenceCount(self, solr_query, solr_filter=' ',split=False,split_start_date=None,split_end_date=None,split_daily=False):
+    def sentenceCount(self, solr_query, solr_filter=' ', split=False, split_start_date=None, split_end_date=None, split_daily=False):
         params = {'q':solr_query, 'fq':solr_filter}
         params['split'] = 1 if split is True else 0
         params['split_daily'] = 1 if split_daily is True else 0
@@ -189,7 +189,7 @@ class MediaCloud(object):
             params['split_end_date'] = split_end_date
         return self._queryForJson(self.V2_API_URL+'sentences/count', params)
 
-    def sentenceFieldCount(self,solr_query, solr_filter=' ', sample_size=1000, include_stats=False, field='tags_id_story_sentences',tag_sets_id=None):
+    def sentenceFieldCount(self, solr_query, solr_filter=' ', sample_size=1000, include_stats=False, field='tags_id_story_sentences', tag_sets_id=None):
         '''
         Right now the fields supported are 'tags_id_stories' or 'tags_id_story_sentences'
         '''
@@ -197,7 +197,7 @@ class MediaCloud(object):
         if tag_sets_id is not None:
             params['tag_sets_id'] = tag_sets_id
         params['include_stats'] = 1 if include_stats is True else 0
-        return self._queryForJson(self.V2_API_URL+'sentences/field_count',params)
+        return self._queryForJson(self.V2_API_URL+'sentences/field_count', params)
 
     def wordCount(self, solr_query, solr_filter='', languages='en', num_words=500, sample_size=1000, include_stopwords=False, include_stats=False):
         params = {
@@ -259,9 +259,9 @@ class MediaCloud(object):
         args = {}
         if name is not None:
             args['name'] = name
-        return self._queryForJson(self.V2_API_URL+'controversies/list',args)    
+        return self._queryForJson(self.V2_API_URL+'controversies/list', args)    
 
-    def controversyDump(self,controversy_dumps_id):
+    def controversyDump(self, controversy_dumps_id):
         '''
         Details about one controversy dump
         '''
@@ -274,9 +274,9 @@ class MediaCloud(object):
         args = {}
         if controversies_id is not None:
             args['controversies_id'] = controversies_id
-        return self._queryForJson(self.V2_API_URL+'controversy_dumps/list',args)    
+        return self._queryForJson(self.V2_API_URL+'controversy_dumps/list', args)    
 
-    def controversyDumpTimeSlice(self,controversy_dump_time_slices_id):
+    def controversyDumpTimeSlice(self, controversy_dump_time_slices_id):
         '''
         Details about one controversy dump time slice
         '''
@@ -298,7 +298,7 @@ class MediaCloud(object):
             args['start_date'] = start_date
         if end_date is not None:
             args['end_date'] = end_date
-        return self._queryForJson(self.V2_API_URL+'controversy_dump_time_slices/list',args)    
+        return self._queryForJson(self.V2_API_URL+'controversy_dump_time_slices/list', args)    
 
     def _queryForJson(self, url, params={}, http_method='GET'):
         '''
@@ -307,7 +307,7 @@ class MediaCloud(object):
         response = self._query(url, params, http_method)
         # print response.content
         response_json = response.json()
-        # print json.dumps(response_json,indent=2)
+        # print json.dumps(response_json, indent=2)
         if 'error' in response_json:
             self._logger.error('Error in response from server on request to '+url+' : '+response_json['error'])
             raise mediacloud.error.MCException(response_json['error'], requests.codes.ok)
@@ -376,10 +376,10 @@ class MediaCloud(object):
         return 'publish_date:' + self._solr_date_range( start_date, end_date, start_date_inclusive, end_date_inclusive)
 
 # used when calling AdminMediaCloud.tagStories
-StoryTag = namedtuple('StoryTag',['stories_id','tag_set_name','tag_name'])
+StoryTag = namedtuple('StoryTag', ['stories_id', 'tag_set_name', 'tag_name'])
 
 # used when calling AdminMediaCloud.tagSentences
-SentenceTag = namedtuple('SentenceTag',['story_sentences_id','tag_set_name','tag_name'])
+SentenceTag = namedtuple('SentenceTag', ['story_sentences_id', 'tag_set_name', 'tag_name'])
 
 class AdminMediaCloud(MediaCloud):
     '''
@@ -430,7 +430,7 @@ class AdminMediaCloud(MediaCloud):
     def tagStories(self, tags={}, clear_others=False):
         '''
         Add some tags to stories. The tags parameter should be a list of StoryTag objects
-        Returns ["1,rahulb@media.mit.edu:example_tag_2"] as response
+        Returns ["1, rahulb@media.mit.edu:example_tag_2"] as response
         '''
         params = {}
         if clear_others is True:
@@ -439,7 +439,7 @@ class AdminMediaCloud(MediaCloud):
         for tag in tags:
             if tag.__class__ is not StoryTag:
                 raise ValueError('To use tagStories you must send in a list of StoryTag objects')
-            custom_tags.append( '{},{}:{}'.format( tag.stories_id, tag.tag_set_name, tag.tag_name ) )
+            custom_tags.append( '{}, {}:{}'.format( tag.stories_id, tag.tag_set_name, tag.tag_name ) )
         params['story_tag'] = custom_tags
         return self._queryForJson( self.V2_API_URL+'stories/put_tags', params, 'PUT')
 
@@ -452,17 +452,17 @@ class AdminMediaCloud(MediaCloud):
             params['clear_tags'] = 1
         # bath into smaller requests so we don't hit the 414 Request-URI Too Large error
         results = []
-        for tag_chunk in self._chunkify(tags,50):
+        for tag_chunk in self._chunkify(tags, 50):
             custom_tags = []
             for tag in tag_chunk:
                 if tag.__class__ is not SentenceTag:
                     raise ValueError('To use tagSentences you must send in a list of SentenceTag objects')
-                custom_tags.append( '{},{}:{}'.format( tag.story_sentences_id, tag.tag_set_name, tag.tag_name ) )
+                custom_tags.append( '{}, {}:{}'.format( tag.story_sentences_id, tag.tag_set_name, tag.tag_name ) )
             params['sentence_tag'] = custom_tags
             results = results + self._queryForJson( self.V2_API_URL+'sentences/put_tags', params, 'PUT')
         return results
 
-    def updateTag(self, tags_id,name,label,description):
+    def updateTag(self, tags_id, name, label, description):
         params = {}
         if name is not None:
             params['tag'] = name
@@ -472,7 +472,7 @@ class AdminMediaCloud(MediaCloud):
             params['description'] = description
         return self._queryForJson( (self.V2_API_URL+'tags/update/%d') % tags_id, params, 'PUT')
 
-    def updateTagSet(self, tag_sets_id,name,label,description):
+    def updateTagSet(self, tag_sets_id, name, label, description):
         params = {}
         if name is not None:
             params['name'] = name
@@ -491,7 +491,7 @@ class AdminMediaCloud(MediaCloud):
     def topicMediaList(self, topic_id, snapshot_id=None, timespan_id=None, sort=None, limit=None, continuation_id=None):
         params = {}
         if sort is not None:
-            if sort in ['social','inlink']:
+            if sort in ['social', 'inlink']:
                 params['sort'] = sort
             else:
                 raise ValueError('Sort must be either social or inlink')
@@ -503,12 +503,12 @@ class AdminMediaCloud(MediaCloud):
             params['limit'] = limit
         if continuation_id is not None:
             params['continuation_id'] = continuation_id
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/media/list',params)
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/media/list', params)
 
     def topicStoryList(self, topic_id, snapshot_id=None, timespan_id=None, sort=None, limit=None, continuation_id=None):
         params = {'limit': limit}
         if sort is not None:
-            if sort in ['social','inlink']:
+            if sort in ['social', 'inlink']:
                 params['sort'] = sort
             else:
                 raise ValueError('Sort must be either social or inlink')
@@ -520,7 +520,7 @@ class AdminMediaCloud(MediaCloud):
             params['limit'] = limit
         if continuation_id is not None:
             params['continuation_id'] = continuation_id
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/stories/list',params)
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/stories/list', params)
 
     def topicWordCount(self, topic_id, solr_query='*', solr_filter='', languages='en', num_words=500, sample_size=1000, 
                         include_stopwords=False, snapshot_id=None, timespan_id=None, include_stats=False):
@@ -541,7 +541,7 @@ class AdminMediaCloud(MediaCloud):
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/wc/list', params)
 
     def topicSentenceCount(self, topic_id, solr_query='*', solr_filter='',
-        split=False,split_start_date=None,split_end_date=None,split_daily=False,
+        split=False, split_start_date=None, split_end_date=None, split_daily=False,
         snapshot_id=None, timespan_id=None, ):
         params = {'q':solr_query, 'fq':solr_filter}
         params['split'] = 1 if split is True else 0
