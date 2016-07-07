@@ -25,7 +25,7 @@ last_processed_stories_id = 0
 while len(stories) < 2000:
     fetched_stories = mc.storyList('( obama AND policy ) OR ( whitehouse AND policy)', 
                                    solr_filter=[ mc.publish_date_query( datetime.date(2013,1,1), datetime.date(2015,1,1)), 
-                                                                         'media_sets_id:1'],
+                                                                         'tags_id_media:1'],
                                     last_processed_stories_id=last_processed_stories_id, rows= fetch_size)
     stories.extend( fetched_stories)
     if len( fetched_stories) < fetch_size:
@@ -40,7 +40,7 @@ Find out how many sentences in the US mainstream media that mentioned "Zimbabwe"
 ```python
 import mediacloud, datetime
 mc = mediacloud.api.MediaCloud('MY_API_KEY')
-res = mc.sentenceCount('( zimbabwe AND president)', solr_filter=[mc.publish_date_query( datetime.date( 2013, 1, 1), datetime.date( 2014, 1, 1) ), 'media_sets_id:1' ])
+res = mc.sentenceCount('( zimbabwe AND president)', solr_filter=[mc.publish_date_query( datetime.date( 2013, 1, 1), datetime.date( 2014, 1, 1) ), 'tags_id_media:1' ])
 print res['count'] # prints the number of sentences found
 ```
 
@@ -48,7 +48,7 @@ Alternatively, this query could be specified as follows
 ```python
 import mediacloud
 mc = mediacloud.api.MediaCloud('MY_API_KEY')
-mc.sentenceCount('( zimbabwe AND president)', '+publish_date:[2013-01-01T00:00:00Z TO 2014-01-01T00:00:00Z} AND +media_sets_id:1')
+mc.sentenceCount('( zimbabwe AND president)', '+publish_date:[2013-01-01T00:00:00Z TO 2014-01-01T00:00:00Z} AND +tags_id_media:1')
 print res['count']
 ```
 
@@ -56,7 +56,7 @@ Find the most commonly used words in sentences from the US mainstream media that
 ```python
 import mediacloud, datetime
 mc = mediacloud.api.MediaCloud('MY_API_KEY')
-words = mc.wordCount('( zimbabwe AND president)',  solr_filter=[mc.publish_date_query( datetime.date( 2013, 1, 1), datetime.date( 2014, 1, 1) ), 'media_sets_id:1' ] )
+words = mc.wordCount('( zimbabwe AND president)',  solr_filter=[mc.publish_date_query( datetime.date( 2013, 1, 1), datetime.date( 2014, 1, 1) ), 'tags_id_media:1' ] )
 print words[0]  #prints the most common word
 ```
 
