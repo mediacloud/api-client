@@ -143,24 +143,17 @@ class ApiMediaTest(ApiBaseTest):
         matchingList = self._mc.mediaList(tags_id=8875027)  # US MSM
         self.assertTrue(len(matchingList)>0)
 
-class ApiControversyTest(ApiBaseTest):
+class ApiTopicTest(AdminApiBaseTest):
 
-    def testControversy(self):
-        controversy = self._mc.controversy(1)
-        self.assertEqual(controversy['controversies_id'], 1)
-        self.assertEqual(controversy['name'], 'trayvon')
+    def testTopic(self):
+        topic = self._mc.topic(1)
+        self.assertEqual(topic['topics_id'], 1)
+        self.assertEqual(topic['name'], 'trayvon')
 
-    def testControversyList(self):
+    def testTopicList(self):
         # verify it pulls some
-        controversy_list = self._mc.controversyList()
-        self.assertTrue(len(controversy_list)>1)
-        # make sure the filtering works
-        pop_controversy_list = self._mc.controversyList('prop')
-        self.assertTrue(len(pop_controversy_list)>1)
-        self.assertTrue(len(pop_controversy_list)<len(controversy_list))
-        # make sure a failure case works
-        random_controversy_list = self._mc.controversyList('12335')
-        self.assertEqual(len(random_controversy_list), 0)
+        topic_list = self._mc.topicList()
+        self.assertTrue(len(topic_list)>1)
 
 class ApiControversyDumpTest(ApiBaseTest):
 

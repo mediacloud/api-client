@@ -246,21 +246,6 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'tag_sets/list',
             {'last_tag_sets_id': last_tag_sets_id, 'rows':rows})
 
-    def controversy(self, controversies_id):
-        '''
-        Details about one controversy
-        '''
-        return self._queryForJson(self.V2_API_URL+'controversies/single/'+str(controversies_id))[0]
-
-    def controversyList(self, name=None):
-        '''
-        List all the controversies
-        '''
-        args = {}
-        if name is not None:
-            args['name'] = name
-        return self._queryForJson(self.V2_API_URL+'controversies/list', args)
-
     def controversyDump(self, controversy_dumps_id):
         '''
         Details about one controversy dump
@@ -556,3 +541,15 @@ class AdminMediaCloud(MediaCloud):
         if timespan_id is not None:
             params['timeslice'] = timespan_id
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/sentences/count', params)
+
+    def topic(self, topic_id):
+        '''
+        Details about one controversy
+        '''
+        return self._queryForJson(self.V2_API_URL+'topics/single/'+str(topic_id))[0]
+
+    def topicList(self):
+        '''
+        List all the controversies
+        '''
+        return self._queryForJson(self.V2_API_URL+'topics/list')

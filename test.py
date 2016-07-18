@@ -15,7 +15,7 @@ test_classes = [
     ApiStoriesTest, AdminApiStoriesTest, 
     ApiWordCountTest, ApiSentencesTest, AdminApiSentencesTest,
     MongoStorageTest,
-    ApiControversyTest, ApiControversyDumpTest, ApiControversyDumpTimeSliceTest,
+    ApiTopicTest, ApiControversyDumpTest, ApiControversyDumpTimeSliceTest,
     AuthTokenTest,
     ApiAllFieldsOptionTest,
     PublishDateQueryTest,

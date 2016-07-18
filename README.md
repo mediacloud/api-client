@@ -104,6 +104,7 @@ Then run `python tests.py`. Notice you get a `mediacloud-api.log` that tells you
 Version History
 ---------------
 
+* __v2.30.0__: migrate controversyList and controversy to topicList and topic 
 * __v2.29.1__: fixes to topicWordCount method return value
 * __v2.29.0__: add topicSentenceCount, and paging for topicMediaList & topicStoriesList endpoints
 * __v2.28.0__: add storyWordMatrix, support long queries via POST automatically
