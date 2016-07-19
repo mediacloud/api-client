@@ -126,7 +126,7 @@ class ApiMediaTest(ApiBaseTest):
     def testMediaList(self):
         first_list = self._mc.mediaList()
         for media in first_list:
-            self.assertTrue(media['media_id']>0)
+            self.assertTrue(media['media_id'] > 0)
         self.assertNotEqual(first_list, None)
         self.assertEqual(len(first_list), 20)
         last_page_one_media_id = int(first_list[19]['media_id'])-1
@@ -140,8 +140,8 @@ class ApiMediaTest(ApiBaseTest):
         self.assertEqual(len(longer_list), 200)
 
     def testMediaListWithTagId(self):
-        matchingList = self._mc.mediaList(tags_id=8875027)  # US MSM
-        self.assertTrue(len(matchingList)>0)
+        matchingList = self._mc.mediaList(tags_id = 8875027)  # US MSM
+        self.assertTrue(len(matchingList) > 0)
 
 class ApiTopicTest(AdminApiBaseTest):
 
@@ -153,26 +153,22 @@ class ApiTopicTest(AdminApiBaseTest):
     def testTopicList(self):
         # verify it pulls some
         topic_list = self._mc.topicList()
-        self.assertTrue(len(topic_list)>1)
+        self.assertTrue(len(topic_list) > 1)
 
-class ApiControversyDumpTest(ApiBaseTest):
+class ApiTopicSnapshotTest(AdminApiBaseTest):
 
-    def testControversyDump(self):
-        controversy_dump = self._mc.controversyDump(557)
-        self.assertEqual(controversy_dump['controversy_dumps_id'], 557)
-        self.assertEqual(controversy_dump['controversies_id'], 1)
+    #def testControversyDump(self):
+    #    controversy_dump = self._mc.controversyDump(557)
+    #    self.assertEqual(controversy_dump['controversy_dumps_id'], 557)
+    #    self.assertEqual(controversy_dump['controversies_id'], 1)
 
-    def testControversyDumpList(self):
-        # verify it pulls some
-        controversy_dump_list = self._mc.controversyDumpList()
-        self.assertTrue(len(controversy_dump_list)>1)
-        # make sure the filtering works
-        specific_controversy_dump_list = self._mc.controversyDumpList(1)
-        self.assertTrue(len(specific_controversy_dump_list)>1)
-        self.assertTrue(len(specific_controversy_dump_list)<len(controversy_dump_list))
+    def testTopicSnapshotList(self):
+        # make sure it works
+        specific_one = self._mc.topicSnapshotList(1)
+        self.assertEqual(len(specific_one), 10)
         # make sure a failure case works
-        random_controversy_dump_list = self._mc.controversyDumpList('12335')
-        self.assertEqual(len(random_controversy_dump_list), 0)
+        random_one = self._mc.topicSnapshotList('1232545235')
+        self.assertEqual(len(random_one), 0)
 
 class ApiControversyDumpTimeSliceTest(ApiBaseTest):
 
@@ -185,11 +181,11 @@ class ApiControversyDumpTimeSliceTest(ApiBaseTest):
     def testControversyDumpTimeSliceList(self):
         # verify it pulls some
         dump_time_slice_list = self._mc.controversyDumpTimeSliceList()
-        self.assertTrue(len(dump_time_slice_list)>1)
+        self.assertTrue(len(dump_time_slice_list) > 1)
         # make sure the filtering works
         specific_dump_time_slice_list = self._mc.controversyDumpTimeSliceList(controversy_dumps_id=16)
-        self.assertTrue(len(specific_dump_time_slice_list)>1)
-        self.assertTrue(len(specific_dump_time_slice_list)<=len(dump_time_slice_list))
+        self.assertTrue(len(specific_dump_time_slice_list) > 1)
+        self.assertTrue(len(specific_dump_time_slice_list) <= len(dump_time_slice_list))
 
 class ApiTagsTest(ApiBaseTest):
 

@@ -252,15 +252,6 @@ class MediaCloud(object):
         '''
         return self._queryForJson(self.V2_API_URL+'controversy_dumps/single/'+str(controversy_dumps_id))[0]
 
-    def controversyDumpList(self, controversies_id=None):
-        '''
-        List all the controversy dumps in a controversy
-        '''
-        args = {}
-        if controversies_id is not None:
-            args['controversies_id'] = controversies_id
-        return self._queryForJson(self.V2_API_URL+'controversy_dumps/list', args)
-
     def controversyDumpTimeSlice(self, controversy_dump_time_slices_id):
         '''
         Details about one controversy dump time slice
@@ -553,3 +544,12 @@ class AdminMediaCloud(MediaCloud):
         List all the controversies
         '''
         return self._queryForJson(self.V2_API_URL+'topics/list')
+
+    def topicSnapshotList(self, topic_id=None):
+        '''
+        List all the controversy dumps in a controversy
+        '''
+        args = {}
+        if topic_id is not None:
+            args['topic_id'] = topic_id
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/snapshots/list', args)['snapshots']
