@@ -446,7 +446,7 @@ class AdminMediaCloud(MediaCloud):
         '''
         return [data[x:x+chunk_size] for x in xrange(0, len(data), chunk_size)]
 
-    def topicMediaList(self, topic_id, snapshot_id=None, timespan_id=None, sort=None, limit=None, continuation_id=None):
+    def topicMediaList(self, topic_id, snapshot_id=None, timespan_id=None, sort=None, limit=None, link_id=None):
         params = {}
         if sort is not None:
             if sort in ['social', 'inlink']:
@@ -459,11 +459,11 @@ class AdminMediaCloud(MediaCloud):
             params['timeslice'] = timespan_id
         if limit is not None:
             params['limit'] = limit
-        if continuation_id is not None:
-            params['continuation_id'] = continuation_id
+        if link_id is not None:
+            params['link_id'] = link_id
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/media/list', params)
 
-    def topicStoryList(self, topic_id, snapshot_id=None, timespan_id=None, sort=None, limit=None, continuation_id=None):
+    def topicStoryList(self, topic_id, snapshot_id=None, timespan_id=None, sort=None, limit=None, link_id=None):
         params = {'limit': limit}
         if sort is not None:
             if sort in ['social', 'inlink']:
@@ -476,8 +476,8 @@ class AdminMediaCloud(MediaCloud):
             params['timeslice'] = timespan_id
         if limit is not None:
             params['limit'] = limit
-        if continuation_id is not None:
-            params['continuation_id'] = continuation_id
+        if link_id is not None:
+            params['link_id'] = link_id
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/stories/list', params)
 
     def topicWordCount(self, topic_id, solr_query='*', solr_filter='', languages='en', num_words=500, sample_size=1000,
@@ -500,7 +500,7 @@ class AdminMediaCloud(MediaCloud):
 
     def topicSentenceCount(self, topic_id, solr_query='*', solr_filter='',
         split=False, split_start_date=None, split_end_date=None, split_daily=False,
-        snapshot_id=None, timespan_id=None, ):
+        snapshot_id=None, timespan_id=None ):
         params = {'q':solr_query, 'fq':solr_filter}
         params['split'] = 1 if split is True else 0
         params['split_daily'] = 1 if split_daily is True else 0

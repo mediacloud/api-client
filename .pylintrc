@@ -1,0 +1,7 @@
+[MESSAGES CONTROL]
+# Disable the following PyLint messages:
+# C0103: Invalid %s name "%s"
+# W0401: Wildcard import %s
+# C0111: Missing %s docstring
+# C0301: Line too long (%s/%s)
+disable-msg=C0103,W0401,C0111,C0301

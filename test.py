@@ -1,26 +1,26 @@
 #! /usr/bin/env python
-
-import unittest, logging
+import unittest
+import logging
 import sys
 
-from mediacloud.test.apitest import *
-from mediacloud.test.storagetest import *
+import mediacloud.test.apitest as t
+import  mediacloud.test.storagetest as s
 
 test_classes = [
-    AdminTopicSentenceCountTest,
-    ApiBigQueryTest,
-    ApiStoriesWordMatrixTest,
-    ApiMediaHealthTest,
-    ApiMediaTest, ApiFeedsTest, ApiTagsTest, ApiTagSetsTest, 
-    ApiStoriesTest, AdminApiStoriesTest, 
-    ApiWordCountTest, ApiSentencesTest, AdminApiSentencesTest,
-    MongoStorageTest,
-    ApiTopicTest, ApiTopicSnapshotTest, ApiTopicTimespanTest, 
-    AuthTokenTest,
-    ApiAllFieldsOptionTest,
-    PublishDateQueryTest,
-    AdminApiTaggingContentTest, AdminApiTaggingUpdateTest,
-    AdminTopicStoryListTest, AdminTopicMediaListTest, AdminTopicWordCountTest
+    t.AdminTopicSentenceCountTest,
+    t.ApiBigQueryTest,
+    t.ApiStoriesWordMatrixTest,
+    t.ApiMediaHealthTest,
+    t.ApiMediaTest, t.ApiFeedsTest, t.ApiTagsTest, t.ApiTagSetsTest,
+    t.ApiStoriesTest, t.AdminApiStoriesTest,
+    t.ApiWordCountTest, t.ApiSentencesTest, t.AdminApiSentencesTest,
+    s.MongoStorageTest,
+    t.ApiTopicTest, t.ApiTopicSnapshotTest, t.ApiTopicTimespanTest,
+    t.AuthTokenTest,
+    t.ApiAllFieldsOptionTest,
+    t.PublishDateQueryTest,
+    t.AdminApiTaggingContentTest, t.AdminApiTaggingUpdateTest,
+    t.AdminTopicStoryListTest, t.AdminTopicMediaListTest, t.AdminTopicWordCountTest
 ]
 
 # set up all logging to DEBUG (cause we're running tests here!)
@@ -38,7 +38,7 @@ requests_logger.propagate = False
 requests_logger.addHandler(log_handler)
 
 # now run all the tests
-suites = [ unittest.TestLoader().loadTestsFromTestCase(test_class) for test_class in test_classes ]
+suites = [unittest.TestLoader().loadTestsFromTestCase(test_class) for test_class in test_classes]
 
 if __name__ == "__main__":
     suite = unittest.TestSuite(suites)
