@@ -1,3 +1,13 @@
+# PyLint configuration file 
+
+[BASIC]
+# Regular expression which should only match correct function names
+function-rgx=[a-z_]+[a-z0-9_][a-z0-9]*$
+
+[DESIGN]
+# some base class constructors have quite a few arguments
+max-args = 30
+
 [MESSAGES CONTROL]
 # Disable the following PyLint messages:
 # C0103: Invalid %s name "%s"
@@ -5,3 +15,9 @@
 # C0111: Missing %s docstring
 # C0301: Line too long (%s/%s)
 disable-msg=C0103,W0401,C0111,C0301
+
+[MISCELLANEOUS]
+# List of note tags to take in consideration, separated by a comma.
+# FIXME -- something which needs fixing
+# TODO  -- future plan
+notes=FIXME,TODO
