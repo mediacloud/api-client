@@ -2,7 +2,8 @@ import logging
 import datetime
 from collections import namedtuple
 import requests
-import mediacloud, mediacloud.error
+import mediacloud
+import mediacloud.error
 
 MAX_HTTP_GET_CHARS = 4000   # experimentally determined for our main servers (conservative)
 
@@ -74,7 +75,7 @@ class MediaCloud(object):
         Details about one media source
         '''
         return self._queryForJson(self.V2_API_URL+'mediahealth/list',
-            {'media_id':media_id} )[0]
+            {'media_id':media_id})[0]
 
     def mediaList(self, last_media_id=0, rows=20, name_like=None,
                 controversy_dump_time_slices_id=None, controversy_mode=None, tags_id=None, q=None):
@@ -105,7 +106,7 @@ class MediaCloud(object):
         Page through all the feeds of one media source
         '''
         return self._queryForJson(self.V2_API_URL+'feeds/list',
-            {'media_id':media_id, 'last_feeds_id':last_feeds_id, 'rows':rows} )
+            {'media_id':media_id, 'last_feeds_id':last_feeds_id, 'rows':rows})
 
     def storyPublic(self, stories_id):
         '''
@@ -155,9 +156,9 @@ class MediaCloud(object):
         {stories_id => 1, corenlp => 'story is not annotated' }
         '''
         return self._queryForJson(self.V2_API_URL+'stories/corenlp',
-            {'stories_id': story_id_list} )
+            {'stories_id': story_id_list})
 
-    def storyWordMatrix(self, solr_query='', solr_filter='', rows=1000, max_words=None, stopword_length=None ):
+    def storyWordMatrix(self, solr_query='', solr_filter='', rows=1000, max_words=None, stopword_length=None):
         '''
         Helpful to feed term-document-matrix driven analyses, like TF-IDF.
         '''
@@ -284,54 +285,48 @@ class MediaCloud(object):
             total_url_length = len(url)+sum([len(str(k)) for k in params.keys()])+sum([len(str(v)) for v in params.values()])
             try:
                 if total_url_length > MAX_HTTP_GET_CHARS:
-                    r = requests.post(url, data=params, headers={'Accept': 'application/json'} )
-                else :
-                    r = requests.get(url, params=params, headers={'Accept': 'application/json'} )
+                    r = requests.post(url, data=params, headers={'Accept': 'application/json'})
+                else:
+                    r = requests.get(url, params=params, headers={'Accept': 'application/json'})
             except Exception as e:
                 self._logger.error('Failed to GET or POST to url '+url+' because '+str(e))
                 raise e
         elif http_method is 'PUT':
             try:
-                r = requests.put( url, params=params, headers={'Accept': 'application/json'} )
+                r = requests.put(url, params=params, headers={'Accept': 'application/json'})
             except Exception as e:
                 self._logger.error('Failed to PUT url '+url+' because '+str(e))
                 raise e
         else:
             raise ValueError('Error - unsupported HTTP method %s' % http_method)
         if r.status_code is not requests.codes.ok:
-            self._logger.error('Bad HTTP response to '+r.url +' : '+str(r.status_code)  + ' ' +  str( r.reason) )
-            self._logger.error('\t' + r.content )
+            self._logger.error('Bad HTTP response to '+r.url +' : '+str(r.status_code)  + ' ' +  str(r.reason))
+            self._logger.error('\t' + r.content)
             msg = 'Error - got a HTTP status code of %s with the message "%s", body: %s' % (
-                str(r.status_code) , str(r.reason), str(r.text) )
+                str(r.status_code), str(r.reason), str(r.text))
             raise mediacloud.error.MCException(msg, r.status_code)
         return r
 
     def _zi_time(self, d):
         return datetime.datetime.combine(d, datetime.time.min).isoformat() + "Z"
 
-    def _solr_date_range( self, start_date, end_date, start_date_inclusive=True, end_date_inclusive=False):
+    def _solr_date_range(self, start_date, end_date, start_date_inclusive=True, end_date_inclusive=False):
         ret = ''
-
         if start_date_inclusive:
             ret += '['
         else:
             ret += '{'
-
-        ret += self._zi_time( start_date )
-
+        ret += self._zi_time(start_date)
         ret += " TO "
-
-        ret += self._zi_time( end_date )
-
+        ret += self._zi_time(end_date)
         if end_date_inclusive:
             ret += ']'
         else:
             ret += '}'
-
         return ret
 
-    def publish_date_query( self, start_date, end_date, start_date_inclusive=True, end_date_inclusive=False):
-        return 'publish_date:' + self._solr_date_range( start_date, end_date, start_date_inclusive, end_date_inclusive)
+    def publish_date_query(self, start_date, end_date, start_date_inclusive=True, end_date_inclusive=False):
+        return 'publish_date:' + self._solr_date_range(start_date, end_date, start_date_inclusive, end_date_inclusive)
 
 # used when calling AdminMediaCloud.tagStories
 StoryTag = namedtuple('StoryTag', ['stories_id', 'tag_set_name', 'tag_name'])
@@ -397,9 +392,9 @@ class AdminMediaCloud(MediaCloud):
         for tag in tags:
             if tag.__class__ is not StoryTag:
                 raise ValueError('To use tagStories you must send in a list of StoryTag objects')
-            custom_tags.append( '{}, {}:{}'.format( tag.stories_id, tag.tag_set_name, tag.tag_name ) )
+            custom_tags.append( '{}, {}:{}'.format(tag.stories_id, tag.tag_set_name, tag.tag_name))
         params['story_tag'] = custom_tags
-        return self._queryForJson( self.V2_API_URL+'stories/put_tags', params, 'PUT')
+        return self._queryForJson(self.V2_API_URL+'stories/put_tags', params, 'PUT')
 
     def tagSentences(self, tags={}, clear_others=False):
         '''
@@ -415,9 +410,9 @@ class AdminMediaCloud(MediaCloud):
             for tag in tag_chunk:
                 if tag.__class__ is not SentenceTag:
                     raise ValueError('To use tagSentences you must send in a list of SentenceTag objects')
-                custom_tags.append( '{}, {}:{}'.format( tag.story_sentences_id, tag.tag_set_name, tag.tag_name ) )
+                custom_tags.append('{}, {}:{}'.format(tag.story_sentences_id, tag.tag_set_name, tag.tag_name))
             params['sentence_tag'] = custom_tags
-            results = results + self._queryForJson( self.V2_API_URL+'sentences/put_tags', params, 'PUT')
+            results = results + self._queryForJson(self.V2_API_URL+'sentences/put_tags', params, 'PUT')
         return results
 
     def updateTag(self, tags_id, name, label, description):
@@ -428,7 +423,7 @@ class AdminMediaCloud(MediaCloud):
             params['label'] = label
         if description is not None:
             params['description'] = description
-        return self._queryForJson( (self.V2_API_URL+'tags/update/%d') % tags_id, params, 'PUT')
+        return self._queryForJson((self.V2_API_URL+'tags/update/%d') % tags_id, params, 'PUT')
 
     def updateTagSet(self, tag_sets_id, name, label, description):
         params = {}
@@ -438,7 +433,7 @@ class AdminMediaCloud(MediaCloud):
             params['label'] = label
         if description is not None:
             params['description'] = description
-        return self._queryForJson( (self.V2_API_URL+'tag_sets/update/%d') % tag_sets_id, params, 'PUT')
+        return self._queryForJson((self.V2_API_URL+'tag_sets/update/%d') % tag_sets_id, params, 'PUT')
 
     def _chunkify(self, data, chunk_size):
         '''
@@ -500,7 +495,7 @@ class AdminMediaCloud(MediaCloud):
 
     def topicSentenceCount(self, topic_id, solr_query='*', solr_filter='',
         split=False, split_start_date=None, split_end_date=None, split_daily=False,
-        snapshot_id=None, timespan_id=None ):
+        snapshot_id=None, timespan_id=None):
         params = {'q':solr_query, 'fq':solr_filter}
         params['split'] = 1 if split is True else 0
         params['split_daily'] = 1 if split_daily is True else 0
