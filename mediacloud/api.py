@@ -478,7 +478,7 @@ class AdminMediaCloud(MediaCloud):
         '''
         Details about one controversy
         '''
-        return self._queryForJson(self.V2_API_URL+'topics/single/'+str(topics_id))[0]
+        return self._queryForJson(self.V2_API_URL+'topics/single/'+str(topics_id))['topics'][0]
 
     def topicList(self, link_id=None):
         '''
