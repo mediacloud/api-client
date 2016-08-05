@@ -61,7 +61,7 @@ class MediaCloud(object):
         except mediacloud.error.MCException:
             return False
         except Exception as exception:
-            self._logger.warn("AuthToken verify failed: %s" % exception)
+            self._logger.warn("AuthToken verify failed: %s", exception)
         return False
 
     def media(self, media_id):
@@ -259,7 +259,7 @@ class MediaCloud(object):
         '''
         return self._queryForJson(self.V2_API_URL+'controversy_dump_time_slices/single/'+str(controversy_dump_time_slices_id))[0]
 
-    def _queryForJson(self, url, params={}, http_method='GET'):
+    def _queryForJson(self, url, params=None, http_method='GET'):
         '''
         Helper that returns queries to the API as real objects
         '''
@@ -269,11 +269,13 @@ class MediaCloud(object):
         # print json.dumps(response_json, indent=2)
         if 'error' in response_json:
             self._logger.error('Error in response from server on request to '+url+' : '+response_json['error'])
-            raise mediacloud.error.MCException(response_json['error'], requests.codes.ok)
+            raise mediacloud.error.MCException(response_json['error'], requests.codes['ok'])
         return response_json
 
-    def _query(self, url, params={}, http_method='GET'):
+    def _query(self, url, params=None, http_method='GET'):
         self._logger.debug("query "+http_method+" to "+url+" with "+str(params))
+        if params is None:
+            params = {}
         if not isinstance(params, dict):
             raise ValueError('Queries must include a dict of parameters')
         if 'key' not in params:
@@ -281,7 +283,7 @@ class MediaCloud(object):
         if self._all_fields:
             params['all_fields'] = 1
         if http_method is 'GET':
-            # switch to POST if request too long
+            # automatically switch to POST if request too long
             total_url_length = len(url)+sum([len(str(k)) for k in params.keys()])+sum([len(str(v)) for v in params.values()])
             try:
                 if total_url_length > MAX_HTTP_GET_CHARS:
@@ -297,9 +299,15 @@ class MediaCloud(object):
             except Exception as e:
                 self._logger.error('Failed to PUT url '+url+' because '+str(e))
                 raise e
+        elif http_method is 'POST':
+            try:
+                r = requests.post(url, params=params, headers={'Accept': 'application/json'})
+            except Exception as e:
+                self._logger.error('Failed to POST url '+url+' because '+str(e))
+                raise e
         else:
             raise ValueError('Error - unsupported HTTP method %s' % http_method)
-        if r.status_code is not requests.codes.ok:
+        if r.status_code is not requests.codes['ok']:
             self._logger.error('Bad HTTP response to '+r.url +' : '+str(r.status_code)  + ' ' +  str(r.reason))
             self._logger.error('\t' + r.content)
             msg = 'Error - got a HTTP status code of %s with the message "%s", body: %s' % (
@@ -307,26 +315,8 @@ class MediaCloud(object):
             raise mediacloud.error.MCException(msg, r.status_code)
         return r
 
-    def _zi_time(self, d):
-        return datetime.datetime.combine(d, datetime.time.min).isoformat() + "Z"
-
-    def _solr_date_range(self, start_date, end_date, start_date_inclusive=True, end_date_inclusive=False):
-        ret = ''
-        if start_date_inclusive:
-            ret += '['
-        else:
-            ret += '{'
-        ret += self._zi_time(start_date)
-        ret += " TO "
-        ret += self._zi_time(end_date)
-        if end_date_inclusive:
-            ret += ']'
-        else:
-            ret += '}'
-        return ret
-
     def publish_date_query(self, start_date, end_date, start_date_inclusive=True, end_date_inclusive=False):
-        return 'publish_date:' + self._solr_date_range(start_date, end_date, start_date_inclusive, end_date_inclusive)
+        return 'publish_date:' + _solr_date_range(start_date, end_date, start_date_inclusive, end_date_inclusive)
 
 # used when calling AdminMediaCloud.tagStories
 StoryTag = namedtuple('StoryTag', ['stories_id', 'tag_set_name', 'tag_name'])
@@ -339,6 +329,8 @@ class AdminMediaCloud(MediaCloud):
     A MediaCloud API client that includes admin-only methods, including to writing back
     data to MediaCloud.
     '''
+
+    FOCAL_TECHNIQUE_BOOLEAN_QUERY = "Boolean Query"
 
     def story(self, stories_id, raw_1st_download=False, corenlp=False, sentences=False, text=False):
         '''
@@ -380,7 +372,7 @@ class AdminMediaCloud(MediaCloud):
                  'sort': sort
                 })
 
-    def tagStories(self, tags={}, clear_others=False):
+    def tagStories(self, tags=None, clear_others=False):
         '''
         Add some tags to stories. The tags parameter should be a list of StoryTag objects
         Returns ["1, rahulb@media.mit.edu:example_tag_2"] as response
@@ -388,15 +380,17 @@ class AdminMediaCloud(MediaCloud):
         params = {}
         if clear_others is True:
             params['clear_tags'] = 1
+        if tags is None:
+            tags = {}
         custom_tags = []
         for tag in tags:
             if tag.__class__ is not StoryTag:
                 raise ValueError('To use tagStories you must send in a list of StoryTag objects')
-            custom_tags.append( '{}, {}:{}'.format(tag.stories_id, tag.tag_set_name, tag.tag_name))
+            custom_tags.append('{},{}:{}'.format(tag.stories_id, tag.tag_set_name, tag.tag_name))
         params['story_tag'] = custom_tags
         return self._queryForJson(self.V2_API_URL+'stories/put_tags', params, 'PUT')
 
-    def tagSentences(self, tags={}, clear_others=False):
+    def tagSentences(self, tags=None, clear_others=False):
         '''
         Add some tags to sentences. The tags parameter should be a list of SentenceTag objects
         '''
@@ -404,13 +398,15 @@ class AdminMediaCloud(MediaCloud):
         if clear_others is True:
             params['clear_tags'] = 1
         # bath into smaller requests so we don't hit the 414 Request-URI Too Large error
+        if tags is None:
+            tags = {}
         results = []
-        for tag_chunk in self._chunkify(tags, 50):
+        for tag_chunk in _chunkify(tags, 50):
             custom_tags = []
             for tag in tag_chunk:
                 if tag.__class__ is not SentenceTag:
                     raise ValueError('To use tagSentences you must send in a list of SentenceTag objects')
-                custom_tags.append('{}, {}:{}'.format(tag.story_sentences_id, tag.tag_set_name, tag.tag_name))
+                custom_tags.append('{},{}:{}'.format(tag.story_sentences_id, tag.tag_set_name, tag.tag_name))
             params['sentence_tag'] = custom_tags
             results = results + self._queryForJson(self.V2_API_URL+'sentences/put_tags', params, 'PUT')
         return results
@@ -435,106 +431,187 @@ class AdminMediaCloud(MediaCloud):
             params['description'] = description
         return self._queryForJson((self.V2_API_URL+'tag_sets/update/%d') % tag_sets_id, params, 'PUT')
 
-    def _chunkify(self, data, chunk_size):
-        '''
-        Helper method to break an array into a set of smaller arrays
-        '''
-        return [data[x:x+chunk_size] for x in xrange(0, len(data), chunk_size)]
-
-    def topicMediaList(self, topic_id, snapshot_id=None, timespan_id=None, sort=None, limit=None, link_id=None):
+    def topicMediaList(self, topics_id, **kwargs):
         params = {}
-        if sort is not None:
-            if sort in ['social', 'inlink']:
-                params['sort'] = sort
-            else:
-                raise ValueError('Sort must be either social or inlink')
-        if snapshot_id is not None:
-            params['snapshot'] = snapshot_id
-        if timespan_id is not None:
-            params['timeslice'] = timespan_id
-        if limit is not None:
-            params['limit'] = limit
-        if link_id is not None:
-            params['link_id'] = link_id
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/media/list', params)
+        valid_params = ['media_id', 'sort', 'name', 'limit',
+            'link_id', 'snapshot_id', 'foci_id', 'timespan_id']
+        _validate_params(params, valid_params, kwargs)
+        if 'sort' in params:
+            _validate_sort_param(params['sort'])
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/media/list', params)
 
-    def topicStoryList(self, topic_id, snapshot_id=None, timespan_id=None, sort=None, limit=None, link_id=None):
-        params = {'limit': limit}
-        if sort is not None:
-            if sort in ['social', 'inlink']:
-                params['sort'] = sort
-            else:
-                raise ValueError('Sort must be either social or inlink')
-        if snapshot_id is not None:
-            params['snapshot'] = snapshot_id
-        if timespan_id is not None:
-            params['timeslice'] = timespan_id
-        if limit is not None:
-            params['limit'] = limit
-        if link_id is not None:
-            params['link_id'] = link_id
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/stories/list', params)
+    def topicStoryList(self, topics_id, **kwargs):
+        params = {}
+        valid_params = ['q', 'sort', 'stories_id', 'link_to_stories_id', 'link_from_stories_id',
+            'link_to_media_id', 'link_from_media_id', 'media_id', 'limit', 'link_id', 'snapshot_id',
+            'foci_id', 'timespan_id']
+        _validate_params(params, valid_params, kwargs)
+        if 'sort' in params:
+            _validate_sort_param(params['sort'])
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/stories/list', params)
 
-    def topicWordCount(self, topic_id, solr_query='*', solr_filter='', languages='en', num_words=500, sample_size=1000,
-                        include_stopwords=False, snapshot_id=None, timespan_id=None, include_stats=False):
-        params = {
-            'q': solr_query,
-            'l': languages,
-            'num_words': num_words,
-            'sample_size': sample_size,
-            'include_stats': 1 if include_stats is True else 0,
-            'include_stopwords': 1 if include_stopwords is True else 0
-        }
-        if snapshot_id is not None:
-            params['snapshot'] = snapshot_id
-        if timespan_id is not None:
-            params['timeslice'] = timespan_id
-        if len(solr_filter) > 0:
-            params['fq'] = solr_filter
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/wc/list', params)
+    def topicStoryCount(self, topics_id, **kwargs):
+        params = {}
+        valid_params = ['q', 'snapshots_id', 'foci_id', 'timespans_id', 'limit']
+        _validate_params(params, valid_params, kwargs)
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/stories/count', params)
 
-    def topicSentenceCount(self, topic_id, solr_query='*', solr_filter='',
-        split=False, split_start_date=None, split_end_date=None, split_daily=False,
-        snapshot_id=None, timespan_id=None):
-        params = {'q':solr_query, 'fq':solr_filter}
-        params['split'] = 1 if split is True else 0
-        params['split_daily'] = 1 if split_daily is True else 0
-        if split is True:
-            datetime.datetime.strptime(split_start_date, '%Y-%m-%d')    #will throw a ValueError if invalid
-            datetime.datetime.strptime(split_end_date, '%Y-%m-%d')    #will throw a ValueError if invalid
-            params['split_start_date'] = split_start_date
-            params['split_end_date'] = split_end_date
-        if snapshot_id is not None:
-            params['snapshot'] = snapshot_id
-        if timespan_id is not None:
-            params['timeslice'] = timespan_id
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/sentences/count', params)
+    def topicWordCount(self, topics_id, **kwargs):
+        params = {}
+        valid_params = ['q', 'fq', 'languages', 'num_words', 'sample_size', 'include_stopwords',
+            'include_stats', 'snapshots_id', 'foci_id', 'timespans_id']
+        _validate_params(params, valid_params, kwargs)
+        _validate_bool_params('include_stopwords', 'include_stats')
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/wc/list', params)
 
-    def topic(self, topic_id):
+    def topicSentenceCount(self, topics_id, **kwargs):
+        params = {}
+        valid_params = ['q', 'fq', 'split', 'split_start_date', 'split_end_date',
+            'snapshots_id', 'foci_id', 'timespans_id']
+        _validate_params(params, valid_params, kwargs)
+        _validate_bool_params(params, 'split', 'split_daily')
+        if 'split' in params and params['split'] is True:
+            _validate_date_params(params, 'split_start_date', 'split_end_date')
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/sentences/count', params)
+
+    def topic(self, topics_id):
         '''
         Details about one controversy
         '''
-        return self._queryForJson(self.V2_API_URL+'topics/single/'+str(topic_id))[0]
+        return self._queryForJson(self.V2_API_URL+'topics/single/'+str(topics_id))[0]
 
-    def topicList(self):
+    def topicList(self, link_id=None):
         '''
         List all the controversies
         '''
-        return self._queryForJson(self.V2_API_URL+'topics/list')
+        params = {}
+        if link_id is not None:
+            params['link_id'] = link_id
+        return self._queryForJson(self.V2_API_URL+'topics/list', params)
 
-    def topicSnapshotList(self, topic_id):
-        '''
-        List all the controversy dumps in a controversy
-        '''
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/snapshots/list')['snapshots']
+    def topicSnapshotList(self, topics_id):
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/snapshots/list')['snapshots']
 
-    def topicTimespanList(self, topic_id, snapshots_id=None, foci_id=None):
-        '''
-        List all the controversy dumps time slices in a controversy dump
-        '''
-        args = {}
-        if snapshots_id is not None:
-            args['snapshots_id'] = snapshots_id
-        if foci_id is not None:
-            args['foci_id'] = foci_id
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topic_id)+'/timespans/list', args)['timespans']
+    def topicGenerateSnapshot(self, topics_id, **kwargs):
+        params = {}
+        valid_params = ['note']
+        _validate_params(params, valid_params, kwargs)
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/snapshots/generate', params, 'POST')
+
+    def topicTimespanList(self, topics_id, **kwargs):
+        params = {}
+        valid_params = ['snapshots_id', 'foci_id']
+        _validate_params(params, valid_params, kwargs)
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/timespans/list', params)['timespans']
+
+    def topicFocalSetDefinitionList(self, topics_id):
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_set_definitions/list')['focal_set_definitions']
+
+    def topicFocalSetDefinitionCreate(self, topics_id, name, description, focal_technique):
+        params = {
+            'name': name,
+            'description': description,
+            'focal_technique': focal_technique
+        }
+        if params['focal_technique'] not in [self.FOCAL_TECHNIQUE_BOOLEAN_QUERY]:
+            raise ValueError('%s is not a valid focal technique' % params['focal_technique'])
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_set_definitions/'+
+            '/create', params, http_method='POST')['focal_set_definitions']
+
+    def topicFocalSetDefinitionDelete(self, topics_id, focal_set_definitions_id):
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_set_definitions/'+
+            focal_set_definitions_id+'/delete', http_method='PUT')
+
+    def topicFocalSetDefinitionUpdate(self, topics_id, focal_set_definitions_id, **kwargs):
+        params = {}
+        valid_params = ['name', 'description']
+        _validate_params(params, valid_params, kwargs)
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_set_definitions/'+
+            focal_set_definitions_id+'/update', params, http_method='PUT')['focal_set_definitions']
+
+    def topicFocalSetList(self, topics_id):
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_sets/list')['focal_sets']
+
+    def topicFocusDefinitionList(self, topics_id, focal_set_definitions_id):
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focus_definitions/'+
+            focal_set_definitions_id+'/list')['focus_definitions']
+
+    def topicFocusDefinitionCreate(self, topics_id, **kwargs):
+        params = {}
+        valid_params = ['name', 'description', 'query', 'focus_set_definitions_id']
+        _validate_params(params, valid_params, kwargs)
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_sets/create',
+            params, http_method='POST')['focus_definitions']
+
+    def topicFocusDefinitionUpdate(self, topics_id, focus_definitions_id, **kwargs):
+        params = {}
+        valid_params = ['name', 'description', 'query']
+        _validate_params(params, valid_params, kwargs)
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focus_definitions/'+
+            focus_definitions_id+'/update', params, http_method='PUT')['focus_definitions']
+
+    def topicFocusDefinitionDelete(self, topics_id, focus_definitions_id):
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focus_definitions/'+
+            focus_definitions_id+'/delete', http_method='PUT')
+
+    def topicFociList(self, topics_id, focal_sets_id):
+        params = {'focal_sets_id': focal_sets_id}
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/foci/list', params)['foci']
+
+    '''
+    def topicAddTimespan(self, topics_id, **kwargs):
+        params = {}
+        valid_params = ['start_date', 'end_date']
+        _validate_params(params, valid_params, kwargs)
+        _validate_date_params(params, valid_params)
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/timespans/add_dates', params, 'POST')
+    '''
+
+def _solr_date_range(start_date, end_date, start_date_inclusive=True, end_date_inclusive=False):
+    ret = ''
+    if start_date_inclusive:
+        ret += '['
+    else:
+        ret += '{'
+    ret += _zi_time(start_date)
+    ret += " TO "
+    ret += _zi_time(end_date)
+    if end_date_inclusive:
+        ret += ']'
+    else:
+        ret += '}'
+    return ret
+
+def _zi_time(d):
+    return datetime.datetime.combine(d, datetime.time.min).isoformat() + "Z"
+
+def _chunkify(data, chunk_size):
+    '''
+    Helper method to break an array into a set of smaller arrays
+    '''
+    return [data[x:x+chunk_size] for x in xrange(0, len(data), chunk_size)]
+
+def _validate_params(params, valid_params, args):
+    for key, value in args.iteritems():
+        if key not in valid_params:
+            raise ValueError('%s is not a valid argument for this api method' % key)
+        params[key] = value
+    return params
+
+def _validate_sort_param(order):
+    if order not in [None, 'social', 'inlink']:
+        raise ValueError('Sort must be either social or inlink')
+
+def _validate_bool_params(params, *args):
+    for arg in args:
+        if arg in params:
+            if params[arg] not in [True, False]:
+                raise ValueError('%s must be a python boolean (True or False)' % arg)
+            params[arg] = 1 if params[arg] is True else 0
+    return params
+
+def _validate_date_params(params, *args):
+    for arg in args:
+        if arg in params:
+            datetime.datetime.strptime(params[arg], '%Y-%m-%d')    #will throw a ValueError if invalid
+    return params

@@ -157,6 +157,17 @@ class ApiTopicTest(AdminApiBaseTest):
         topic_list = self._mc.topicList()
         self.assertTrue(len(topic_list) > 1)
 
+    def testTopicListPaging(self):
+        # verify second page doesn't contain any ids from the first page
+        topic_list_page_1 = self._mc.topicList()
+        page_1_ids = [t['topics_id'] for t in topic_list_page_1['topics']]
+        self.assertTrue(len(topic_list_page_1) > 1)
+        topic_list_page_2 = self._mc.topicList(topic_list_page_1['link_ids']['next'])
+        self.assertTrue(len(topic_list_page_2) > 1)
+        page_2_ids = [t['topics_id'] for t in topic_list_page_2['topics']]
+        for page_2_topic_id in page_2_ids:
+            self.assertTrue(page_2_topic_id not in page_1_ids)
+
 class ApiTopicSnapshotTest(AdminApiBaseTest):
 
     def testTopicSnapshotList(self):
@@ -346,7 +357,7 @@ class ApiStoriesTest(ApiBaseTest):
 
     def testStoryCount(self):
         results = self._mc.storyCount(self.QUERY, self.FILTER_QUERY)
-        self.assertEqual(results['count'], 2083)
+        self.assertEqual(results['count'], 623)
 
 class AdminApiSentencesTest(AdminApiBaseTest):
 
@@ -362,7 +373,7 @@ class AdminApiSentencesTest(AdminApiBaseTest):
                 self.assertTrue(last_date <= this_date, "Date wrong: "+str(last_date)+" is not <= "+str(this_date))
                 last_date = this_date
             last_date = this_date
-        
+
     def testSentenceListSortingDescending(self):
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, 0, ApiBaseTest.SENTENCE_COUNT,
             self._mc.SORT_PUBLISH_DATE_DESC)
@@ -381,7 +392,7 @@ class AdminApiSentencesTest(AdminApiBaseTest):
         results1 = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, 0, ApiBaseTest.SENTENCE_COUNT,
             self._mc.SORT_RANDOM)
         self.assertEqual(len(results1['response']['docs']), ApiBaseTest.SENTENCE_COUNT)
-        results2 = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, ApiBaseTest.SENTENCE_COUNT+3, ApiBaseTest.SENTENCE_COUNT,
+        results2 = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, ApiBaseTest.SENTENCE_COUNT*2, ApiBaseTest.SENTENCE_COUNT,
             self._mc.SORT_RANDOM)
         self.assertEqual(len(results2['response']['docs']), ApiBaseTest.SENTENCE_COUNT)
         for idx in range(0, ApiBaseTest.SENTENCE_COUNT):
@@ -391,18 +402,18 @@ class AdminApiSentencesTest(AdminApiBaseTest):
     def testSentenceList(self):
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY)
         self.assertEqual(int(results['responseHeader']['status']), 0)
-        self.assertEqual(int(results['response']['numFound']), 5793)
+        self.assertEqual(int(results['response']['numFound']), 1934)
         self.assertEqual(len(results['response']['docs']), 1000)
 
     def testSentenceListPaging(self):
         # test limiting rows returned
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, 0, 100)
-        self.assertEqual(int(results['response']['numFound']), 5793)
+        self.assertEqual(int(results['response']['numFound']), 1934)
         self.assertEqual(len(results['response']['docs']), 100)
         # test starting offset
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, 5700)
-        self.assertEqual(int(results['response']['numFound']), 5793)
-        self.assertEqual(len(results['response']['docs']), 93)
+        self.assertEqual(int(results['response']['numFound']), 1934)
+        self.assertEqual(len(results['response']['docs']), 0)
 
 class ApiSentencesTest(ApiBaseTest):
 
@@ -553,7 +564,7 @@ class AdminApiTaggingContentTest(AdminApiBaseTest):
     def testChunkify(self):
         chunk_size = 50
         data = [x for x in range(0, 507)]
-        chunked = self._mc._chunkify(data, chunk_size)
+        chunked = mediacloud.api._chunkify(data, chunk_size)
         self.assertEqual(11, len(chunked))
         for x in range(0, 10):
             self.assertEqual(chunk_size, len(chunked[x]))
@@ -625,7 +636,7 @@ class AdminTopicStoryListTest(AdminApiBaseTest):
 
     def testTopicStoryList(self):
         response = self._mc.topicStoryList(self.TOPIC_ID)
-        self.assertEqual(len(response['stories']), 100)
+        self.assertEqual(len(response['stories']), 20)
 
     def testTopicStoryListPaging(self):
         limit = 50
@@ -640,12 +651,10 @@ class AdminTopicStoryListTest(AdminApiBaseTest):
         self.assertEqual(len(responsePage1Ids)+len(responsePage2Ids), len(combinedIds))
 
     def testTopicStoryListLimit(self):
-        response = self._mc.topicStoryList(self.TOPIC_ID)
-        self.assertEqual(len(response['stories']), 100)
-        response = self._mc.topicStoryList(self.TOPIC_ID, limit=76)
-        self.assertEqual(len(response['stories']), 76)
-        response = self._mc.topicStoryList(self.TOPIC_ID, limit=500)
-        self.assertEqual(len(response['stories']), 500)
+        response1 = self._mc.topicStoryList(self.TOPIC_ID)
+        self.assertEqual(len(response1['stories']), 20)
+        response2 = self._mc.topicStoryList(self.TOPIC_ID, limit=67)
+        self.assertEqual(len(response2['stories']), 67)
 
     def testTopicStoryListSortSocial(self):
         response = self._mc.topicStoryList(self.TOPIC_ID, limit=500, sort='social')
@@ -661,6 +670,18 @@ class AdminTopicStoryListTest(AdminApiBaseTest):
             self.assertTrue(story['inlink_count'] <= last_inlink_count)
             last_inlink_count = story['inlink_count']
 
+class AdminTopicStoryCountTest(AdminApiBaseTest):
+    TOPIC_ID = 1
+
+    def testTopicStoryCount(self):
+        response = self._mc.topicStoryCount(self.TOPIC_ID)
+        self.assertTrue('count' in response)
+        self.assertTrue(response['count'] > 0)
+        response2 = self._mc.topicStoryCount(self.TOPIC_ID, q='Obama')
+        self.assertTrue('count' in response2)
+        self.assertTrue(response2['count'] > 0)
+        self.assertTrue(response['count'] > response2['count'])
+
 class AdminTopicMediaListTest(AdminApiBaseTest):
     TOPIC_ID = 1
 
@@ -673,17 +694,15 @@ class AdminTopicMediaListTest(AdminApiBaseTest):
 
     def testTopicMediaListLimit(self):
         response = self._mc.topicMediaList(self.TOPIC_ID)
-        self.assertEqual(len(response['media']), 100)
-        response = self._mc.topicMediaList(self.TOPIC_ID, limit=76)
-        self.assertEqual(len(response['media']), 76)
-        response = self._mc.topicMediaList(self.TOPIC_ID, limit=500)
-        self.assertEqual(len(response['media']), 500)
+        self.assertEqual(len(response['media']), 20)
+        response = self._mc.topicMediaList(self.TOPIC_ID, limit=31)
+        self.assertEqual(len(response['media']), 31)
 
     def testTopicMediaListPaging(self):
-        limit = 50
+        limit = 10
         responsePage1 = self._mc.topicMediaList(self.TOPIC_ID, limit=limit)
         responsePage1Ids = [m['media_id'] for m in responsePage1['media']]
-        self.assertEqual(len(responsePage1['media']), 50)
+        self.assertEqual(len(responsePage1['media']), 10)
         self.assertTrue('link_ids' in responsePage1)
         responsePage2 = self._mc.topicMediaList(self.TOPIC_ID, link_id=responsePage1['link_ids']['next'], limit=limit)
         responsePage2Ids = [m['media_id'] for m in responsePage2['media']]
@@ -724,20 +743,23 @@ class AdminTopicWordCountTest(AdminApiBaseTest):
     def testNumWords(self):
         term_freq = self._mc.topicWordCount(self.TOPIC_ID)
         self.assertEqual(len(term_freq), 500)
-        term_freq = self._mc.topicWordCount(self.TOPIC_ID, num_words=500)
-        self.assertEqual(len(term_freq), 500)
+        term_freq = self._mc.topicWordCount(self.TOPIC_ID, num_words=52)
+        self.assertEqual(len(term_freq), 52)
+        term_freq = self._mc.topicWordCount(self.TOPIC_ID, num_words=1000)
+        self.assertEqual(len(term_freq), 1000)
 
 class AdminTopicSentenceCountTest(AdminApiBaseTest):
     TOPIC_ID = 1
 
     def testSentenceCount(self):
         results = self._mc.topicSentenceCount(self.TOPIC_ID)
-        self.assertTrue(int(results['count']) > 10000)
-        results = self._mc.topicSentenceCount(self.TOPIC_ID, snapshot_id=365)
+        self.assertTrue(int(results['count']) > 1000)
+        results = self._mc.topicSentenceCount(self.TOPIC_ID, snapshots_id=365)
         self.assertTrue(int(results['count']) > 1000)
 
     def testSentenceCountSplit(self):
-        results = self._mc.topicSentenceCount(self.TOPIC_ID, '*', '*', True, '2013-01-01', '2016-01-01')
+        results = self._mc.topicSentenceCount(self.TOPIC_ID, q='*', fq='*',
+            split=True, split_start_date='2013-01-01', split_end_date='2016-01-01')
         self.assertEqual(results['split']['gap'], '+7DAYS')
         self.assertEqual(len(results['split']), 160)
 

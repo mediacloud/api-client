@@ -14,7 +14,10 @@ max-args = 30
 # W0401: Wildcard import %s
 # C0111: Missing %s docstring
 # C0301: Line too long (%s/%s)
-disable-msg=C0103,W0401,C0111,C0301
+# R0904: Too many public methods
+# R0912: Too many branches (%s/%s) 
+# W0221: Arguments number differs from %s method
+disable-msg=C0103,W0401,C0111,C0301,R0904,R0912
 
 [MISCELLANEOUS]
 # List of note tags to take in consideration, separated by a comma.
