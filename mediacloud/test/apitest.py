@@ -69,7 +69,7 @@ class AuthTokenTest(ApiBaseTest):
         self._mc.setAuthToken(valid_auth_token)
 
     def testUserAuthToken(self):
-        # test failure mode 
+        # test failure mode
         try:
             self._mc.userAuthToken('user@funkytown.us', '1234')
             self.assertFalse(True)
@@ -456,17 +456,17 @@ class ApiSentencesTest(ApiBaseTest):
         story_results = self._mc.sentenceFieldCount('obama', '+media_id:1', field='tags_id_stories')
         self.assertFalse('stats' in story_results)
         self.assertFalse('counts' in story_results)
-        self.assertTrue(len(story_results)>0)
+        self.assertTrue(len(story_results) > 0)
         ignore = [self.assertTrue(tag['count']) for tag in story_results]
         # compare
-        self.assertTrue(len(story_results)!=len(sentence_results))
+        self.assertTrue(len(story_results) != len(sentence_results))
         # with stats
         results = self._mc.sentenceFieldCount('obama', '+media_id:1', include_stats=True)
         self.assertTrue('stats' in results)
         self.assertTrue('counts' in results)
         # filter by tag set
         sentence_results = self._mc.sentenceFieldCount('obama', '+media_id:1', tag_sets_id=GEO_TAG_SET_ID)
-        self.assertTrue(len(sentence_results)>0)
+        self.assertTrue(len(sentence_results) > 0)
         ignore = [self.assertEqual(tag['tag_sets_id'], GEO_TAG_SET_ID) for tag in sentence_results]
 
 class ApiWordCountTest(ApiBaseTest):
@@ -476,7 +476,7 @@ class ApiWordCountTest(ApiBaseTest):
     def testResults(self):
         term_freq = self._mc.wordCount(self.QUERY, self.FILTER_QUERY)
         self.assertEqual(len(term_freq), 500)
-        self.assertEqual(term_freq[3]['term'], u'pacific')
+        self.assertEqual(term_freq[3]['term'], u'space')
 
     def testSort(self):
         term_freq = self._mc.wordCount(self.QUERY, self.FILTER_QUERY)
@@ -494,13 +494,13 @@ class ApiWordCountTest(ApiBaseTest):
 
     def testStopWords(self):
         term_freq = self._mc.wordCount(self.QUERY, self.FILTER_QUERY)
-        self.assertEqual(term_freq[3]['term'], u'pacific')
+        self.assertEqual(term_freq[3]['term'], u'rim')
         term_freq = self._mc.wordCount(self.QUERY, self.FILTER_QUERY, include_stopwords=True)
-        self.assertEqual(term_freq[3]['term'], u'that')   
+        self.assertEqual(term_freq[3]['term'], u'that')
 
     def testStats(self):
         term_freq = self._mc.wordCount(self.QUERY, self.FILTER_QUERY)
-        self.assertEqual(term_freq[3]['term'], u'pacific')
+        self.assertEqual(term_freq[3]['term'], u'rim')
         term_freq = self._mc.wordCount(self.QUERY, self.FILTER_QUERY, include_stats=True)
         self.assertEqual(len(term_freq), 2)
         self.assertTrue('stats' in term_freq.keys())
@@ -511,13 +511,13 @@ class AdminApiTaggingUpdateTest(AdminApiBaseTest):
     def testTagUpdate(self):
         example_tag_id = 9172167
         # change the name, label and description
-        result = self._mc.updateTag(example_tag_id, 'modified tag', 'modified label', 'modified description')
+        self._mc.updateTag(example_tag_id, 'modified tag', 'modified label', 'modified description')
         modified_tag = self._mc.tag(example_tag_id)
         self.assertEqual(modified_tag['tag'], 'modified tag')
         self.assertEqual(modified_tag['label'], 'modified label')
         self.assertEqual(modified_tag['description'], 'modified description')
         # set it back
-        result = self._mc.updateTag(example_tag_id, 'example tag', 'example label', 'This is an exampel tag used in api client test scripts')
+        self._mc.updateTag(example_tag_id, 'example tag', 'example label', 'This is an exampel tag used in api client test scripts')
         modified_tag = self._mc.tag(example_tag_id)
         self.assertEqual(modified_tag['tag'], 'example tag')
         self.assertEqual(modified_tag['label'], 'example label')
@@ -526,13 +526,13 @@ class AdminApiTaggingUpdateTest(AdminApiBaseTest):
     def testTagSetUpdate(self):
         example_tag_sets_id = TEST_TAG_SET_ID
         # change the name, label and description
-        result = self._mc.updateTagSet(example_tag_sets_id, TEST_USER_EMAIL, 'modified label', 'modified description')
+        self._mc.updateTagSet(example_tag_sets_id, TEST_USER_EMAIL, 'modified label', 'modified description')
         modified_tag = self._mc.tagSet(example_tag_sets_id)
         self.assertEqual(modified_tag['name'], TEST_USER_EMAIL)
         self.assertEqual(modified_tag['label'], 'modified label')
         self.assertEqual(modified_tag['description'], 'modified description')
         # set it back
-        result = self._mc.updateTagSet(example_tag_sets_id, TEST_USER_EMAIL, 'rahulbot', 'The tag set of Rahul!')
+        self._mc.updateTagSet(example_tag_sets_id, TEST_USER_EMAIL, 'rahulbot', 'The tag set of Rahul!')
         modified_tag = self._mc.tagSet(example_tag_sets_id)
         self.assertEqual(modified_tag['name'], TEST_USER_EMAIL)
         self.assertEqual(modified_tag['label'], 'rahulbot')
