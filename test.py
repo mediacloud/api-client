@@ -15,12 +15,13 @@ test_classes = [
     t.ApiStoriesTest, t.AdminApiStoriesTest,
     t.ApiWordCountTest, t.ApiSentencesTest, t.AdminApiSentencesTest,
     s.MongoStorageTest,
-    t.ApiTopicTest, t.ApiTopicSnapshotTest, t.ApiTopicTimespanTest,
     t.AuthTokenTest,
     t.ApiAllFieldsOptionTest,
     t.PublishDateQueryTest,
     t.AdminApiTaggingContentTest, t.AdminApiTaggingUpdateTest,
-    t.AdminTopicStoryListTest, t.AdminTopicMediaListTest, t.AdminTopicWordCountTest
+    t.ApiTopicTest, t.ApiTopicSnapshotTest, t.ApiTopicTimespanTest,
+    t.AdminTopicStoryListTest, t.AdminTopicMediaListTest, t.AdminTopicWordCountTest,
+    t.AdminTopicStoryCountTest
 ]
 
 # set up all logging to DEBUG (cause we're running tests here!)
