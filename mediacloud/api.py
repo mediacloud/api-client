@@ -434,7 +434,7 @@ class AdminMediaCloud(MediaCloud):
     def topicMediaList(self, topics_id, **kwargs):
         params = {}
         valid_params = ['media_id', 'sort', 'name', 'limit',
-            'link_id', 'snapshot_id', 'foci_id', 'timespan_id']
+            'link_id', 'snapshots_id', 'foci_id', 'timespans_id']
         _validate_params(params, valid_params, kwargs)
         if 'sort' in params:
             _validate_sort_param(params['sort'])
@@ -443,8 +443,8 @@ class AdminMediaCloud(MediaCloud):
     def topicStoryList(self, topics_id, **kwargs):
         params = {}
         valid_params = ['q', 'sort', 'stories_id', 'link_to_stories_id', 'link_from_stories_id',
-            'link_to_media_id', 'link_from_media_id', 'media_id', 'limit', 'link_id', 'snapshot_id',
-            'foci_id', 'timespan_id']
+            'link_to_media_id', 'link_from_media_id', 'media_id', 'limit', 'link_id', 'snapshots_id',
+            'foci_id', 'timespans_id']
         _validate_params(params, valid_params, kwargs)
         if 'sort' in params:
             _validate_sort_param(params['sort'])
