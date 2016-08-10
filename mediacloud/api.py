@@ -452,7 +452,7 @@ class AdminMediaCloud(MediaCloud):
 
     def topicStoryCount(self, topics_id, **kwargs):
         params = {}
-        valid_params = ['q', 'snapshots_id', 'foci_id', 'timespans_id', 'limit']
+        valid_params = ['q', 'snapshots_id', 'foci_id', 'timespans_id']
         _validate_params(params, valid_params, kwargs)
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/stories/count', params)
 
