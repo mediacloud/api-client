@@ -278,7 +278,7 @@ class MediaCloud(object):
             params = {}
         if not isinstance(params, dict):
             raise ValueError('Queries must include a dict of parameters')
-        if 'key' not in params:
+        if ('key' not in params) and (http_method is not 'POST'):
             params['key'] = self._auth_token
         if self._all_fields:
             params['all_fields'] = 1
@@ -299,9 +299,10 @@ class MediaCloud(object):
             except Exception as e:
                 self._logger.error('Failed to PUT url '+url+' because '+str(e))
                 raise e
-        elif http_method is 'POST':
+        elif http_method is 'POST': # posts JSON data, needs key in url
             try:
-                r = requests.post(url, params=params, headers={'Accept': 'application/json'})
+                url_with_key = url + "?key="+self._auth_token
+                r = requests.post(url_with_key, json=params, headers={'Accept': 'application/json', 'Content-Type': 'application/json'})
             except Exception as e:
                 self._logger.error('Failed to POST url '+url+' because '+str(e))
                 raise e
@@ -500,7 +501,7 @@ class AdminMediaCloud(MediaCloud):
 
     def topicTimespanList(self, topics_id, **kwargs):
         params = {}
-        valid_params = ['snapshots_id', 'foci_id']
+        valid_params = ['snapshots_id', 'foci_id', 'timespans_id']
         _validate_params(params, valid_params, kwargs)
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/timespans/list', params)['timespans']
 
@@ -515,8 +516,8 @@ class AdminMediaCloud(MediaCloud):
         }
         if params['focal_technique'] not in [self.FOCAL_TECHNIQUE_BOOLEAN_QUERY]:
             raise ValueError('%s is not a valid focal technique' % params['focal_technique'])
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_set_definitions/'+
-            '/create', params, http_method='POST')['focal_set_definitions']
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_set_definitions/create',
+            params, http_method='POST')['focal_set_definitions'][0]
 
     def topicFocalSetDefinitionDelete(self, topics_id, focal_set_definitions_id):
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_set_definitions/'+
@@ -527,20 +528,26 @@ class AdminMediaCloud(MediaCloud):
         valid_params = ['name', 'description']
         _validate_params(params, valid_params, kwargs)
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_set_definitions/'+
-            focal_set_definitions_id+'/update', params, http_method='PUT')['focal_set_definitions']
+            str(focal_set_definitions_id)+'/update', params, http_method='PUT')['focal_set_definitions']
 
-    def topicFocalSetList(self, topics_id):
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_sets/list')['focal_sets']
+    def topicFocalSetList(self, topics_id, **kwargs):
+        params = {}
+        valid_params = ['snapshots_id', 'timespans_id', 'foci_id']
+        _validate_params(params, valid_params, kwargs)
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_sets/list',
+            params)['focal_sets']
 
     def topicFocusDefinitionList(self, topics_id, focal_set_definitions_id):
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focus_definitions/'+
-            focal_set_definitions_id+'/list')['focus_definitions']
+        params = {}
+        params['focal_set_definitions_id'] = focal_set_definitions_id
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focus_definitions/list',
+            params)['focus_definitions']
 
     def topicFocusDefinitionCreate(self, topics_id, **kwargs):
         params = {}
-        valid_params = ['name', 'description', 'query', 'focus_set_definitions_id']
+        valid_params = ['name', 'description', 'query', 'focal_set_definitions_id']
         _validate_params(params, valid_params, kwargs)
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_sets/create',
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focus_definitions/create',
             params, http_method='POST')['focus_definitions']
 
     def topicFocusDefinitionUpdate(self, topics_id, focus_definitions_id, **kwargs):
@@ -548,11 +555,11 @@ class AdminMediaCloud(MediaCloud):
         valid_params = ['name', 'description', 'query']
         _validate_params(params, valid_params, kwargs)
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focus_definitions/'+
-            focus_definitions_id+'/update', params, http_method='PUT')['focus_definitions']
+            str(focus_definitions_id)+'/update', params, http_method='PUT')['focus_definitions']
 
     def topicFocusDefinitionDelete(self, topics_id, focus_definitions_id):
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focus_definitions/'+
-            focus_definitions_id+'/delete', http_method='PUT')
+            str(focus_definitions_id)+'/delete', http_method='PUT')
 
     def topicFociList(self, topics_id, focal_sets_id):
         params = {'focal_sets_id': focal_sets_id}
