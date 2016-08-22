@@ -22,6 +22,8 @@ class MediaCloud(object):
 
     SENTENCE_PUBLISH_DATE_FORMAT = "%Y-%m-%d %H:%M:%S" # use with datetime.datetime.strptime
 
+    FOCAL_TECHNIQUE_BOOLEAN_QUERY = "Boolean Query"
+
     def __init__(self, auth_token=None, all_fields=False):
         self._logger = logging.getLogger(__name__)
         self.setAuthToken(auth_token)
@@ -319,118 +321,6 @@ class MediaCloud(object):
     def publish_date_query(self, start_date, end_date, start_date_inclusive=True, end_date_inclusive=False):
         return 'publish_date:' + _solr_date_range(start_date, end_date, start_date_inclusive, end_date_inclusive)
 
-# used when calling AdminMediaCloud.tagStories
-StoryTag = namedtuple('StoryTag', ['stories_id', 'tag_set_name', 'tag_name'])
-
-# used when calling AdminMediaCloud.tagSentences
-SentenceTag = namedtuple('SentenceTag', ['story_sentences_id', 'tag_set_name', 'tag_name'])
-
-class AdminMediaCloud(MediaCloud):
-    '''
-    A MediaCloud API client that includes admin-only methods, including to writing back
-    data to MediaCloud.
-    '''
-
-    FOCAL_TECHNIQUE_BOOLEAN_QUERY = "Boolean Query"
-
-    def story(self, stories_id, raw_1st_download=False, corenlp=False, sentences=False, text=False):
-        '''
-        Full details about one story.  Handy shortcut to storyList if you want sentences broken out
-        '''
-        return self._queryForJson(self.V2_API_URL+'stories/single/'+str(stories_id),
-                {'raw_1st_download': 1 if raw_1st_download else 0,
-                 'corenlp': 1 if corenlp else 0,
-                 'sentences': 1 if sentences else 0,
-                 'text': 1 if text else 0
-                })[0]
-
-    def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
-                  raw_1st_download=False, corenlp=False, sentences=False, text=False, ap_stories_id=0):
-        '''
-        Search for stories and page through results
-        '''
-        return self._queryForJson(self.V2_API_URL+'stories/list',
-                {'q': solr_query,
-                 'fq': solr_filter,
-                 'last_processed_stories_id': last_processed_stories_id,
-                 'rows': rows,
-                 'raw_1st_download': 1 if raw_1st_download else 0,
-                 'corenlp': 1 if corenlp else 0,    # this is slow - use storyCoreNlList instead
-                 'sentences': 1 if sentences else 0,
-                 'text': 1 if text else 0,
-                 'ap_stories_id': 1 if ap_stories_id else 0
-                })
-
-    def sentenceList(self, solr_query, solr_filter='', start=0, rows=1000, sort=MediaCloud.SORT_PUBLISH_DATE_ASC):
-        '''
-        Search for sentences and page through results
-        '''
-        return self._queryForJson(self.V2_API_URL+'sentences/list',
-                {'q': solr_query,
-                 'fq': solr_filter,
-                 'start': start,
-                 'rows': rows,
-                 'sort': sort
-                })
-
-    def tagStories(self, tags=None, clear_others=False):
-        '''
-        Add some tags to stories. The tags parameter should be a list of StoryTag objects
-        Returns ["1, rahulb@media.mit.edu:example_tag_2"] as response
-        '''
-        params = {}
-        if clear_others is True:
-            params['clear_tags'] = 1
-        if tags is None:
-            tags = {}
-        custom_tags = []
-        for tag in tags:
-            if tag.__class__ is not StoryTag:
-                raise ValueError('To use tagStories you must send in a list of StoryTag objects')
-            custom_tags.append('{},{}:{}'.format(tag.stories_id, tag.tag_set_name, tag.tag_name))
-        params['story_tag'] = custom_tags
-        return self._queryForJson(self.V2_API_URL+'stories/put_tags', params, 'PUT')
-
-    def tagSentences(self, tags=None, clear_others=False):
-        '''
-        Add some tags to sentences. The tags parameter should be a list of SentenceTag objects
-        '''
-        params = {}
-        if clear_others is True:
-            params['clear_tags'] = 1
-        # bath into smaller requests so we don't hit the 414 Request-URI Too Large error
-        if tags is None:
-            tags = {}
-        results = []
-        for tag_chunk in _chunkify(tags, 50):
-            custom_tags = []
-            for tag in tag_chunk:
-                if tag.__class__ is not SentenceTag:
-                    raise ValueError('To use tagSentences you must send in a list of SentenceTag objects')
-                custom_tags.append('{},{}:{}'.format(tag.story_sentences_id, tag.tag_set_name, tag.tag_name))
-            params['sentence_tag'] = custom_tags
-            results = results + self._queryForJson(self.V2_API_URL+'sentences/put_tags', params, 'PUT')
-        return results
-
-    def updateTag(self, tags_id, name, label, description):
-        params = {}
-        if name is not None:
-            params['tag'] = name
-        if label is not None:
-            params['label'] = label
-        if description is not None:
-            params['description'] = description
-        return self._queryForJson((self.V2_API_URL+'tags/update/%d') % tags_id, params, 'PUT')
-
-    def updateTagSet(self, tag_sets_id, name, label, description):
-        params = {}
-        if name is not None:
-            params['name'] = name
-        if label is not None:
-            params['label'] = label
-        if description is not None:
-            params['description'] = description
-        return self._queryForJson((self.V2_API_URL+'tag_sets/update/%d') % tag_sets_id, params, 'PUT')
 
     def topicMediaList(self, topics_id, **kwargs):
         params = {}
@@ -573,6 +463,117 @@ class AdminMediaCloud(MediaCloud):
         _validate_date_params(params, valid_params)
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/timespans/add_dates', params, 'POST')
     '''
+
+# used when calling AdminMediaCloud.tagStories
+StoryTag = namedtuple('StoryTag', ['stories_id', 'tag_set_name', 'tag_name'])
+
+# used when calling AdminMediaCloud.tagSentences
+SentenceTag = namedtuple('SentenceTag', ['story_sentences_id', 'tag_set_name', 'tag_name'])
+
+class AdminMediaCloud(MediaCloud):
+    '''
+    A MediaCloud API client that includes admin-only methods, including to writing back
+    data to MediaCloud.
+    '''
+
+    def story(self, stories_id, raw_1st_download=False, corenlp=False, sentences=False, text=False):
+        '''
+        Full details about one story.  Handy shortcut to storyList if you want sentences broken out
+        '''
+        return self._queryForJson(self.V2_API_URL+'stories/single/'+str(stories_id),
+                {'raw_1st_download': 1 if raw_1st_download else 0,
+                 'corenlp': 1 if corenlp else 0,
+                 'sentences': 1 if sentences else 0,
+                 'text': 1 if text else 0
+                })[0]
+
+    def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
+                  raw_1st_download=False, corenlp=False, sentences=False, text=False, ap_stories_id=0):
+        '''
+        Search for stories and page through results
+        '''
+        return self._queryForJson(self.V2_API_URL+'stories/list',
+                {'q': solr_query,
+                 'fq': solr_filter,
+                 'last_processed_stories_id': last_processed_stories_id,
+                 'rows': rows,
+                 'raw_1st_download': 1 if raw_1st_download else 0,
+                 'corenlp': 1 if corenlp else 0,    # this is slow - use storyCoreNlList instead
+                 'sentences': 1 if sentences else 0,
+                 'text': 1 if text else 0,
+                 'ap_stories_id': 1 if ap_stories_id else 0
+                })
+
+    def sentenceList(self, solr_query, solr_filter='', start=0, rows=1000, sort=MediaCloud.SORT_PUBLISH_DATE_ASC):
+        '''
+        Search for sentences and page through results
+        '''
+        return self._queryForJson(self.V2_API_URL+'sentences/list',
+                {'q': solr_query,
+                 'fq': solr_filter,
+                 'start': start,
+                 'rows': rows,
+                 'sort': sort
+                })
+
+    def tagStories(self, tags=None, clear_others=False):
+        '''
+        Add some tags to stories. The tags parameter should be a list of StoryTag objects
+        Returns ["1, rahulb@media.mit.edu:example_tag_2"] as response
+        '''
+        params = {}
+        if clear_others is True:
+            params['clear_tags'] = 1
+        if tags is None:
+            tags = {}
+        custom_tags = []
+        for tag in tags:
+            if tag.__class__ is not StoryTag:
+                raise ValueError('To use tagStories you must send in a list of StoryTag objects')
+            custom_tags.append('{},{}:{}'.format(tag.stories_id, tag.tag_set_name, tag.tag_name))
+        params['story_tag'] = custom_tags
+        return self._queryForJson(self.V2_API_URL+'stories/put_tags', params, 'PUT')
+
+    def tagSentences(self, tags=None, clear_others=False):
+        '''
+        Add some tags to sentences. The tags parameter should be a list of SentenceTag objects
+        '''
+        params = {}
+        if clear_others is True:
+            params['clear_tags'] = 1
+        # bath into smaller requests so we don't hit the 414 Request-URI Too Large error
+        if tags is None:
+            tags = {}
+        results = []
+        for tag_chunk in _chunkify(tags, 50):
+            custom_tags = []
+            for tag in tag_chunk:
+                if tag.__class__ is not SentenceTag:
+                    raise ValueError('To use tagSentences you must send in a list of SentenceTag objects')
+                custom_tags.append('{},{}:{}'.format(tag.story_sentences_id, tag.tag_set_name, tag.tag_name))
+            params['sentence_tag'] = custom_tags
+            results = results + self._queryForJson(self.V2_API_URL+'sentences/put_tags', params, 'PUT')
+        return results
+
+    def updateTag(self, tags_id, name, label, description):
+        params = {}
+        if name is not None:
+            params['tag'] = name
+        if label is not None:
+            params['label'] = label
+        if description is not None:
+            params['description'] = description
+        return self._queryForJson((self.V2_API_URL+'tags/update/%d') % tags_id, params, 'PUT')
+
+    def updateTagSet(self, tag_sets_id, name, label, description):
+        params = {}
+        if name is not None:
+            params['name'] = name
+        if label is not None:
+            params['label'] = label
+        if description is not None:
+            params['description'] = description
+        return self._queryForJson((self.V2_API_URL+'tag_sets/update/%d') % tag_sets_id, params, 'PUT')
 
 def _solr_date_range(start_date, end_date, start_date_inclusive=True, end_date_inclusive=False):
     ret = ''
