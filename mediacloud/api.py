@@ -1,4 +1,5 @@
 import logging
+import json
 import datetime
 from collections import namedtuple
 import requests
@@ -295,6 +296,13 @@ class MediaCloud(object):
             except Exception as e:
                 self._logger.error('Failed to GET or POST to url '+url+' because '+str(e))
                 raise e
+        elif http_method is 'PUT_JSON':
+            try:
+                url_with_key = url + "?key="+self._auth_token
+                r = requests.put(url_with_key, data=json.dumps(params), headers={'Accept': 'application/json', 'Content-Type': 'application/json'})
+            except Exception as e:
+                self._logger.error('Failed to PUT url '+url+' because '+str(e))
+                raise e
         elif http_method is 'PUT':
             try:
                 r = requests.put(url, params=params, headers={'Accept': 'application/json'})
@@ -311,8 +319,8 @@ class MediaCloud(object):
         else:
             raise ValueError('Error - unsupported HTTP method %s' % http_method)
         if r.status_code is not requests.codes['ok']:
-            self._logger.error('Bad HTTP response to '+r.url +' : '+str(r.status_code)  + ' ' +  str(r.reason))
-            self._logger.error('\t' + r.content)
+            self._logger.info('Bad HTTP response to '+r.url +' : '+str(r.status_code)  + ' ' +  str(r.reason))
+            self._logger.info('\t' + r.content)
             msg = 'Error - got a HTTP status code of %s with the message "%s", body: %s' % (
                 str(r.status_code), str(r.reason), str(r.text))
             raise mediacloud.error.MCException(msg, r.status_code)
@@ -320,7 +328,6 @@ class MediaCloud(object):
 
     def publish_date_query(self, start_date, end_date, start_date_inclusive=True, end_date_inclusive=False):
         return 'publish_date:' + _solr_date_range(start_date, end_date, start_date_inclusive, end_date_inclusive)
-
 
     def topicMediaList(self, topics_id, **kwargs):
         params = {}
@@ -454,6 +461,20 @@ class MediaCloud(object):
     def topicFociList(self, topics_id, focal_sets_id):
         params = {'focal_sets_id': focal_sets_id}
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/foci/list', params)['foci']
+
+    def userPermissionsList(self):
+        return self._queryForJson(self.V2_API_URL+'topics/permissions/user/list')
+
+    def topicPermissionsList(self, topics_id):
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/permissions/list')
+
+    def topicPermissionsUpdate(self, topics_id, email, permission):
+        _validate_permission_param(permission)
+        params = {
+            'email': email,
+            'permission': permission
+        }
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/permissions/update', params, 'PUT_JSON')
 
     '''
     def topicAddTimespan(self, topics_id, **kwargs):
@@ -609,6 +630,10 @@ def _validate_params(params, valid_params, args):
 def _validate_sort_param(order):
     if order not in [None, 'social', 'inlink']:
         raise ValueError('Sort must be either social or inlink')
+
+def _validate_permission_param(permission):
+    if permission not in ['none', 'read', 'write', 'admin']:
+        raise ValueError('Permission must be none, read, write or admin')
 
 def _validate_bool_params(params, *args):
     for arg in args:

@@ -104,6 +104,7 @@ Then run `python tests.py`. Notice you get a `mediacloud-api.log` that tells you
 Version History
 ---------------
 
+* __v2.34.0__: new permissons endpoints
 * __v2.33.1__: move topic endpoints to standard client so users can run them
 * __v2.33.0__: lots of new api endpoints for topic management
 * __v2.32.0__: fix links in topicStoryList and topicMediaList
