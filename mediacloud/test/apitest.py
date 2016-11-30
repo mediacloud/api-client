@@ -76,6 +76,22 @@ class AuthTokenTest(ApiBaseTest):
         except:
             self.assertTrue(True)
 
+class UserProfileTest(ApiBaseTest):
+
+    def testUserProfile(self):
+        profile = self._mc.userProfile()
+        self.assertTrue('email' in profile)
+        self.assertTrue('auth_roles' in profile)
+
+class StatsTest(ApiBaseTest):
+
+    def testStats(self):
+        profile = self._mc.stats()
+        data_keys  = ["total_media", "total_stories", "total_downloads", "total_sentences", "active_crawled_media", "active_crawled_feeds", "daily_stories", "daily_downloads"]
+        for key in data_keys:
+            self.assertTrue(key in profile)
+            self.assertTrue(profile[key] > 100)
+
 class PublishDateQueryTest(ApiBaseTest):
 
     def testPublishDateQuery(self):
@@ -144,6 +160,13 @@ class ApiMediaTest(ApiBaseTest):
     def testMediaListWithTagId(self):
         matchingList = self._mc.mediaList(tags_id=8875027)  # US MSM
         self.assertTrue(len(matchingList) > 0)
+
+    def testMediaListUnhealthy(self):
+        # make sure no overlap in healthy and unhealthy first page of results
+        healthy_ids = set([m['media_id'] for m in self._mc.mediaList()])
+        unhealthy_ids = set([m['media_id'] for m in self._mc.mediaList(unhealthy=True)])
+        intersection = list(healthy_ids & unhealthy_ids)
+        self.assertTrue(len(intersection) == 0)
 
 class ApiTopicTest(AdminApiBaseTest):
 
@@ -321,6 +344,24 @@ class AdminApiStoriesTest(AdminApiBaseTest):
             self.assertTrue('story_text' in story)
             self.assertTrue('is_fully_extracted' in story)
             self.assertFalse('corenlp' in story)
+
+    def testStoryListInFeed(self):
+        TEST_FEEDS_ID = 61  # NYT US news feeds (http://www.nytimes.com/services/xml/rss/nyt/US.xml)
+        results = self._mc.storyList(feeds_id=TEST_FEEDS_ID)
+        for story in results:
+            self.assertEqual(story['feeds_id'], TEST_FEEDS_ID)
+
+    def testStoryListWordCount(self):
+        results = self._mc.storyList(wc=True)
+        for story in results:
+            self.assertTrue('wc' in story)
+            self.assertTrue(story['wc'] > 0)
+
+    def testStoryListSort(self):
+        resultsById = self._mc.storyList(sort=MediaCloud.SORT_PROCESSED_STORIES_ID, rows=20)
+        resultsByBitly = self._mc.storyList(sort=MediaCloud.SORT_BITLY_CLICK_COUNT, row=20)
+        for i in [0,20]:
+            self.assertNoteEqual(resultsById[i]['stories_id'], resultsByBitly[i]['stories_id'])
 
 class ApiStoriesWordMatrixTest(ApiBaseTest):
 
@@ -547,15 +588,18 @@ class AdminApiTaggingContentTest(AdminApiBaseTest):
         desired_tags = [mediacloud.api.StoryTag(test_story_id, tag_set_name, 'test_tag1'),
                  mediacloud.api.StoryTag(test_story_id, tag_set_name, 'test_tag2')]
         response = self._mc.tagStories(desired_tags)
-        self.assertEqual(len(response), len(desired_tags))
+        self.assertEqual('success' in response)
+        self.assertEqual(response['success'] == 1)
         # make sure it worked
         story = self._mc.story(test_story_id, sentences=True)
         tags_on_story = [t for t in story['story_tags'] if t['tag_set'] == tag_set_name]
-        self.assertEqual(len(tags_on_story), len(desired_tags))
+        self.assertEqual('success' in response)
+        self.assertEqual(response['success'] == 1)
         # now remove one
         desired_tags = [mediacloud.api.StoryTag(test_story_id, TEST_USER_EMAIL, 'test_tag1')]
         response = self._mc.tagStories(desired_tags, clear_others=True)
-        self.assertEqual(len(response), len(desired_tags))
+        self.assertEqual('success' in response)
+        self.assertEqual(response['success'] == 1)
         # and check it
         story = self._mc.story(test_story_id, sentences=True)
         tags_on_story = [t for t in story['story_tags'] if t['tag_set'] == tag_set_name]
@@ -583,7 +627,22 @@ class AdminApiTaggingContentTest(AdminApiBaseTest):
         for x in range(0, 80):
             desired_tags = desired_tags + [mediacloud.api.SentenceTag(sid, tag_set_name, 'test_tag1') for sid in sentence_ids]
         response = self._mc.tagSentences(desired_tags)
-        self.assertEqual(len(response), len(desired_tags))
+        self.assertEqual('success' in response)
+        self.assertEqual(response['success'] == 1)
+
+    def testTagMedia(self):
+        media_to_tag = 4451    # ESPN.com
+        test_tag_id1 = '9172171' # mc-api-test@media.mit.edu:test_tag1
+        tag_set_name = TEST_USER_EMAIL
+        # add a tag
+        desired_tag = mediacloud.api.MediaTag(media_id, tag_set_name, 'test_tag1')
+        response = self._mc.tagMedia([desired_tag])
+        self.assertEqual('success' in response)
+        self.assertEqual(response['success'] == 1)
+        # and check it
+        story = self._mc.media(test_story_id)
+        tags_on_media = [t['tags_id'] for t in story['media_source_tags'] if t['tag_set'] == tag_set_name]
+        self.assertTrue(int(test_tag_id1) in tags_on_media)
 
     def testTagSentences(self):
         test_story_id = 435914244

@@ -18,6 +18,8 @@ class MediaCloud(object):
     SORT_PUBLISH_DATE_ASC = "publish_date_asc"
     SORT_PUBLISH_DATE_DESC = "publish_date_desc"
     SORT_RANDOM = "random"
+    SORT_PROCESSED_STORIES_ID = "processed_stories_id"
+    SORT_BITLY_CLICK_COUNT = "bitly_click_count"
 
     MSG_CORE_NLP_NOT_ANNOTATED = "story is not annotated"
 
@@ -67,6 +69,18 @@ class MediaCloud(object):
             self._logger.warn("AuthToken verify failed: %s", exception)
         return False
 
+    def userProfile(self):
+        '''
+        Returns basic info about the current user, including their roles
+        '''
+        return self._queryForJson(self.V2_API_URL+'users/profile')
+
+    def stats(sef):
+        '''
+        High-level stats about the system
+        '''
+        return self._queryForJson(self.V2_API_URL+'stats')
+
     def media(self, media_id):
         '''
         Details about one media source
@@ -81,22 +95,44 @@ class MediaCloud(object):
             {'media_id':media_id})[0]
 
     def mediaList(self, last_media_id=0, rows=20, name_like=None,
-                controversy_dump_time_slices_id=None, controversy_mode=None, tags_id=None, q=None):
+                timespans_id=None, topic_mode=None, tags_id=None, q=None, include_dups=False,
+                name_or_tag=None, unhealthy=None, similar_media_id=None):
         '''
         Page through all media sources
         '''
         params = {'last_media_id':last_media_id, 'rows':rows}
         if name_like is not None:
             params['name'] = name_like
-        if controversy_dump_time_slices_id is not None:
-            params['controversy_dump_time_slices_id'] = controversy_dump_time_slices_id
-        if controversy_mode is not None:
-            params['controversy_mode'] = controversy_mode
+        if name_or_tag is not None:
+            params['name_or_tag'] = name_or_tag
+        if timespans_id is not None:
+            params['timespans_id'] = timespans_id
+        if topic_mode is not None:
+            params['topic_mode'] = topic_mode
+        if include_dups is not None:
+            params['include_dups'] = 1 if include_dups is True else 0
+        if unhealthy is not None:
+            params['unhealthy'] = 1 if unhealthy is True else 0
+        if similar_media_id is not None:
+            params['similar_media_id'] = similar_media_id
         if tags_id is not None:
             params['tags_id'] = tags_id
         if q is not None:
             params['q'] = q
         return self._queryForJson(self.V2_API_URL+'media/list', params)
+
+    def mediaSuggest(self, url, name=None, feed_url=None, reason=None, collections=[]):
+        for c in collections:
+            if not isinstance(c, int):
+                raise ValueError('The collections must be a list of ids')
+        params = {
+            'url': url,
+            'name': name,
+            'feed_url': feed_url,
+            'reason': reason,
+            'collection': collections
+        }
+        return self._queryForJson(self.V2_API_URL+'media/suggestions/submit', params, 'PUT_JSON')
 
     def feed(self, feeds_id):
         '''
@@ -133,13 +169,15 @@ class MediaCloud(object):
                  'fq': solr_filter
                 })
 
-    def storyPublicList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20):
+    def storyPublicList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
+            wc=False, feeds_id=None, sort=SORT_PROCESSED_STORIES_ID):
         '''
         Maintained for backwards compatability
         '''
-        return self.storyList(solr_query, solr_filter, last_processed_stories_id, rows)
+        return self.storyList(solr_query, solr_filter, last_processed_stories_id, rows, wc, feeds_id, sort)
 
-    def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20):
+    def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
+            wc=False, feeds_id=None, sort=SORT_PROCESSED_STORIES_ID):
         '''
         Authenticated Public Users: Search for stories and page through results
         '''
@@ -147,7 +185,10 @@ class MediaCloud(object):
                 {'q': solr_query,
                  'fq': solr_filter,
                  'last_processed_stories_id': last_processed_stories_id,
-                 'rows': rows
+                 'rows': rows,
+                 'sort': sort,
+                 'wc': 1 if wc is True else 0,
+                 'feeds_id': feeds_id
                 })
 
     def storyCoreNlpList(self, story_id_list):
@@ -491,6 +532,8 @@ StoryTag = namedtuple('StoryTag', ['stories_id', 'tag_set_name', 'tag_name'])
 # used when calling AdminMediaCloud.tagSentences
 SentenceTag = namedtuple('SentenceTag', ['story_sentences_id', 'tag_set_name', 'tag_name'])
 
+MediaTag = namedtuple('MediaTag', ['media_id', 'tag_set_name', 'tag_name'])
+
 class AdminMediaCloud(MediaCloud):
     '''
     A MediaCloud API client that includes admin-only methods, including to writing back
@@ -539,8 +582,7 @@ class AdminMediaCloud(MediaCloud):
 
     def tagStories(self, tags=None, clear_others=False):
         '''
-        Add some tags to stories. The tags parameter should be a list of StoryTag objects
-        Returns ["1, rahulb@media.mit.edu:example_tag_2"] as response
+        Add some tags to stories. The tags parameter should be a list of StoryTag objects.
         '''
         params = {}
         if clear_others is True:
@@ -551,9 +593,11 @@ class AdminMediaCloud(MediaCloud):
         for tag in tags:
             if tag.__class__ is not StoryTag:
                 raise ValueError('To use tagStories you must send in a list of StoryTag objects')
-            custom_tags.append('{},{}:{}'.format(tag.stories_id, tag.tag_set_name, tag.tag_name))
-        params['story_tag'] = custom_tags
-        return self._queryForJson(self.V2_API_URL+'stories/put_tags', params, 'PUT')
+            custom_tags.append({
+                'stories_id': tag.stories_id,
+                'tag': str(tag.tag_set_name)+":"+str(tag.tag_name)
+            })
+        return self._queryForJson(self.V2_API_URL+'stories/put_tags', custom_tags, 'PUT_JSON')
 
     def tagSentences(self, tags=None, clear_others=False):
         '''
@@ -571,12 +615,44 @@ class AdminMediaCloud(MediaCloud):
             for tag in tag_chunk:
                 if tag.__class__ is not SentenceTag:
                     raise ValueError('To use tagSentences you must send in a list of SentenceTag objects')
-                custom_tags.append('{},{}:{}'.format(tag.story_sentences_id, tag.tag_set_name, tag.tag_name))
-            params['sentence_tag'] = custom_tags
-            results = results + self._queryForJson(self.V2_API_URL+'sentences/put_tags', params, 'PUT')
+                custom_tags.append({
+                    'story_sentences_id': tag.story_sentences_id,
+                    'tag': str(tag.tag_set_name)+":"+str(tag.tag_name)
+                })
+            results.append(self._queryForJson(self.V2_API_URL+'story_sentences/put_tags', custom_tags, 'PUT_JSON'))
         return results
 
-    def updateTag(self, tags_id, name, label, description):
+    def tagMedia(self, tags=None, clear_others=False):
+        '''
+        Add some tags to media (ie. put them in a colleciton or add metadata to them).
+        The tags parameter should be a list of MediaTag objects.
+        '''
+        params = {}
+        if clear_others is True:
+            params['clear_tags'] = 1
+        if tags is None:
+            tags = {}
+        custom_tags = []
+        for tag in tags:
+            if tag.__class__ is not MediaTag:
+                raise ValueError('To use tagMedia you must send in a list of MediaTag objects')
+            custom_tags.append({
+                'media_id': tag.media_id,
+                'tag': str(tag.tag_set_name)+":"+str(tag.tag_name)
+            })
+        return self._queryForJson(self.V2_API_URL+'media/put_tags', custom_tags, 'PUT_JSON')
+
+    def createTag(self, tag_sets_id, name, label, description, is_static=False):
+        params = {
+            'tag_sets_id': tag_sets_id,
+            'tag': name,
+            'label': label,
+            'description': description,
+            'is_static': 1 if is_static else 0
+        }
+        return self._queryForJson(self.V2_API_URL+'tags/create', params, 'POST')
+
+    def updateTag(self, tags_id, name=None, label=None, description=None, is_static=False):
         params = {}
         if name is not None:
             params['tag'] = name
@@ -584,9 +660,11 @@ class AdminMediaCloud(MediaCloud):
             params['label'] = label
         if description is not None:
             params['description'] = description
+        if is_static is not None:
+            params['is_static'] = 1 if is_static else 0
         return self._queryForJson((self.V2_API_URL+'tags/update/%d') % tags_id, params, 'PUT')
 
-    def updateTagSet(self, tag_sets_id, name, label, description):
+    def updateTagSet(self, tag_sets_id, name=None, label=None, description=None):
         params = {}
         if name is not None:
             params['name'] = name
@@ -595,6 +673,80 @@ class AdminMediaCloud(MediaCloud):
         if description is not None:
             params['description'] = description
         return self._queryForJson((self.V2_API_URL+'tag_sets/update/%d') % tag_sets_id, params, 'PUT')
+
+    def feedCreate(self, media_id, name, url, feed_type='syndicated', feed_status='active'):
+        _validate_feed_type(feed_type)
+        _validate_feed_status(feed_status)
+        params = {
+            'media_id': media_id,
+            'name': name,
+            'url': url,
+            'feed_type': feed_type,
+            'feed_status': feed_status
+        }
+        return self._queryForJson(self.V2_API_URL+'feeds/create', params, 'POST')
+
+    def feedUpdate(self, feeds_id, name=None, url=None, feed_type='syndicated', feed_status='active'):
+        _validate_feed_type(feed_type)
+        _validate_feed_status(feed_status)
+        params = { 'feeds_id': feeds_id}
+        if name is not None:
+            params['name'] = name
+        if url is not None:
+            params['url'] = url
+        if feed_type is not None:
+            params['feed_type'] = feed_type
+        if feed_status is not None:
+            params['feed_status'] = feed_status
+        return self._queryForJson(self.V2_API_URL+'feeds/update', params, 'PUT_JSON')
+
+    def feedsScrape(self, media_id):
+        return self._queryForJson((self.V2_API_URL+'feeds/scrape/%d') % media_id, params, 'POST')
+
+    def mediaCreate(self, media_items):
+        # validate and clean input
+        valid_params = ['url', 'name', 'foreign_rss_links', 'content_delay', 'feeds', 'tags_ids', 'editor_notes', 'public_notes', 'is_monitored' ]
+        boolean_params = ['foreign_rss_links', 'is_monitored']
+        for media in media_items:
+            for k in media:
+                if k not in valid_params:
+                    raise ValueError('Invalid param in attempt to create media: '+str(k))
+                if k in boolean_params:
+                    media[k] = 1 if k else 0
+            if media['url'] is None or len(media['url']) == 0:
+                raise ValueError('You must supply a media url')
+        return self._queryForJson(self.V2_API_URL+'media/create', params, 'PUT_JSON')
+
+    def mediaUpdate(self, media_id, url, name, foreign_rss_links, content_delay, editor_notes, public_notes, is_monitored):
+        params = { 'media_id': media_id }
+        if name is not None:
+            params['name'] = name
+        if url is not None:
+            params['url'] = url
+        if foreign_rss_links is not None:
+            params['foreign_rss_links'] = 1 if foreign_rss_links else 0
+        if content_delay is not None:
+            params['content_delay'] = content_delay
+        if editor_notes is not None:
+            params['editor_notes'] = editor_notes
+        if public_notes is not None:
+            params['public_notes'] = public_notes
+        if is_monitored is not None:
+            params['is_monitored'] = 1 if is_monitored else 0
+        return self._queryForJson(self.V2_API_URL+'media/update', params, 'PUT_JSON')
+
+    def mediaSuggestionsList(self, all=False):
+        return self._queryForJson(self.V2_API_URL+'media/list', {'all': all})
+
+    def mediaSuggestionsMark(self, media_suggestions_id, status, mark_reason):
+        if status not in ['approved', 'rejected']:
+            raise ValueError('Invalid media suggestion status: '+str(status))
+        params = {
+            'media_suggestions_id': media_suggestions_id,
+            'status': status,
+            'mark_reason': mark_reason
+        }
+        return self._queryForJson(self.V2_API_URL+'media/suggestions/mark', params, 'PUT_JSON')
 
 def _solr_date_range(start_date, end_date, start_date_inclusive=True, end_date_inclusive=False):
     ret = ''
@@ -648,3 +800,11 @@ def _validate_date_params(params, *args):
         if arg in params:
             datetime.datetime.strptime(params[arg], '%Y-%m-%d')    #will throw a ValueError if invalid
     return params
+
+def _validate_feed_type(feed_type):
+    if feed_type not in ['syndicated', 'web_page']:
+            raise ValueError('feed_type must be syndicated or web_page')
+
+def _validate_feed_status(feed_type):
+    if feed_status not in ['active', 'inactive', 'skipped']:
+        raise ValueError('feed_status must be active, inactive, or skipped')
