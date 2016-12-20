@@ -2,9 +2,11 @@ import logging
 import json
 import datetime
 from collections import namedtuple
+import urllib
 import requests
 import mediacloud
 import mediacloud.error
+from mediacloud.tags import StoryTag, SentenceTag, MediaTag
 
 MAX_HTTP_GET_CHARS = 4000   # experimentally determined for our main servers (conservative)
 
@@ -73,9 +75,9 @@ class MediaCloud(object):
         '''
         Returns basic info about the current user, including their roles
         '''
-        return self._queryForJson(self.V2_API_URL+'users/profile')
+        return self._queryForJson(self.V2_API_URL+'auth/profile')
 
-    def stats(sef):
+    def stats(self):
         '''
         High-level stats about the system
         '''
@@ -224,6 +226,8 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'sentences/single/'+str(story_sentences_id))[0]
 
     def sentenceCount(self, solr_query, solr_filter=' ', split=False, split_start_date=None, split_end_date=None, split_daily=False):
+        if split not in [True, False]:
+            raise ValueError('split much be a boolean True or False')
         params = {'q':solr_query, 'fq':solr_filter}
         params['split'] = 1 if split is True else 0
         params['split_daily'] = 1 if split_daily is True else 0
@@ -263,7 +267,7 @@ class MediaCloud(object):
         '''
         return self._queryForJson(self.V2_API_URL+'tags/single/'+str(tags_id))[0]
 
-    def tagList(self, tag_sets_id=None, last_tags_id=0, rows=20, public_only=False, name_like=None):
+    def tagList(self, tag_sets_id=None, last_tags_id=0, rows=20, public_only=False, name_like=None, similar_tags_id=None):
         '''
         List all the tags in one tag set
         '''
@@ -276,6 +280,8 @@ class MediaCloud(object):
             params['tag_sets_id'] = tag_sets_id
         if name_like is not None:
             params['search'] = name_like
+        if similar_tags_id is not None:
+            params['similar_tags_id'] = similar_tags_id
         return self._queryForJson(self.V2_API_URL+'tags/list', params)
 
     def tagSet(self, tag_sets_id):
@@ -303,11 +309,11 @@ class MediaCloud(object):
         '''
         return self._queryForJson(self.V2_API_URL+'controversy_dump_time_slices/single/'+str(controversy_dump_time_slices_id))[0]
 
-    def _queryForJson(self, url, params=None, http_method='GET'):
+    def _queryForJson(self, url, params=None, http_method='GET', json_data=None):
         '''
         Helper that returns queries to the API as real objects
         '''
-        response = self._query(url, params, http_method)
+        response = self._query(url, params, http_method, json_data)
         # print response.content
         response_json = response.json()
         # print json.dumps(response_json, indent=2)
@@ -316,7 +322,7 @@ class MediaCloud(object):
             raise mediacloud.error.MCException(response_json['error'], requests.codes['ok'])
         return response_json
 
-    def _query(self, url, params=None, http_method='GET'):
+    def _query(self, url, params=None, http_method='GET', json_data=None):
         self._logger.debug("query "+http_method+" to "+url+" with "+str(params))
         if params is None:
             params = {}
@@ -339,10 +345,20 @@ class MediaCloud(object):
                 raise e
         elif http_method is 'PUT_JSON':
             try:
-                url_with_key = url + "?key="+self._auth_token
-                r = requests.put(url_with_key, data=json.dumps(params), headers={'Accept': 'application/json', 'Content-Type': 'application/json'})
+                # the json to post could be an array (not a dict), so we need to add the params and the json to post differently
+                data_to_send = None # as json
+                url_with_key = url
+                if json_data is None:
+                    url_with_key = url_with_key + "?key=" + self._auth_token
+                    data_to_send = params
+                else:
+                    url_with_key = url_with_key + "?" + urllib.urlencode(params)
+                    data_to_send = json_data
+                    self._logger.info(url_with_key)
+                    self._logger.info(json.dumps(data_to_send))
+                r = requests.put(url_with_key, data=json.dumps(data_to_send), headers={'Accept': 'application/json', 'Content-Type': 'application/json'})
             except Exception as e:
-                self._logger.error('Failed to PUT url '+url+' because '+str(e))
+                self._logger.exception(e)
                 raise e
         elif http_method is 'PUT':
             try:
@@ -353,7 +369,7 @@ class MediaCloud(object):
         elif http_method is 'POST': # posts JSON data, needs key in url
             try:
                 url_with_key = url + "?key="+self._auth_token
-                r = requests.post(url_with_key, json=params, headers={'Accept': 'application/json', 'Content-Type': 'application/json'})
+                r = requests.post(url_with_key, data=json.dumps(params), headers={'Accept': 'application/json', 'Content-Type': 'application/json'})
             except Exception as e:
                 self._logger.error('Failed to POST url '+url+' because '+str(e))
                 raise e
@@ -526,13 +542,6 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/timespans/add_dates', params, 'POST')
     '''
 
-# used when calling AdminMediaCloud.tagStories
-StoryTag = namedtuple('StoryTag', ['stories_id', 'tag_set_name', 'tag_name'])
-
-# used when calling AdminMediaCloud.tagSentences
-SentenceTag = namedtuple('SentenceTag', ['story_sentences_id', 'tag_set_name', 'tag_name'])
-
-MediaTag = namedtuple('MediaTag', ['media_id', 'tag_set_name', 'tag_name'])
 
 class AdminMediaCloud(MediaCloud):
     '''
@@ -593,11 +602,8 @@ class AdminMediaCloud(MediaCloud):
         for tag in tags:
             if tag.__class__ is not StoryTag:
                 raise ValueError('To use tagStories you must send in a list of StoryTag objects')
-            custom_tags.append({
-                'stories_id': tag.stories_id,
-                'tag': str(tag.tag_set_name)+":"+str(tag.tag_name)
-            })
-        return self._queryForJson(self.V2_API_URL+'stories/put_tags', custom_tags, 'PUT_JSON')
+            custom_tags.append(tag.getParams())
+        return self._queryForJson(self.V2_API_URL+'stories/put_tags', params, 'PUT_JSON', custom_tags)
 
     def tagSentences(self, tags=None, clear_others=False):
         '''
@@ -615,11 +621,8 @@ class AdminMediaCloud(MediaCloud):
             for tag in tag_chunk:
                 if tag.__class__ is not SentenceTag:
                     raise ValueError('To use tagSentences you must send in a list of SentenceTag objects')
-                custom_tags.append({
-                    'story_sentences_id': tag.story_sentences_id,
-                    'tag': str(tag.tag_set_name)+":"+str(tag.tag_name)
-                })
-            results.append(self._queryForJson(self.V2_API_URL+'story_sentences/put_tags', custom_tags, 'PUT_JSON'))
+                custom_tags.append(tag.getParams())
+            results.append(self._queryForJson(self.V2_API_URL+'sentences/put_tags', params, 'PUT_JSON', custom_tags))
         return results
 
     def tagMedia(self, tags=None, clear_others=False):
@@ -636,11 +639,8 @@ class AdminMediaCloud(MediaCloud):
         for tag in tags:
             if tag.__class__ is not MediaTag:
                 raise ValueError('To use tagMedia you must send in a list of MediaTag objects')
-            custom_tags.append({
-                'media_id': tag.media_id,
-                'tag': str(tag.tag_set_name)+":"+str(tag.tag_name)
-            })
-        return self._queryForJson(self.V2_API_URL+'media/put_tags', custom_tags, 'PUT_JSON')
+            custom_tags.append(tag.getParams())
+        return self._queryForJson(self.V2_API_URL+'media/put_tags', params, 'PUT_JSON', custom_tags)
 
     def createTag(self, tag_sets_id, name, label, description, is_static=False):
         params = {
@@ -650,10 +650,10 @@ class AdminMediaCloud(MediaCloud):
             'description': description,
             'is_static': 1 if is_static else 0
         }
-        return self._queryForJson(self.V2_API_URL+'tags/create', params, 'POST')
+        return self._queryForJson(self.V2_API_URL+'tags/create', params, 'PUT_JSON')
 
-    def updateTag(self, tags_id, name=None, label=None, description=None, is_static=False):
-        params = {}
+    def updateTag(self, tags_id, name=None, label=None, description=None, is_static=False, show_on_media=False, show_on_stories=False):
+        params = { }
         if name is not None:
             params['tag'] = name
         if label is not None:
@@ -662,10 +662,14 @@ class AdminMediaCloud(MediaCloud):
             params['description'] = description
         if is_static is not None:
             params['is_static'] = 1 if is_static else 0
+        if show_on_media is not None:
+            params['show_on_media'] = 1 if show_on_media else 0
+        if show_on_stories is not None:
+            params['show_on_stories'] = 1 if show_on_stories else 0
         return self._queryForJson((self.V2_API_URL+'tags/update/%d') % tags_id, params, 'PUT')
 
-    def updateTagSet(self, tag_sets_id, name=None, label=None, description=None):
-        params = {}
+    def updateTagSet(self, tag_sets_id, name=None, label=None, description=None, show_on_media=False, show_on_stories=False):
+        params = { 'tag_sets_id': tag_sets_id }
         if name is not None:
             params['name'] = name
         if label is not None:
