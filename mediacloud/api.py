@@ -640,7 +640,7 @@ class AdminMediaCloud(MediaCloud):
             if tag.__class__ is not MediaTag:
                 raise ValueError('To use tagMedia you must send in a list of MediaTag objects')
             custom_tags.append(tag.getParams())
-        return self._queryForJson(self.V2_API_URL+'media/put_tags', params, 'PUT_JSON', custom_tags)
+        return self._queryForJson(self.V2_API_URL+'media/put_tags', {params}, 'PUT_JSON', custom_tags)
 
     def createTag(self, tag_sets_id, name, label, description, is_static=False):
         params = {
@@ -650,10 +650,10 @@ class AdminMediaCloud(MediaCloud):
             'description': description,
             'is_static': 1 if is_static else 0
         }
-        return self._queryForJson(self.V2_API_URL+'tags/create', params, 'PUT_JSON')
+        return self._queryForJson(self.V2_API_URL+'tags/create', params, 'POST')
 
     def updateTag(self, tags_id, name=None, label=None, description=None, is_static=False, show_on_media=False, show_on_stories=False):
-        params = { }
+        params = { 'tags_id': tags_id }
         if name is not None:
             params['tag'] = name
         if label is not None:
@@ -666,7 +666,15 @@ class AdminMediaCloud(MediaCloud):
             params['show_on_media'] = 1 if show_on_media else 0
         if show_on_stories is not None:
             params['show_on_stories'] = 1 if show_on_stories else 0
-        return self._queryForJson((self.V2_API_URL+'tags/update/%d') % tags_id, params, 'PUT')
+        return self._queryForJson(self.V2_API_URL+'tags/update/', {}, 'PUT_JSON', params)
+
+    def createTagSet(self, name, label, description):
+        params = {
+            'tag': name,
+            'label': label,
+            'description': description,
+        }
+        return self._queryForJson(self.V2_API_URL+'tag_sets/create', params, 'POST')
 
     def updateTagSet(self, tag_sets_id, name=None, label=None, description=None, show_on_media=False, show_on_stories=False):
         params = { 'tag_sets_id': tag_sets_id }
@@ -676,7 +684,7 @@ class AdminMediaCloud(MediaCloud):
             params['label'] = label
         if description is not None:
             params['description'] = description
-        return self._queryForJson((self.V2_API_URL+'tag_sets/update/%d') % tag_sets_id, params, 'PUT')
+        return self._queryForJson(self.V2_API_URL+'tag_sets/update/', {}, 'PUT_JSON', params)
 
     def feedCreate(self, media_id, name, url, feed_type='syndicated', feed_status='active'):
         _validate_feed_type(feed_type)
