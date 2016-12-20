@@ -534,6 +534,7 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/permissions/update', params, 'PUT_JSON')
 
     '''
+    # not implemented yet
     def topicAddTimespan(self, topics_id, **kwargs):
         params = {}
         valid_params = ['start_date', 'end_date']
@@ -561,7 +562,8 @@ class AdminMediaCloud(MediaCloud):
                 })[0]
 
     def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
-                  raw_1st_download=False, corenlp=False, sentences=False, text=False, ap_stories_id=0):
+                  wc=False, feeds_id=None, sort=MediaCloud.SORT_PROCESSED_STORIES_ID, raw_1st_download=False,
+                  corenlp=False, sentences=False, text=False, ap_stories_id=0):
         '''
         Search for stories and page through results
         '''
@@ -574,7 +576,10 @@ class AdminMediaCloud(MediaCloud):
                  'corenlp': 1 if corenlp else 0,    # this is slow - use storyCoreNlList instead
                  'sentences': 1 if sentences else 0,
                  'text': 1 if text else 0,
-                 'ap_stories_id': 1 if ap_stories_id else 0
+                 'ap_stories_id': 1 if ap_stories_id else 0,
+                 'sort': sort,
+                 'wc': 1 if wc is True else 0,
+                 'feeds_id': feeds_id
                 })
 
     def sentenceList(self, solr_query, solr_filter='', start=0, rows=1000, sort=MediaCloud.SORT_PUBLISH_DATE_ASC):
@@ -640,7 +645,7 @@ class AdminMediaCloud(MediaCloud):
             if tag.__class__ is not MediaTag:
                 raise ValueError('To use tagMedia you must send in a list of MediaTag objects')
             custom_tags.append(tag.getParams())
-        return self._queryForJson(self.V2_API_URL+'media/put_tags', {params}, 'PUT_JSON', custom_tags)
+        return self._queryForJson(self.V2_API_URL+'media/put_tags', params, 'PUT_JSON', custom_tags)
 
     def createTag(self, tag_sets_id, name, label, description, is_static=False):
         params = {

@@ -3,31 +3,34 @@ import unittest
 import logging
 import sys
 
-import mediacloud.test.apitest as t
-import  mediacloud.test.storagetest as s
+import mediacloud.test.apitest as api
+import mediacloud.test.apitopictest as topic
+import mediacloud.test.storagetest as storage
 
 test_classes = [
-    t.AdminTopicSentenceCountTest,
-    t.ApiBigQueryTest,
-    t.ApiStoriesWordMatrixTest,
-    t.ApiMediaHealthTest,
-    t.ApiMediaTest, t.ApiFeedsTest, t.ApiTagsTest, t.ApiTagSetsTest,
-    t.ApiStoriesTest, t.AdminApiStoriesTest,
-    t.ApiWordCountTest, t.ApiSentencesTest, t.AdminApiSentencesTest,
-    s.MongoStorageTest,
-    t.AuthTokenTest,
-    t.ApiAllFieldsOptionTest,
-    t.PublishDateQueryTest,
-    t.AdminApiTaggingContentTest, t.AdminApiTaggingUpdateTest,
-    t.ApiTopicTest, t.ApiTopicSnapshotTest, t.ApiTopicTimespanTest,
-    t.AdminTopicStoryListTest, t.AdminTopicMediaListTest, t.AdminTopicWordCountTest,
-    t.AdminTopicStoryCountTest
+    api.ApiBigQueryTest,
+    api.ApiStoriesWordMatrixTest,
+    api.ApiMediaHealthTest,
+    api.ApiMediaTest, api.ApiFeedsTest, api.ApiTagsTest, api.ApiTagSetsTest,
+    api.ApiStoriesTest, api.AdminApiStoriesTest,
+    api.ApiWordCountTest, api.ApiSentencesTest, api.AdminApiSentencesTest,
+    storage.MongoStorageTest,
+    api.AuthTokenTest, api.UserProfileTest,
+    api.ApiAllFieldsOptionTest,
+    api.PublishDateQueryTest,
+    api.AdminApiTaggingContentTest, api.AdminApiTaggingTest,
+    topic.AdminTopicSentenceCountTest,
+    topic.ApiTopicTest, topic.ApiTopicSnapshotTest, topic.ApiTopicTimespanTest,
+    topic.AdminTopicStoryListTest, topic.AdminTopicMediaListTest, topic.AdminTopicWordCountTest,
+    topic.AdminTopicStoryCountTest
+    # not implemented yet
+#    api.StatsTest, 
 ]
 
 # set up all logging to DEBUG (cause we're running tests here!)
 logging.basicConfig(level=logging.DEBUG)
 log_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-log_handler = logging.FileHandler('mediacloud-api-test.log')
+log_handler = logging.FileHandler('mediacloud-api-tesapi.log')
 log_handler.setFormatter(log_formatter)
 # set up mediacloud logging to the file
 mc_logger = logging.getLogger('mediacloud')
