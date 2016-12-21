@@ -104,6 +104,9 @@ Then run `python tests.py`. Notice you get a `mediacloud-api.log` that tells you
 Version History
 ---------------
 
+* __v2.35.3__: fixes to clear_others support in tag* calls
+* __v2.35.2__: fixes to updateMedia
+* __v2.35.1__: fixes to createTagSet
 * __v2.35.0__: tons of new source-related endpoints
 * __v2.34.0__: new permissons endpoints
 * __v2.33.1__: move topic endpoints to standard client so users can run them

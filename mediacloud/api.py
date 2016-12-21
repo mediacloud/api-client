@@ -600,7 +600,7 @@ class AdminMediaCloud(MediaCloud):
         '''
         params = {}
         if clear_others is True:
-            params['clear_tags'] = 1
+            params['clear_tag_sets'] = 1
         if tags is None:
             tags = {}
         custom_tags = []
@@ -616,7 +616,7 @@ class AdminMediaCloud(MediaCloud):
         '''
         params = {}
         if clear_others is True:
-            params['clear_tags'] = 1
+            params['clear_tag_sets'] = 1
         # bath into smaller requests so we don't hit the 414 Request-URI Too Large error
         if tags is None:
             tags = {}
@@ -637,7 +637,7 @@ class AdminMediaCloud(MediaCloud):
         '''
         params = {}
         if clear_others is True:
-            params['clear_tags'] = 1
+            params['clear_tag_sets'] = 1
         if tags is None:
             tags = {}
         custom_tags = []
@@ -675,7 +675,7 @@ class AdminMediaCloud(MediaCloud):
 
     def createTagSet(self, name, label, description):
         params = {
-            'tag': name,
+            'name': name,
             'label': label,
             'description': description,
         }
@@ -734,7 +734,7 @@ class AdminMediaCloud(MediaCloud):
                 raise ValueError('You must supply a media url')
         return self._queryForJson(self.V2_API_URL+'media/create', params, 'PUT_JSON')
 
-    def mediaUpdate(self, media_id, url, name, foreign_rss_links, content_delay, editor_notes, public_notes, is_monitored):
+    def mediaUpdate(self, media_id, url=None, name=None, foreign_rss_links=None, content_delay=None, editor_notes=None, public_notes=None, is_monitored=None):
         params = { 'media_id': media_id }
         if name is not None:
             params['name'] = name
