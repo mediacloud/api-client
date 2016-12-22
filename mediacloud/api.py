@@ -647,13 +647,15 @@ class AdminMediaCloud(MediaCloud):
             custom_tags.append(tag.getParams())
         return self._queryForJson(self.V2_API_URL+'media/put_tags', params, 'PUT_JSON', custom_tags)
 
-    def createTag(self, tag_sets_id, name, label, description, is_static=False):
+    def createTag(self, tag_sets_id, name, label, description, is_static=False, show_on_media=False, show_on_stories=False):
         params = {
             'tag_sets_id': tag_sets_id,
             'tag': name,
             'label': label,
             'description': description,
-            'is_static': 1 if is_static else 0
+            'is_static': 1 if is_static else 0,
+            'show_on_media': 1 if show_on_media else 0,
+            'show_on_stories': 1 if show_on_stories else 0
         }
         return self._queryForJson(self.V2_API_URL+'tags/create', params, 'POST')
 
@@ -732,7 +734,7 @@ class AdminMediaCloud(MediaCloud):
                     media[k] = 1 if k else 0
             if media['url'] is None or len(media['url']) == 0:
                 raise ValueError('You must supply a media url')
-        return self._queryForJson(self.V2_API_URL+'media/create', params, 'PUT_JSON')
+        return self._queryForJson(self.V2_API_URL+'media/create', media_items, 'POST')
 
     def mediaUpdate(self, media_id, url=None, name=None, foreign_rss_links=None, content_delay=None, editor_notes=None, public_notes=None, is_monitored=None):
         params = { 'media_id': media_id }
