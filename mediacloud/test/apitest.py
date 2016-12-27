@@ -252,6 +252,11 @@ class AdminApiStoriesTest(AdminApiBaseTest):
         results2 = set([s['stories_id'] for s in self._mc.storyList(feeds_id=TEST_FEEDS_ID_2)])
         intersection = list(results1 & results2)
         self.assertTrue(len(intersection) == 0)
+        # now test lower level (only do 3 cause it takes a long time)
+        results1 = self._mc.storyList(feeds_id=TEST_FEEDS_ID_1, show_feeds=True, rows=3)
+        for s in results1:
+            feed_ids = [f['feeds_id'] for f in s['feeds']]
+            self.assertTrue(TEST_FEEDS_ID_1 in feed_ids)
 
     def testStoryListWordCount(self):
         results = self._mc.storyList(wc=True)

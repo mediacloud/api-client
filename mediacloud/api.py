@@ -172,14 +172,14 @@ class MediaCloud(object):
                 })
 
     def storyPublicList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
-            wc=False, feeds_id=None, sort=SORT_PROCESSED_STORIES_ID):
+            wc=False, feeds_id=None, sort=SORT_PROCESSED_STORIES_ID, show_feeds=False):
         '''
         Maintained for backwards compatability
         '''
         return self.storyList(solr_query, solr_filter, last_processed_stories_id, rows, wc, feeds_id, sort)
 
     def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
-            wc=False, feeds_id=None, sort=SORT_PROCESSED_STORIES_ID):
+            wc=False, feeds_id=None, sort=SORT_PROCESSED_STORIES_ID, show_feeds=False):
         '''
         Authenticated Public Users: Search for stories and page through results
         '''
@@ -190,7 +190,8 @@ class MediaCloud(object):
                  'rows': rows,
                  'sort': sort,
                  'wc': 1 if wc is True else 0,
-                 'feeds_id': feeds_id
+                 'feeds_id': feeds_id,
+                 'show_feeds': 1 if show_feeds is True else 0,
                 })
 
     def storyCoreNlpList(self, story_id_list):
@@ -563,7 +564,7 @@ class AdminMediaCloud(MediaCloud):
 
     def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
                   wc=False, feeds_id=None, sort=MediaCloud.SORT_PROCESSED_STORIES_ID, raw_1st_download=False,
-                  corenlp=False, sentences=False, text=False, ap_stories_id=0):
+                  corenlp=False, sentences=False, text=False, ap_stories_id=0, show_feeds=False):
         '''
         Search for stories and page through results
         '''
@@ -579,7 +580,8 @@ class AdminMediaCloud(MediaCloud):
                  'ap_stories_id': 1 if ap_stories_id else 0,
                  'sort': sort,
                  'wc': 1 if wc is True else 0,
-                 'feeds_id': feeds_id
+                 'feeds_id': feeds_id,
+                 'show_feeds': 1 if show_feeds is True else 0,
                 })
 
     def sentenceList(self, solr_query, solr_filter='', start=0, rows=1000, sort=MediaCloud.SORT_PUBLISH_DATE_ASC):
