@@ -10,7 +10,7 @@ import mediacloud.test.storagetest as storage
 test_classes = [
     api.ApiBigQueryTest,
     api.ApiStoriesWordMatrixTest,
-    api.ApiMediaHealthTest,
+    api.ApiMediaHealthTest, api.AdminApiMediaTest, 
     api.ApiMediaTest, api.ApiFeedsTest, api.ApiTagsTest, api.ApiTagSetsTest,
     api.ApiStoriesTest, api.AdminApiStoriesTest,
     api.ApiWordCountTest, api.ApiSentencesTest, api.AdminApiSentencesTest,

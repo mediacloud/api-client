@@ -235,6 +235,21 @@ class ApiFeedsTest(ApiBaseTest):
         longer_list = self._mc.feedList(1, 0, 200)
         self.assertEqual(len(longer_list), 142)
 
+class AdminApiMediaTest(AdminApiBaseTest):
+
+    def testMediaCreateDuplicate(self):
+        mediaItem = {
+            'url': "http://nytimes.com",
+            'editor_notes': "duplicate for testing",
+            'tags_ids': [8875027],
+            'name': 'Duplicate New York Times'
+        }
+        mediaToCreate = [mediaItem]
+        results = self._mc.mediaCreate(mediaToCreate)
+        self.assertEqual(len(results['errors']), 0)
+        self.assertEqual(len(results['media']), len(mediaToCreate))
+        self.assertEqual(int(results['media'][0]['media_id']), 1)   # the existing NYT media source
+
 class AdminApiStoriesTest(AdminApiBaseTest):
 
     def testStoryListSort(self):

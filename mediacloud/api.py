@@ -324,11 +324,11 @@ class MediaCloud(object):
         return response_json
 
     def _query(self, url, params=None, http_method='GET', json_data=None):
-        self._logger.debug("query "+http_method+" to "+url+" with "+str(params))
+        self._logger.debug("query "+http_method+" to "+url+" with "+str(params)+" and "+str(json_data))
         if params is None:
             params = {}
-        if not isinstance(params, dict):
-            raise ValueError('Queries must include a dict of parameters')
+#        if (http_method is not 'PUT_JSON') and (not isinstance(params, dict)):
+#            raise ValueError('Queries must include a dict of parameters')
         if ('key' not in params) and (http_method is not 'POST'):
             params['key'] = self._auth_token
         if self._all_fields:
