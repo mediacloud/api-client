@@ -246,9 +246,11 @@ class AdminApiMediaTest(AdminApiBaseTest):
         }
         mediaToCreate = [mediaItem]
         results = self._mc.mediaCreate(mediaToCreate)
-        self.assertEqual(len(results['errors']), 0)
-        self.assertEqual(len(results['media']), len(mediaToCreate))
-        self.assertEqual(int(results['media'][0]['media_id']), 1)   # the existing NYT media source
+        self.assertEqual(len(results), len(mediaToCreate))
+        self.assertTrue("media_id" in results[0])
+        self.assertTrue("status" in results[0])
+        self.assertTrue("url" in results[0])
+        self.assertEqual("existing", results[0]['status'])
 
 class AdminApiStoriesTest(AdminApiBaseTest):
 

@@ -104,6 +104,7 @@ Then run `python tests.py`. Notice you get a `mediacloud-api.log` that tells you
 Version History
 ---------------
 
+* __v2.35.6__: mediaCreate fixes, storyList feed support
 * __v2.35.5__: create media fixes
 * __v2.35.4__: create collection fixes
 * __v2.35.3__: fixes to clear_others support in tag* calls
