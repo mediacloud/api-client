@@ -134,7 +134,7 @@ class MediaCloud(object):
             'reason': reason,
             'collection': collections
         }
-        return self._queryForJson(self.V2_API_URL+'media/suggestions/submit', params, 'PUT_JSON')
+        return self._queryForJson(self.V2_API_URL+'media/suggestions/submit', params, 'POST')
 
     def feed(self, feeds_id):
         '''
@@ -756,8 +756,13 @@ class AdminMediaCloud(MediaCloud):
             params['is_monitored'] = 1 if is_monitored else 0
         return self._queryForJson(self.V2_API_URL+'media/update', params, 'PUT_JSON')
 
-    def mediaSuggestionsList(self, all=False):
-        return self._queryForJson(self.V2_API_URL+'media/list', {'all': all})
+    def mediaSuggestionsList(self, all=False, tags_id=None):
+        params = {}
+        if all is not None:
+            params['all'] = 1 if all else 0
+        if tags_id is not None:
+            params['tags_id'] = tags_id
+        return self._queryForJson(self.V2_API_URL+'media/list_suggestions', params)
 
     def mediaSuggestionsMark(self, media_suggestions_id, status, mark_reason):
         if status not in ['approved', 'rejected']:
@@ -767,7 +772,7 @@ class AdminMediaCloud(MediaCloud):
             'status': status,
             'mark_reason': mark_reason
         }
-        return self._queryForJson(self.V2_API_URL+'media/suggestions/mark', params, 'PUT_JSON')
+        return self._queryForJson(self.V2_API_URL+'media/mark_suggestion', params, 'PUT_JSON')
 
 def _solr_date_range(start_date, end_date, start_date_inclusive=True, end_date_inclusive=False):
     ret = ''

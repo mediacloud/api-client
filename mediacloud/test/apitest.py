@@ -8,6 +8,7 @@ from mediacloud.tags import StoryTag, SentenceTag, MediaTag, TAG_ACTION_ADD, TAG
 TEST_USER_EMAIL = "mc-api-test@media.mit.edu"
 TEST_TAG_SET_ID = 1727
 GEO_TAG_SET_ID = 1011
+TEST_MEDIA_SUGGEST_REASON = "!!!! TESTING SUGGESTION !!!!"
 
 class ApiBigQueryTest(ApiBaseTest):
 
@@ -159,6 +160,31 @@ class ApiMediaTest(ApiBaseTest):
         intersection = list(healthy_ids & unhealthy_ids)
         self.assertTrue(len(intersection) == 0)
     '''
+
+class AdminApiMediaSuggestionsTest(AdminApiBaseTest):
+
+    def testMediaSuggest(self):
+        results = self._mc.mediaSuggest("https://rahulbotics", 
+                                        name="Rahulbotics",
+                                        reason=TEST_MEDIA_SUGGEST_REASON,
+                                        collections=[9353679])
+        self.assertTrue('success' in results)
+        self.assertEqual(1, int(results['success']))
+
+    def testMediaSuggestionsList(self):
+        results = self._mc.mediaSuggestionsList()
+        self.assertTrue(len(results) > 0)
+
+    def testMediaSuggestionMark(self):
+        results = self._mc.mediaSuggestionsList()
+        self.assertTrue('success' in results)
+        self.assertEqual(1, int(results['success']))
+        for suggestion in results:
+            if suggestion['reason'] == TEST_MEDIA_SUGGEST_REASON:
+                result = self._mc.mediaSuggestionsMark(suggestion['media_suggestions_id'],
+                                                       "This was a test suggestion, so we are deleting it.")
+                self.assertTrue('success' in result)
+                self.assertEqual(1, int(result['success']))
 
 class ApiTagsTest(ApiBaseTest):
 
