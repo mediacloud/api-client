@@ -25,14 +25,14 @@ class ApiAllFieldsOptionTest(ApiBaseTest):
         # do a regular query
         media = self._mc.media(1751)
         self.assertNotEqual(media, None)
-        self.assertEqual(media['media_id'], 1751)
+        self.assertEqual(media['media_id'], '1751')
         self.assertFalse('foreign_rss_links' in media)
         self.assertTrue('url' in media)
         # do an all fields regular query and verify extra fields are there
         self._mc.setAllFields(True)
         media = self._mc.media(1751)
         self.assertNotEqual(media, None)
-        self.assertEqual(media['media_id'], 1751)
+        self.assertEqual(media['media_id'], '1751')
         self.assertTrue('foreign_rss_links' in media)
         self.assertTrue('url' in media)
 
@@ -456,17 +456,17 @@ class AdminApiSentencesTest(AdminApiBaseTest):
     def testSentenceList(self):
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY)
         self.assertEqual(int(results['responseHeader']['status']), 0)
-        self.assertEqual(int(results['response']['numFound']), 2200)
+        self.assertEqual(int(results['response']['numFound']), 2197)
         self.assertEqual(len(results['response']['docs']), 1000)
 
     def testSentenceListPaging(self):
         # test limiting rows returned
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, 0, 100)
-        self.assertEqual(int(results['response']['numFound']), 2200)
+        self.assertEqual(int(results['response']['numFound']), 2196)
         self.assertEqual(len(results['response']['docs']), 100)
         # test starting offset
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, 5700)
-        self.assertEqual(int(results['response']['numFound']), 2200)
+        self.assertEqual(int(results['response']['numFound']), 2196)
         self.assertFalse('docs' in results['response'], 0)
 
 class ApiSentencesTest(ApiBaseTest):

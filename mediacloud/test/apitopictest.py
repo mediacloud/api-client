@@ -1,10 +1,6 @@
-import unittest
-import json
-import time
-import ConfigParser
-import datetime
-import mediacloud.api
-from mediacloud.test.basetest import ApiBaseTest, AdminApiBaseTest
+from mediacloud.test.basetest import AdminApiBaseTest
+
+TEST_TOPIC_ID = 1512
 
 class ApiTopicTest(AdminApiBaseTest):
 
@@ -33,7 +29,7 @@ class ApiTopicSnapshotTest(AdminApiBaseTest):
 
     def testTopicSnapshotList(self):
         # make sure it works
-        snapshots = self._mc.topicSnapshotList(1)
+        snapshots = self._mc.topicSnapshotList(TEST_TOPIC_ID)
         self.assertEqual(len(snapshots), 10)
         # make sure a failure case works
         snapshots = self._mc.topicSnapshotList('1232545235')

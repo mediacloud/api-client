@@ -1,5 +1,7 @@
 
-import unittest, os, json
+import unittest
+import os
+import json
 from mediacloud.storage import *
 
 class StorageTest(unittest.TestCase):
