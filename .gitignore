@@ -6,3 +6,4 @@ mediacloud.egg-info
 venv
 dist
 README.rst
+.idea/
