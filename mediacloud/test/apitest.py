@@ -119,7 +119,7 @@ class ApiMediaTest(ApiBaseTest):
     def testMedia(self):
         media = self._mc.media(1)
         self.assertNotEqual(media, None)
-        self.assertEqual(media['media_id'], 1)
+        self.assertEqual(int(media['media_id']), 1)
         self.assertEqual(media['name'], 'New York Times')
         self.assertTrue(len(media['media_source_tags']) > 0)
 
@@ -147,24 +147,33 @@ class ApiMediaTest(ApiBaseTest):
         matchingList = self._mc.mediaList(tags_id=8875027)  # US MSM
         self.assertTrue(len(matchingList) > 0)
 
-    '''
-    # not imlemented yet :-(
     def testMediaListUnhealthy(self):
         # make sure no overlap in healthy and unhealthy first page of results
         ids = set([m['media_id'] for m in self._mc.mediaList()])
-        print(ids)
         healthy_ids = set([i for i in ids if self._mc.mediaHealth(i)['is_healthy'] == 1])
-        print(healthy_ids)
         unhealthy_ids = set([m['media_id'] for m in self._mc.mediaList(unhealthy=True)])
-        print(unhealthy_ids)
         intersection = list(healthy_ids & unhealthy_ids)
         self.assertTrue(len(intersection) == 0)
-    '''
 
 class AdminApiMediaSuggestionsTest(AdminApiBaseTest):
 
+    def testMediaSuggestionMark(self):
+        suggest_result = self._mc.mediaSuggest("https://rahulbotics",
+                                        name="Rahulbotics",
+                                        reason=TEST_MEDIA_SUGGEST_REASON,
+                                        collections=[9353679])
+        self.assertTrue('success' in suggest_result)
+        self.assertEqual(1, int(suggest_result['success']))
+        list_result = self._mc.mediaSuggestionsList()
+        for suggestion in list_result:
+            if suggestion['reason'] == TEST_MEDIA_SUGGEST_REASON:
+                mark_result = self._mc.mediaSuggestionsMark(suggestion['media_suggestions_id'], "rejected",
+                                                       "This was a test suggestion, so we are deleting it.")
+                self.assertTrue('success' in mark_result)
+                self.assertEqual(1, int(mark_result['success']))
+
     def testMediaSuggest(self):
-        results = self._mc.mediaSuggest("https://rahulbotics", 
+        results = self._mc.mediaSuggest("https://rahulbotics",
                                         name="Rahulbotics",
                                         reason=TEST_MEDIA_SUGGEST_REASON,
                                         collections=[9353679])
@@ -173,18 +182,8 @@ class AdminApiMediaSuggestionsTest(AdminApiBaseTest):
 
     def testMediaSuggestionsList(self):
         results = self._mc.mediaSuggestionsList()
-        self.assertTrue(len(results) > 0)
-
-    def testMediaSuggestionMark(self):
-        results = self._mc.mediaSuggestionsList()
-        self.assertTrue('success' in results)
-        self.assertEqual(1, int(results['success']))
-        for suggestion in results:
-            if suggestion['reason'] == TEST_MEDIA_SUGGEST_REASON:
-                result = self._mc.mediaSuggestionsMark(suggestion['media_suggestions_id'],
-                                                       "This was a test suggestion, so we are deleting it.")
-                self.assertTrue('success' in result)
-                self.assertEqual(1, int(result['success']))
+        # could be empty, so lets just make sure it is an array
+        self.assertTrue(isinstance(results, list))
 
 class ApiTagsTest(ApiBaseTest):
 

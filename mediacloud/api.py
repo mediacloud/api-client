@@ -134,7 +134,7 @@ class MediaCloud(object):
             'reason': reason,
             'collection': collections
         }
-        return self._queryForJson(self.V2_API_URL+'media/suggestions/submit', params, 'POST')
+        return self._queryForJson(self.V2_API_URL+'media/submit_suggestion', params, 'POST')
 
     def feed(self, feeds_id):
         '''
@@ -762,7 +762,7 @@ class AdminMediaCloud(MediaCloud):
             params['all'] = 1 if all else 0
         if tags_id is not None:
             params['tags_id'] = tags_id
-        return self._queryForJson(self.V2_API_URL+'media/list_suggestions', params)
+        return self._queryForJson(self.V2_API_URL+'media/list_suggestions', params)['media_suggestions']
 
     def mediaSuggestionsMark(self, media_suggestions_id, status, mark_reason):
         if status not in ['approved', 'rejected']:

@@ -11,7 +11,8 @@ test_classes = [
     api.ApiBigQueryTest,
     api.ApiStoriesWordMatrixTest,
     api.ApiMediaHealthTest, api.AdminApiMediaTest, 
-    api.ApiMediaTest, api.ApiFeedsTest, api.ApiTagsTest, api.ApiTagSetsTest,
+    api.ApiMediaTest, api.AdminApiMediaSuggestionsTest,
+    api.ApiFeedsTest, api.ApiTagsTest, api.ApiTagSetsTest,
     api.ApiStoriesTest, api.AdminApiStoriesTest,
     api.ApiWordCountTest, api.ApiSentencesTest, api.AdminApiSentencesTest,
     storage.MongoStorageTest,
@@ -24,8 +25,11 @@ test_classes = [
     topic.AdminTopicStoryListTest, topic.AdminTopicMediaListTest, topic.AdminTopicWordCountTest,
     topic.AdminTopicStoryCountTest
     # not implemented yet
-#    api.StatsTest, 
+#    api.StatsTest,
+#
 ]
+
+# test_classes = [ api.ApiMediaTest ]
 
 # set up all logging to DEBUG (cause we're running tests here!)
 logging.basicConfig(level=logging.DEBUG)
