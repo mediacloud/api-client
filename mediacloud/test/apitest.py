@@ -72,11 +72,19 @@ class UserProfileTest(ApiBaseTest):
 class StatsTest(ApiBaseTest):
 
     def testStats(self):
-        profile = self._mc.stats()
-        data_keys  = ["total_media", "total_stories", "total_downloads", "total_sentences", "active_crawled_media", "active_crawled_feeds", "daily_stories", "daily_downloads"]
+        stats = self._mc.stats()
+        data_keys  = [
+            "total_downloads",
+            "total_sentences",
+            "active_crawled_feeds",
+            "active_crawled_media",
+            "daily_stories",
+            "total_stories",
+            "daily_downloads",
+            "stats_date"
+        ]
         for key in data_keys:
-            self.assertTrue(key in profile)
-            self.assertTrue(profile[key] > 100)
+            self.assertTrue(key in stats, "{0} not found".format(key))
 
 class PublishDateQueryTest(ApiBaseTest):
 

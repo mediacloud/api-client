@@ -81,7 +81,7 @@ class MediaCloud(object):
         '''
         High-level stats about the system
         '''
-        return self._queryForJson(self.V2_API_URL+'stats')
+        return self._queryForJson(self.V2_API_URL+'stats/list')
 
     def media(self, media_id):
         '''
