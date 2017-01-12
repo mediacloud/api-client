@@ -661,7 +661,7 @@ class AdminMediaCloud(MediaCloud):
         }
         return self._queryForJson(self.V2_API_URL+'tags/create', params, 'POST')
 
-    def updateTag(self, tags_id, name=None, label=None, description=None, is_static=False, show_on_media=False, show_on_stories=False):
+    def updateTag(self, tags_id, name=None, label=None, description=None, is_static=None, show_on_media=None, show_on_stories=None):
         params = { 'tags_id': tags_id }
         if name is not None:
             params['tag'] = name
