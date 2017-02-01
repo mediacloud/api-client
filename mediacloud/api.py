@@ -93,8 +93,10 @@ class MediaCloud(object):
         '''
         Details about one media source
         '''
-        return self._queryForJson(self.V2_API_URL+'mediahealth/list',
-            {'media_id':media_id})[0]
+        results = self._queryForJson(self.V2_API_URL+'mediahealth/list', {'media_id':media_id})
+        if len(results) > 0:
+            return results[0]
+        return results
 
     def mediaList(self, last_media_id=0, rows=20, name_like=None,
                 timespans_id=None, topic_mode=None, tags_id=None, q=None, include_dups=False,
@@ -453,6 +455,46 @@ class MediaCloud(object):
         valid_params = ['note']
         _validate_params(params, valid_params, kwargs)
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/snapshots/generate', params, 'POST')
+
+    def topicSnapshotStatus(self, topics_id):
+        params = {}
+        valid_params = ['note']
+        _validate_params(params, valid_params, kwargs)
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/snapshots/generate', params, 'POST')
+
+    def topicCreate(self, name, solr_seed_query, description, start_date, end_date, media_ids=[], media_tags_ids=[], **kwargs):
+        valid_optional_params = [ 'max_iterations', 'is_public', 'ch_monitor_id', 'twitter_topics_id']
+        params = {}
+        params['name'] = name
+        params['solr_seed_query'] = solr_seed_query
+        params['description'] = description
+        params['start_date'] = start_date
+        params['end_date'] = end_date
+        params['media_ids'] = media_ids
+        params['media_tags_ids'] = media_tags_ids
+        _validate_params(params, valid_optional_params, kwargs)
+        if (len(media_ids) == 0) and (len(media_tags_ids) == 0):
+            raise ValueError('You have to specify media_ids or media_tags_ids')
+        return self._queryForJson(self.V2_API_URL+'topics/create', params, 'POST')
+
+    def topicUpdate(self, topics_id, **kwargs):
+        valid_params = [
+            'name', 'solr_seed_query', 'description', 'start_date', 'end_date', 'media_ids', 'media_tags_ids',
+            'max_iterations', 'is_public', 'ch_monitor_id', 'twitter_topics_id'
+        ]
+        params = {}
+        _validate_params(params, valid_params, kwargs)
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/update', params, 'PUT_JSON')
+
+    def topicSpider(self, topics_id):
+        params = { 'topics_id': topics_id }
+        return self._queryForJson(self.V2_API_URL + 'topics/spider', params, 'POST')
+
+    def topicSpiderStatus(self, topics_id):
+        return self._queryForJson(self.V2_API_URL + 'topics/'+str(topics_id)+'spider_status')
+
+    def topicIterationsList(self, topics_id):
+        return self._queryForJson(self.V2_API_URL + 'topics/' + str(topics_id) + 'iterations/list')
 
     def topicTimespanList(self, topics_id, **kwargs):
         params = {}
