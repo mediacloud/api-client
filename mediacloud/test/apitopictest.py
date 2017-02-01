@@ -49,6 +49,8 @@ class AdminTopicStoryListTest(AdminApiBaseTest):
     def testTopicStoryList(self):
         response = self._mc.topicStoryList(self.TOPIC_ID)
         self.assertEqual(len(response['stories']), 20)
+        for story in response['stories']:
+            self.assertTrue('date_is_reliable' in story)
 
     def testTopicStoryListPaging(self):
         limit = 50
