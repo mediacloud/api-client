@@ -129,6 +129,9 @@ class ApiMediaTest(ApiBaseTest):
         self.assertNotEqual(media, None)
         self.assertEqual(int(media['media_id']), 1)
         self.assertEqual(media['name'], 'New York Times')
+        self.assertTrue("is_monitored", media)
+        self.assertTrue("editor_notes", media)
+        self.assertTrue("public_notes", media)
         self.assertTrue(len(media['media_source_tags']) > 0)
 
     def testMediaListWithName(self):
@@ -139,6 +142,9 @@ class ApiMediaTest(ApiBaseTest):
         first_list = self._mc.mediaList()
         for media in first_list:
             self.assertTrue(media['media_id'] > 0)
+            self.assertTrue("is_monitored", media)
+            self.assertTrue("editor_notes", media)
+            self.assertTrue("public_notes", media)
         self.assertNotEqual(first_list, None)
         self.assertEqual(len(first_list), 20)
         last_page_one_media_id = int(first_list[19]['media_id'])-1
@@ -162,6 +168,21 @@ class ApiMediaTest(ApiBaseTest):
         unhealthy_ids = set([m['media_id'] for m in self._mc.mediaList(unhealthy=True)])
         intersection = list(healthy_ids & unhealthy_ids)
         self.assertTrue(len(intersection) == 0)
+
+class ApiFeedTest(AdminApiBaseTest):
+
+    def testFeedScrape(self):
+        test_media_id = 362086     # rahulbotics.com
+        # queue scrape job
+        results = self._mc.feedsScrape(test_media_id)
+        self.assertEqual(test_media_id, int(results['job_state']['media_id']))
+        self.assertTrue(results['job_state']['state'] in ['queued', 'completed'])
+
+    def testFeedScrapeStatus(self):
+        test_media_id = 1 # nyt
+        # verify no pending jobs
+        scrape_status = self._mc.feedsScrapeStatus(test_media_id)
+        self.assertEqual(0, len(scrape_status['job_states']))
 
 class AdminApiMediaSuggestionsTest(AdminApiBaseTest):
 
@@ -192,6 +213,8 @@ class AdminApiMediaSuggestionsTest(AdminApiBaseTest):
         results = self._mc.mediaSuggestionsList()
         # could be empty, so lets just make sure it is an array
         self.assertTrue(isinstance(results, list))
+        for suggestion in results:
+            self.assertTrue('email' in suggestion)
 
 class ApiTagsTest(ApiBaseTest):
 
