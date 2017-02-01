@@ -378,7 +378,7 @@ class MediaCloud(object):
             raise ValueError('Error - unsupported HTTP method %s' % http_method)
         if r.status_code is not requests.codes['ok']:
             self._logger.info('Bad HTTP response to '+r.url +' : '+str(r.status_code)  + ' ' +  str(r.reason))
-            self._logger.info('\t' + r.content)
+            self._logger.info('\t' + str(r.content))
             msg = 'Error - got a HTTP status code of %s with the message "%s", body: %s' % (
                 str(r.status_code), str(r.reason), str(r.text))
             raise mediacloud.error.MCException(msg, r.status_code)
@@ -722,7 +722,14 @@ class AdminMediaCloud(MediaCloud):
         return self._queryForJson(self.V2_API_URL+'feeds/update', params, 'PUT_JSON')
 
     def feedsScrape(self, media_id):
-        return self._queryForJson((self.V2_API_URL+'feeds/scrape/%d') % media_id, params, 'POST')
+        params = { 'media_id': media_id }
+        return self._queryForJson(self.V2_API_URL+'feeds/scrape', params, 'POST')
+
+    def feedsScrapeStatus(self, media_id=None):
+        params = {}
+        if media_id is not None:
+            params['media_id'] = media_id
+        return self._queryForJson(self.V2_API_URL+'feeds/scrape_status', params)
 
     def mediaCreate(self, media_items):
         # validate and clean input
