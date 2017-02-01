@@ -115,12 +115,16 @@ class PublishDateQueryTest(ApiBaseTest):
 class ApiMediaHealthTest(ApiBaseTest):
 
     def testMediaHealth(self):
-        mediaHealth = self._mc.mediaHealth(2)
-        self.assertEqual(mediaHealth['media_id'], '2')
-        self.assertEqual(mediaHealth['is_healthy'], 0)
-        self.assertEqual(mediaHealth['coverage_gaps'], len(mediaHealth['coverage_gaps_list']))
-        self.assertTrue('start_date' in mediaHealth)
-        self.assertTrue('end_date' in mediaHealth)
+        media_health = self._mc.mediaHealth(2)
+        self.assertEqual(media_health['media_id'], '2')
+        self.assertEqual(media_health['is_healthy'], 0)
+        self.assertEqual(media_health['coverage_gaps'], len(media_health['coverage_gaps_list']))
+        self.assertTrue('start_date' in media_health)
+        self.assertTrue('end_date' in media_health)
+
+    def testNoHealthData(self):
+        health = self._mc.mediaHealth(20994)
+        self.assertEqual(0, len(health))
 
 class ApiMediaTest(ApiBaseTest):
 
