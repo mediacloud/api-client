@@ -446,7 +446,7 @@ class ApiStoriesTest(ApiBaseTest):
 
     def testStoryCount(self):
         results = self._mc.storyCount(self.QUERY, self.FILTER_QUERY)
-        self.assertEqual(results['count'], 722)
+        self.assertEqual(results['count'], 723)
 
 class AdminApiSentencesTest(AdminApiBaseTest):
 
@@ -491,17 +491,17 @@ class AdminApiSentencesTest(AdminApiBaseTest):
     def testSentenceList(self):
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY)
         self.assertEqual(int(results['responseHeader']['status']), 0)
-        self.assertEqual(int(results['response']['numFound']), 2197)
+        self.assertEqual(int(results['response']['numFound']), 2202)
         self.assertEqual(len(results['response']['docs']), 1000)
 
     def testSentenceListPaging(self):
         # test limiting rows returned
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, 0, 100)
-        self.assertEqual(int(results['response']['numFound']), 2196)
+        self.assertEqual(int(results['response']['numFound']), 2202)
         self.assertEqual(len(results['response']['docs']), 100)
         # test starting offset
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, 5700)
-        self.assertEqual(int(results['response']['numFound']), 2196)
+        self.assertEqual(int(results['response']['numFound']), 2202)
         self.assertFalse('docs' in results['response'], 0)
 
 class ApiSentencesTest(ApiBaseTest):
