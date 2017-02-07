@@ -48,8 +48,8 @@ Alternatively, this query could be specified as follows
 ```python
 import mediacloud
 mc = mediacloud.api.MediaCloud('MY_API_KEY')
-mc.sentenceCount('( zimbabwe AND president)', '+publish_date:[2013-01-01T00:00:00Z TO 2014-01-01T00:00:00Z} AND +tags_id_media:1')
-print res['count']
+results = mc.sentenceCount('( zimbabwe AND president)', '+publish_date:[2013-01-01T00:00:00Z TO 2014-01-01T00:00:00Z} AND +tags_id_media:1')
+print results['count']
 ```
 
 Find the most commonly used words in sentences from the US mainstream media that mentioned "Zimbabwe" and "president" in 2013:
@@ -74,7 +74,7 @@ import mediacloud, datetime
 mc = mediacloud.api.MediaCloud('MY_API_KEY')
 db = mediacloud.storage.MongoStoryDatabase('one_day')
 stories = mc.storyList(mc.publish_date_query( datetime.date (2014, 01, 01), datetime.date(2014,01,02) ), last_processed_stories_id=0,rows=100)
-[db.addStory(s) for story in stories]
+[db.addStory(s) for s in stories]
 print db.storyCount()
 ```
 
@@ -104,6 +104,7 @@ Then run `python tests.py`. Notice you get a `mediacloud-api.log` that tells you
 Version History
 ---------------
 
+* __v2.37.0__: media source feed scraping, topic create/update, snapshot generate, and more
 * __v2.36.2__: fixed defaults on updateTag
 * __v2.36.1__: fixed system stats endpoint
 * __v2.36.0__: added mediaSuggest workflow endpoints
