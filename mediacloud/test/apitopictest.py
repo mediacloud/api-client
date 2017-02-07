@@ -1,6 +1,7 @@
 from mediacloud.test.basetest import AdminApiBaseTest
 
-TEST_TOPIC_ID = 1512
+TEST_TOPIC_ID = 1512 # geostudy topic
+TEST_TOPIC2_ID = 1019 # common core
 
 class ApiTopicTest(AdminApiBaseTest):
 
@@ -34,6 +35,22 @@ class ApiTopicSnapshotTest(AdminApiBaseTest):
         # make sure a failure case works
         snapshots = self._mc.topicSnapshotList('1232545235')
         self.assertEqual(len(snapshots), 0)
+
+class ApiTopicSpiderTest(AdminApiBaseTest):
+
+    def testTopicSpiderStatus(self):
+        results = self._mc.topicSpiderStatus(TEST_TOPIC2_ID)
+        self.assertTrue('job_states' in results)
+
+    def testTopicSpiderIterationsList(self):
+        results = self._mc.topicSpiderIterationsList(TEST_TOPIC2_ID)
+        self.assertTrue('iterations' in results)
+        self.assertEqual(15, len(results['iterations']))
+        first_iteration = results['iterations'][0]
+        self.assertTrue('iteration' in first_iteration)
+        self.assertEqual(0, first_iteration['iteration'])
+        self.assertTrue('count' in first_iteration)
+        self.assertTrue(0, first_iteration['count'])
 
 class ApiTopicTimespanTest(AdminApiBaseTest):
 

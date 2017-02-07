@@ -456,11 +456,8 @@ class MediaCloud(object):
         _validate_params(params, valid_params, kwargs)
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/snapshots/generate', params, 'POST')
 
-    def topicSnapshotStatus(self, topics_id):
-        params = {}
-        valid_params = ['note']
-        _validate_params(params, valid_params, kwargs)
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/snapshots/generate', params, 'POST')
+    def topicSnapshotGenerateStatus(self, topics_id):
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/snapshots/generate_status')
 
     def topicCreate(self, name, solr_seed_query, description, start_date, end_date, media_ids=[], media_tags_ids=[], **kwargs):
         valid_optional_params = [ 'max_iterations', 'is_public', 'ch_monitor_id', 'twitter_topics_id']
@@ -487,14 +484,14 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/update', params, 'PUT_JSON')
 
     def topicSpider(self, topics_id):
-        params = { 'topics_id': topics_id }
-        return self._queryForJson(self.V2_API_URL + 'topics/spider', params, 'POST')
+        # this will generate a new snapshot for you
+        return self._queryForJson(self.V2_API_URL + 'topics/'+str(topics_id)+'/spider', {}, 'POST')
 
     def topicSpiderStatus(self, topics_id):
-        return self._queryForJson(self.V2_API_URL + 'topics/'+str(topics_id)+'spider_status')
+        return self._queryForJson(self.V2_API_URL + 'topics/'+str(topics_id)+'/spider_status')
 
-    def topicIterationsList(self, topics_id):
-        return self._queryForJson(self.V2_API_URL + 'topics/' + str(topics_id) + 'iterations/list')
+    def topicSpiderIterationsList(self, topics_id):
+        return self._queryForJson(self.V2_API_URL + 'topics/' + str(topics_id) + '/iterations/list')
 
     def topicTimespanList(self, topics_id, **kwargs):
         params = {}
