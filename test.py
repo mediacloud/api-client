@@ -28,7 +28,7 @@ test_classes = [
     api.StatsTest
 ]
 
-# test_classes = [ topic.ApiTopicSpiderTest ]
+# test_classes = [ api.AdminApiMediaTest ]
 
 # set up all logging to DEBUG (cause we're running tests here!)
 logging.basicConfig(level=logging.DEBUG)

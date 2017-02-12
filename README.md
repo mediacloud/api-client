@@ -104,7 +104,7 @@ Then run `python tests.py`. Notice you get a `mediacloud-api.log` that tells you
 Version History
 ---------------
 
-* __v2.37.0__: media source feed scraping, topic create/update, snapshot generate, and more
+* __v2.37.0__: media source feed scraping, topic create/update, snapshot generate, mediaUpdate change
 * __v2.36.2__: fixed defaults on updateTag
 * __v2.36.1__: fixed system stats endpoint
 * __v2.36.0__: added mediaSuggest workflow endpoints
