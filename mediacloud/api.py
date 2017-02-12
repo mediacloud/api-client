@@ -765,9 +765,7 @@ class AdminMediaCloud(MediaCloud):
         return self._queryForJson(self.V2_API_URL+'feeds/scrape', params, 'POST')
 
     def feedsScrapeStatus(self, media_id=None):
-        params = {}
-        if media_id is not None:
-            params['media_id'] = media_id
+        params = { 'media_id': media_id }
         return self._queryForJson(self.V2_API_URL+'feeds/scrape_status', params)
 
     def mediaCreate(self, media_items):
@@ -784,23 +782,19 @@ class AdminMediaCloud(MediaCloud):
                 raise ValueError('You must supply a media url')
         return self._queryForJson(self.V2_API_URL+'media/create', media_items, 'POST')
 
-    def mediaUpdate(self, media_id, url=None, name=None, foreign_rss_links=None, content_delay=None, editor_notes=None, public_notes=None, is_monitored=None):
-        params = { 'media_id': media_id }
-        if name is not None:
-            params['name'] = name
-        if url is not None:
-            params['url'] = url
-        if foreign_rss_links is not None:
-            params['foreign_rss_links'] = 1 if foreign_rss_links else 0
-        if content_delay is not None:
-            params['content_delay'] = content_delay
-        if editor_notes is not None:
-            params['editor_notes'] = editor_notes
-        if public_notes is not None:
-            params['public_notes'] = public_notes
-        if is_monitored is not None:
-            params['is_monitored'] = 1 if is_monitored else 0
-        return self._queryForJson(self.V2_API_URL+'media/update', params, 'PUT_JSON')
+    def mediaUpdate(self, media_id, new_props):
+        # validate and clean inputs
+        valid_params = ['url', 'name', 'foreign_rss_links', 'content_delay', 'editor_notes', 'public_notes', 'is_monitored']
+        boolean_params = ['is_monitored']
+        for k in new_props:
+            if k not in valid_params:
+                raise ValueError('Invalid param in attempt to update media: '+str(k))
+            if k in boolean_params:
+                new_props[k] = 1 if k else 0
+        if 'url' in new_props and (new_props['url'] is None or len(new_props['url']) == 0):
+            raise ValueError('The media URL can\'t be empty')
+        new_props['media_id'] = media_id
+        return self._queryForJson(self.V2_API_URL+'media/update', new_props, 'PUT_JSON')
 
     def mediaSuggestionsList(self, all=False, tags_id=None):
         params = {}

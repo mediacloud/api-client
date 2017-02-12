@@ -297,6 +297,20 @@ class ApiFeedsTest(ApiBaseTest):
 
 class AdminApiMediaTest(AdminApiBaseTest):
 
+    def testMediaUpdate(self):
+        test_media_id = 362086     # rahulbotics.com
+        prop_to_change = 'editor_notes'
+        updated_prop_value = 'Rahul\'s test domain!'
+        original = self._mc.media(test_media_id)
+        # update something
+        results = self._mc.mediaUpdate(test_media_id, { prop_to_change: updated_prop_value })
+        updated = self._mc.media(test_media_id)
+        self.assertEqual(updated[prop_to_change], updated_prop_value)
+        # set it back and verify
+        results = self._mc.mediaUpdate(test_media_id, { prop_to_change: original[prop_to_change] })
+        reverted = self._mc.media(test_media_id)
+        self.assertEqual(reverted[prop_to_change], original[prop_to_change])
+
     def testMediaCreateDuplicate(self):
         mediaItem = {
             'url': "http://nytimes.com",
