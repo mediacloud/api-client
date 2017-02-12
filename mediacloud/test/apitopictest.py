@@ -7,7 +7,7 @@ class ApiTopicTest(AdminApiBaseTest):
 
     def testTopic(self):
         topic = self._mc.topic(1)
-        self.assertEqual(topic['topics_id'], 1)
+        self.assertEqual(int(topic['topics_id']), 1)
         self.assertEqual(topic['name'], 'trayvon')
 
     def testTopicList(self):
@@ -31,7 +31,7 @@ class ApiTopicSnapshotTest(AdminApiBaseTest):
     def testTopicSnapshotList(self):
         # make sure it works
         snapshots = self._mc.topicSnapshotList(TEST_TOPIC_ID)
-        self.assertEqual(len(snapshots), 10)
+        self.assertEqual(len(snapshots), 4)
         # make sure a failure case works
         snapshots = self._mc.topicSnapshotList('1232545235')
         self.assertEqual(len(snapshots), 0)
