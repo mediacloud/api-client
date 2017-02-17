@@ -559,6 +559,12 @@ class MediaCloud(object):
         params = {'focal_sets_id': focal_sets_id}
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/foci/list', params)['foci']
 
+    def topicMediaMap(self, topics_id, **kwargs):
+        params = {}
+        valid_params = ['color_field', 'num_media', 'include_weights', 'num_links_per_medium', 'snapshots_id', 'foci_id', 'timespans_id']
+        _validate_params(params, valid_params, kwargs)
+        return self._query(self.V2_API_URL+'topics/'+str(topics_id)+'/media/map', params).content
+
     def userPermissionsList(self):
         return self._queryForJson(self.V2_API_URL+'topics/permissions/user/list')
 

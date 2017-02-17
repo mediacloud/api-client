@@ -193,3 +193,9 @@ class AdminTopicSentenceCountTest(AdminApiBaseTest):
             split=True, split_start_date='2013-01-01', split_end_date='2016-01-01')
         self.assertEqual(results['split']['gap'], '+7DAYS')
         self.assertEqual(len(results['split']), 160)
+
+class AdminTopicMediaMapTest(AdminApiBaseTest):
+
+    def testMediaMap(self):
+        results = self._mc.topicMediaMap(TEST_TOPIC2_ID)
+        self.assertTrue('gexf' in results)
