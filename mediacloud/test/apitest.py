@@ -25,14 +25,14 @@ class ApiAllFieldsOptionTest(ApiBaseTest):
         # do a regular query
         media = self._mc.media(1751)
         self.assertNotEqual(media, None)
-        self.assertEqual(media['media_id'], '1751')
+        self.assertEqual(media['media_id'], 1751)
         self.assertFalse('foreign_rss_links' in media)
         self.assertTrue('url' in media)
         # do an all fields regular query and verify extra fields are there
         self._mc.setAllFields(True)
         media = self._mc.media(1751)
         self.assertNotEqual(media, None)
-        self.assertEqual(media['media_id'], '1751')
+        self.assertEqual(media['media_id'], 1751)
         self.assertTrue('foreign_rss_links' in media)
         self.assertTrue('url' in media)
 
@@ -184,9 +184,9 @@ class ApiFeedTest(AdminApiBaseTest):
 
     def testFeedScrapeStatus(self):
         test_media_id = 1 # nyt
-        # verify no pending jobs
+        # verify pending jobs
         scrape_status = self._mc.feedsScrapeStatus(test_media_id)
-        self.assertEqual(0, len(scrape_status['job_states']))
+        self.assertEqual(18, len(scrape_status['job_states']))
 
 class AdminApiMediaSuggestionsTest(AdminApiBaseTest):
 
@@ -252,7 +252,7 @@ class ApiTagsTest(ApiBaseTest):
 
     def testTagListSimilar(self):
         collection_tags = self._mc.tagList(similar_tags_id=8876989)
-        self.assertEqual(19, len(collection_tags))
+        self.assertEqual(20, len(collection_tags))
 
     def testTagListSearch(self):
         # verify search works at all
@@ -312,15 +312,15 @@ class AdminApiMediaTest(AdminApiBaseTest):
         self.assertEqual(reverted[prop_to_change], original[prop_to_change])
 
     def testMediaCreateDuplicate(self):
-        mediaItem = {
+        media_item = {
             'url': "http://nytimes.com",
             'editor_notes': "duplicate for testing",
             'tags_ids': [8875027],
             'name': 'Duplicate New York Times'
         }
-        mediaToCreate = [mediaItem]
-        results = self._mc.mediaCreate(mediaToCreate)
-        self.assertEqual(len(results), len(mediaToCreate))
+        media_to_create = [media_item]
+        results = self._mc.mediaCreate(media_to_create)
+        self.assertEqual(len(results), len(media_to_create))
         self.assertTrue("media_id" in results[0])
         self.assertTrue("status" in results[0])
         self.assertTrue("url" in results[0])
@@ -329,12 +329,12 @@ class AdminApiMediaTest(AdminApiBaseTest):
 class AdminApiStoriesTest(AdminApiBaseTest):
 
     def testStoryListSort(self):
-        resultsById = self._mc.storyList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, sort=mediacloud.api.MediaCloud.SORT_PROCESSED_STORIES_ID, rows=20)
-        self.assertEqual(len(resultsById), 20)
-        resultsByBitly = self._mc.storyList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, sort=mediacloud.api.MediaCloud.SORT_BITLY_CLICK_COUNT, rows=20)
-        self.assertEqual(len(resultsByBitly), 20)
+        results_by_id = self._mc.storyList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, sort=mediacloud.api.MediaCloud.SORT_PROCESSED_STORIES_ID, rows=20)
+        self.assertEqual(len(results_by_id), 20)
+        results_by_bitly = self._mc.storyList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, sort=mediacloud.api.MediaCloud.SORT_BITLY_CLICK_COUNT, rows=20)
+        self.assertEqual(len(results_by_bitly), 20)
         for i in [0,19]:
-            self.assertNotEqual(resultsById[i]['stories_id'], resultsByBitly[i]['stories_id'])
+            self.assertNotEqual(results_by_id[i]['stories_id'], results_by_bitly[i]['stories_id'])
 
     def testStoryListInFeed(self):
         TEST_FEEDS_ID_1 = 61  # NYT US news feeds (http://www.nytimes.com/services/xml/rss/nyt/US.xml)
