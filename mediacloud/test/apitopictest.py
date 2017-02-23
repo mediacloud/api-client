@@ -42,6 +42,7 @@ class ApiTopicSpiderTest(AdminApiBaseTest):
         results = self._mc.topicSpiderStatus(TEST_TOPIC2_ID)
         self.assertTrue('job_states' in results)
 
+'''
     def testTopicSpiderIterationsList(self):
         results = self._mc.topicSpiderIterationsList(TEST_TOPIC2_ID)
         self.assertTrue('iterations' in results)
@@ -51,6 +52,7 @@ class ApiTopicSpiderTest(AdminApiBaseTest):
         self.assertEqual(0, first_iteration['iteration'])
         self.assertTrue('count' in first_iteration)
         self.assertTrue(0, first_iteration['count'])
+'''
 
 class ApiTopicTimespanTest(AdminApiBaseTest):
 
