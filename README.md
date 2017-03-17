@@ -104,6 +104,7 @@ Then run `python tests.py`. Notice you get a `mediacloud-api.log` that tells you
 Version History
 ---------------
 
+* __v2.28.1__: fix bug in mediaSuggestionsMark for approving media suggestions
 * __v2.38.0__: add topic media map support
 * __v2.37.0__: media source feed scraping, topic create/update, snapshot generate, mediaUpdate change
 * __v2.36.2__: fixed defaults on updateTag
