@@ -730,7 +730,7 @@ class AdminMediaCloud(MediaCloud):
         }
         return self._queryForJson(self.V2_API_URL+'tag_sets/create', params, 'POST')
 
-    def updateTagSet(self, tag_sets_id, name=None, label=None, description=None, show_on_media=False, show_on_stories=False):
+    def updateTagSet(self, tag_sets_id, name=None, label=None, description=None):
         params = { 'tag_sets_id': tag_sets_id }
         if name is not None:
             params['name'] = name
@@ -738,6 +738,7 @@ class AdminMediaCloud(MediaCloud):
             params['label'] = label
         if description is not None:
             params['description'] = description
+
         return self._queryForJson(self.V2_API_URL+'tag_sets/update/', {}, 'PUT_JSON', params)
 
     def feedCreate(self, media_id, name, url, feed_type='syndicated', feed_status='active'):
@@ -810,14 +811,16 @@ class AdminMediaCloud(MediaCloud):
             params['tags_id'] = tags_id
         return self._queryForJson(self.V2_API_URL+'media/list_suggestions', params)['media_suggestions']
 
-    def mediaSuggestionsMark(self, media_suggestions_id, status, mark_reason):
+    def mediaSuggestionsMark(self, media_suggestions_id, status, mark_reason, media_id=None):
         if status not in ['approved', 'rejected']:
             raise ValueError('Invalid media suggestion status: '+str(status))
         params = {
             'media_suggestions_id': media_suggestions_id,
             'status': status,
-            'mark_reason': mark_reason
+            'mark_reason': mark_reason,
         }
+        if media_id is not None:
+            params['media_id'] = media_id
         return self._queryForJson(self.V2_API_URL+'media/mark_suggestion', params, 'PUT_JSON')
 
 def _solr_date_range(start_date, end_date, start_date_inclusive=True, end_date_inclusive=False):
