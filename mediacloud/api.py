@@ -222,12 +222,6 @@ class MediaCloud(object):
                 raise ValueError('Error - stopword_length must be "tiny", "short" or "long"')
         return self._queryForJson(self.V2_API_URL+'stories_public/word_matrix/', params)
 
-    def sentence(self, story_sentences_id):
-        '''
-        Return info about a single sentence
-        '''
-        return self._queryForJson(self.V2_API_URL+'sentences/single/'+str(story_sentences_id))[0]
-
     def sentenceCount(self, solr_query, solr_filter=' ', split=False, split_start_date=None, split_end_date=None, split_daily=False):
         if split not in [True, False]:
             raise ValueError('split much be a boolean True or False')
@@ -251,7 +245,7 @@ class MediaCloud(object):
         params['include_stats'] = 1 if include_stats is True else 0
         return self._queryForJson(self.V2_API_URL+'sentences/field_count', params)
 
-    def wordCount(self, solr_query, solr_filter='', languages='en', num_words=500, sample_size=1000, include_stopwords=False, include_stats=False):
+    def wordCount(self, solr_query, solr_filter='', languages=None, num_words=500, sample_size=1000, include_stopwords=False, include_stats=False):
         params = {
             'q': solr_query,
             'l': languages,
