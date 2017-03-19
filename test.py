@@ -24,11 +24,12 @@ test_classes = [
     topic.AdminTopicSentenceCountTest,
     topic.ApiTopicTest, topic.ApiTopicSnapshotTest, topic.ApiTopicTimespanTest,
     topic.AdminTopicStoryListTest, topic.AdminTopicMediaListTest, topic.AdminTopicWordCountTest,
-    topic.AdminTopicStoryCountTest, topic.ApiTopicSpiderTest, topic.AdminTopicMediaMapTest,
+    topic.AdminTopicStoryCountTest, topic.AdminTopicMediaMapTest,
+    topic.ApiTopicSpiderTest,
     api.StatsTest
 ]
 
-# test_classes = [ topic.AdminTopicMediaMapTest ]
+# test_classes = [ api.AdminApiMediaTest ]
 
 # set up all logging to DEBUG (cause we're running tests here!)
 logging.basicConfig(level=logging.DEBUG)
