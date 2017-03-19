@@ -32,9 +32,6 @@ class ApiTopicSnapshotTest(AdminApiBaseTest):
         # make sure it works
         snapshots = self._mc.topicSnapshotList(TEST_TOPIC_ID)
         self.assertEqual(len(snapshots), 4)
-        # make sure a failure case works
-        snapshots = self._mc.topicSnapshotList('1232545235')
-        self.assertEqual(len(snapshots), 0)
 
 class ApiTopicSpiderTest(AdminApiBaseTest):
 
