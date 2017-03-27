@@ -1,11 +1,11 @@
 import logging
 import json
 import datetime
-from collections import namedtuple
 import urllib
 import requests
 import mediacloud
 import mediacloud.error
+
 from mediacloud.tags import StoryTag, SentenceTag, MediaTag
 
 MAX_HTTP_GET_CHARS = 4000   # experimentally determined for our main servers (conservative)
@@ -46,6 +46,7 @@ class MediaCloud(object):
         '''
         self._auth_token = auth_token
 
+    @mediacloud.error.deprecated
     def userAuthToken(self, username, password):
         '''
         Get a auth_token for future requests to use
@@ -73,9 +74,91 @@ class MediaCloud(object):
 
     def userProfile(self):
         '''
-        Returns basic info about the current user, including their roles
+        :return: basic info about the current user, including their roles
         '''
         return self._queryForJson(self.V2_API_URL+'auth/profile')
+
+    def authLogin(self, username, password):
+        '''
+        :return: { success: 1, profile: {...}} or {error: msg}
+        '''
+        params = {
+            'username': username,   # ie. email
+            'password': password
+        }
+        return self._queryForJson(self.V2_API_URL+'auth/login', params, 'POST')
+
+    def authRegister(self, email, password, full_name, notes, subscribe_to_newsletter, activation_url):
+        '''
+        :return: {success: 1}, or {error: "msg"}
+        '''
+        params = {
+            'email': email,
+            'password': password,
+            'full_name': full_name,
+            'notes': notes,
+            'subscribe_to_newsletter': subscribe_to_newsletter,
+            'activation_url': activation_url
+        }
+        _validate_bool_params(params, 'subscribe_to_newsletter')
+        return self._queryForJson(self.V2_API_URL+'auth/register', params, 'POST')
+
+    def authActivate(self, email, activation_token):
+        '''
+        :return: { success: 1, profile: {...}} or {error: msg}
+        '''
+        params = {
+            'email': email,
+            'activation_token': activation_token
+        }
+        return self._queryForJson(self.V2_API_URL+'auth/activate', params, 'POST')
+
+    def authResendActivationLink(self, email, activation_token):
+        '''
+        :return: {success: 1}, or {error: "msg"}
+        '''
+        params = {
+            'email': email,
+            'activation_token': activation_token
+        }
+        return self._queryForJson(self.V2_API_URL + 'auth/resend_activation_link', params, 'POST')
+
+    def authSendPasswordResetLink(self, email, password_reset_url):
+        '''
+        :return: {success: 1}, or {error: "msg"}
+        '''
+        params = {
+            'email': email,
+            'password_reset_url': password_reset_url
+        }
+        return self._queryForJson(self.V2_API_URL + 'auth/send_password_reset_link', params, 'POST')
+
+    def authResetPassword(self, email, password_reset_token, new_password):
+        '''
+        :return: {success: 1}, or {error: "msg"}
+        '''
+        params = {
+            'email': email,
+            'password_reset_token': password_reset_token,
+            'new_password': new_password
+        }
+        return self._queryForJson(self.V2_API_URL + 'auth/reset_password', params, 'POST')
+
+    def authChangePassword(self, old_password, new_password):
+        '''
+        :return: { success: 1, profile: {...}} or {error: msg}
+        '''
+        params = {
+            'old_password': old_password,
+            'new_password': new_password
+        }
+        return self._queryForJson(self.V2_API_URL + 'auth/change_password', params, 'POST')
+
+    def authResetApiKey(self):
+        '''
+        :return: {success: 1}, or {error: "msg"}
+        '''
+        return self._queryForJson(self.V2_API_URL + 'auth/reset_api_key', {}, 'POST')
 
     def stats(self):
         '''
@@ -413,7 +496,7 @@ class MediaCloud(object):
         valid_params = ['q', 'fq', 'languages', 'num_words', 'sample_size', 'include_stopwords',
             'include_stats', 'snapshots_id', 'foci_id', 'timespans_id']
         _validate_params(params, valid_params, kwargs)
-        _validate_bool_params('include_stopwords', 'include_stats')
+        _validate_bool_params(params, 'include_stopwords', 'include_stats')
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/wc/list', params)
 
     def topicSentenceCount(self, topics_id, **kwargs):
