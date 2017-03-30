@@ -308,7 +308,7 @@ class MediaCloud(object):
     def sentenceCount(self, solr_query, solr_filter=' ', split=False, split_start_date=None, split_end_date=None, split_daily=False):
         if split not in [True, False]:
             raise ValueError('split much be a boolean True or False')
-        params = {'q':solr_query, 'fq':solr_filter}
+        params = {'q': solr_query, 'fq': solr_filter}
         params['split'] = 1 if split is True else 0
         params['split_daily'] = 1 if split_daily is True else 0
         if split is True:
@@ -402,6 +402,18 @@ class MediaCloud(object):
             raise mediacloud.error.MCException(response_json['error'], requests.codes['ok'])
         return response_json
 
+    def _url_length(self, url, params):
+        # this has to be smart to handle ints, ascii strings, and unicode strings
+        param_value_length = 0
+        for v in params.values():
+            try:
+                param_value_length += len(str(v))   # using str call here to compute length of ints
+            except UnicodeEncodeError: # it is a unicode string, so str called failed, but len call will work
+                param_value_length += len(v)
+        param_key_length = sum([len(str(k)) for k in params.keys()])
+        total_url_length = len(url) + param_key_length + param_value_length
+        return total_url_length
+
     def _query(self, url, params=None, http_method='GET', json_data=None):
         self._logger.debug("query "+http_method+" to "+url+" with "+str(params)+" and "+str(json_data))
         if params is None:
@@ -414,9 +426,8 @@ class MediaCloud(object):
             params['all_fields'] = 1
         if http_method is 'GET':
             # automatically switch to POST if request too long
-            total_url_length = len(url)+sum([len(str(k)) for k in params.keys()])+sum([len(str(v)) for v in params.values()])
             try:
-                if total_url_length > MAX_HTTP_GET_CHARS:
+                if self._url_length(url, params) > MAX_HTTP_GET_CHARS:
                     r = requests.post(url, data=params, headers={'Accept': 'application/json'})
                 else:
                     r = requests.get(url, params=params, headers={'Accept': 'application/json'})

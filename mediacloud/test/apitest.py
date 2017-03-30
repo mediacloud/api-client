@@ -520,6 +520,14 @@ class AdminApiSentencesTest(AdminApiBaseTest):
 
 class ApiSentencesTest(ApiBaseTest):
 
+    def testUnicodeSentenceCount(self):
+        # make sure Unicode str doesn't toss an error
+        split_start_date = '2017-03-15'
+        split_end_date = '2017-03-30'
+        q = u'+( \u5b89\u90e8 ) AND media_id:97659'
+        results = self._mc.sentenceCount(solr_query=q, split_start_date=split_start_date, split_end_date=split_end_date)
+        self.assertTrue(results is not None)
+
     def testSentenceCount(self):
         # basic counting
         results = self._mc.sentenceCount('obama', '+media_id:1')
