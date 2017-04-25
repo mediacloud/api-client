@@ -123,7 +123,7 @@ class ApiMediaHealthTest(ApiBaseTest):
         self.assertTrue('end_date' in media_health)
 
     def testNoHealthData(self):
-        health = self._mc.mediaHealth(20994)
+        health = self._mc.mediaHealth(99999999999)  # ie. an invalid id
         self.assertEqual(0, len(health))
 
 class ApiMediaTest(ApiBaseTest):
@@ -226,7 +226,7 @@ class ApiTagsTest(ApiBaseTest):
         tag = self._mc.tag(8876989) # US mainstream media
         self.assertEqual(tag['tags_id'], 8876989)
         self.assertEqual(tag['tag'], 'JP')
-        self.assertEqual(tag['tag_sets_id'], 597) 
+        self.assertEqual(tag['tag_sets_id'], 597)
 
     def testTagList(self):
         # verify it only pulls tags from that one set
