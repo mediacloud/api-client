@@ -452,15 +452,18 @@ class ApiStoriesTest(ApiBaseTest):
         for story in results:
             self.assertTrue('bitly_click_count' in story)
 
+    def testStoryCount(self):
+        results = self._mc.storyCount(self.QUERY, self.FILTER_QUERY)
+        self.assertEqual(results['count'], 725)
+
+'''
+TOO SLOW TO RUN!
     def testStoryPublicListByFeed(self):
         FEED_ID = 65    # NYT World feed
         results = self._mc.storyList(feeds_id=FEED_ID)
         self.assertNotEqual(len(results), 0)
         # anyway to check the feed id on a story returned?
-
-    def testStoryCount(self):
-        results = self._mc.storyCount(self.QUERY, self.FILTER_QUERY)
-        self.assertEqual(results['count'], 725)
+'''
 
 class AdminApiSentencesTest(AdminApiBaseTest):
 
