@@ -15,7 +15,6 @@ test_classes = [
     api.ApiFeedsTest, api.ApiTagsTest, api.ApiTagSetsTest,
     api.ApiStoriesTest, api.AdminApiStoriesTest,
     api.ApiWordCountTest, api.ApiSentencesTest, api.AdminApiSentencesTest,
-    api.ApiFeedTest,
     storage.MongoStorageTest,
     api.AuthTokenTest, api.UserProfileTest,
     api.ApiAllFieldsOptionTest,
@@ -29,7 +28,7 @@ test_classes = [
     api.StatsTest
 ]
 
-# test_classes = [ api.AdminApiMediaTest ]
+# test_classes = [ api.ApiMediaHealthTest ]
 
 # set up all logging to DEBUG (cause we're running tests here!)
 logging.basicConfig(level=logging.DEBUG)
