@@ -62,6 +62,15 @@ class ApiTopicTimespanTest(AdminApiBaseTest):
 class AdminTopicStoryListTest(AdminApiBaseTest):
     TOPIC_ID = 1
 
+    def testTopicStoryListFacebookData(self):
+        response = self._mc.topicStoryListFacebookData(self.TOPIC_ID)
+        self.assertEqual(len(response['counts']), 20)
+        for story in response['counts']:
+            self.assertTrue('facebook_api_collect_date' in story)
+            self.assertTrue('facebook_comment_count' in story)
+            self.assertTrue('facebook_share_count' in story)
+            self.assertTrue('stories_id' in story)
+
     def testTopicStoryList(self):
         response = self._mc.topicStoryList(self.TOPIC_ID)
         self.assertEqual(len(response['stories']), 20)

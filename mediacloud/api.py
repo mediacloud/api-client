@@ -496,6 +496,15 @@ class MediaCloud(object):
             _validate_sort_param(params['sort'])
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/stories/list', params)
 
+    def topicStoryListFacebookData(self, topics_id, **kwargs):
+        '''
+        For technical reasons this data is too hard to include in the topicStoryList results :-(
+        '''
+        params = {}
+        valid_params = ['q', 'limit', 'link_id', 'snapshots_id', 'foci_id', 'timespans_id']
+        _validate_params(params, valid_params, kwargs)
+        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/stories/facebook', params)
+
     def topicStoryCount(self, topics_id, **kwargs):
         params = {}
         valid_params = ['q', 'snapshots_id', 'foci_id', 'timespans_id']
