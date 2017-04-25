@@ -480,7 +480,7 @@ class MediaCloud(object):
     def topicMediaList(self, topics_id, **kwargs):
         params = {}
         valid_params = ['media_id', 'sort', 'name', 'limit',
-            'link_id', 'snapshots_id', 'foci_id', 'timespans_id']
+            'link_id', 'snapshots_id', 'foci_id', 'timespans_id', 'q']
         _validate_params(params, valid_params, kwargs)
         if 'sort' in params:
             _validate_sort_param(params['sort'])
@@ -938,7 +938,7 @@ def _chunkify(data, chunk_size):
 def _validate_params(params, valid_params, args):
     for key, value in args.iteritems():
         if key not in valid_params:
-            raise ValueError('%s is not a valid argument for this api method' % key)
+            raise ValueError("{} is not a valid argument for this api method".format(key))
         params[key] = value
     return params
 
@@ -954,7 +954,7 @@ def _validate_bool_params(params, *args):
     for arg in args:
         if arg in params:
             if params[arg] not in [True, False]:
-                raise ValueError('%s must be a python boolean (True or False)' % arg)
+                raise ValueError("{} must be a python boolean (True or False)".format(arg))
             params[arg] = 1 if params[arg] is True else 0
     return params
 
@@ -968,6 +968,6 @@ def _validate_feed_type(feed_type):
     if feed_type not in ['syndicated', 'web_page']:
             raise ValueError('feed_type must be syndicated or web_page')
 
-def _validate_feed_status(feed_type):
+def _validate_feed_status(feed_status):
     if feed_status not in ['active', 'inactive', 'skipped']:
         raise ValueError('feed_status must be active, inactive, or skipped')
