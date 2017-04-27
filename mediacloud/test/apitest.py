@@ -336,18 +336,6 @@ class AdminApiStoriesTest(AdminApiBaseTest):
         for i in [0,19]:
             self.assertNotEqual(results_by_id[i]['stories_id'], results_by_bitly[i]['stories_id'])
 
-    def testStoryListInFeed(self):
-        TEST_FEEDS_ID_1 = 61  # NYT US news feeds (http://www.nytimes.com/services/xml/rss/nyt/US.xml)
-        TEST_FEEDS_ID_2 = 313908  # WashPo Business feed (https://core.mediacloud.org/admin/downloads/list?f=313908)
-        results1 = set([s['stories_id'] for s in self._mc.storyList(feeds_id=TEST_FEEDS_ID_1)])
-        results2 = set([s['stories_id'] for s in self._mc.storyList(feeds_id=TEST_FEEDS_ID_2)])
-        intersection = list(results1 & results2)
-        self.assertTrue(len(intersection) == 0)
-        # now test lower level (only do 3 cause it takes a long time)
-        results1 = self._mc.storyList(feeds_id=TEST_FEEDS_ID_1, show_feeds=True, rows=3)
-        for s in results1:
-            feed_ids = [f['feeds_id'] for f in s['feeds']]
-            self.assertTrue(TEST_FEEDS_ID_1 in feed_ids)
 
     def testStoryListWordCount(self):
         results = self._mc.storyList(wc=True)
@@ -418,6 +406,22 @@ class AdminApiStoriesTest(AdminApiBaseTest):
             self.assertTrue('story_text' in story)
             self.assertTrue('is_fully_extracted' in story)
             self.assertFalse('corenlp' in story)
+'''
+TOO SLOW!
+    def testStoryListInFeed(self):
+        TEST_FEEDS_ID_1 = 61  # NYT US news feeds (http://www.nytimes.com/services/xml/rss/nyt/US.xml)
+        TEST_FEEDS_ID_2 = 313908  # WashPo Business feed (https://core.mediacloud.org/admin/downloads/list?f=313908)
+        results1 = set([s['stories_id'] for s in self._mc.storyList(feeds_id=TEST_FEEDS_ID_1)])
+        results2 = set([s['stories_id'] for s in self._mc.storyList(feeds_id=TEST_FEEDS_ID_2)])
+        intersection = list(results1 & results2)
+        self.assertTrue(len(intersection) == 0)
+        # now test lower level (only do 3 cause it takes a long time)
+        results1 = self._mc.storyList(feeds_id=TEST_FEEDS_ID_1, show_feeds=True, rows=3)
+        for s in results1:
+            feed_ids = [f['feeds_id'] for f in s['feeds']]
+            self.assertTrue(TEST_FEEDS_ID_1 in feed_ids)
+'''
+
 
 class ApiStoriesWordMatrixTest(ApiBaseTest):
 
