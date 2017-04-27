@@ -104,7 +104,9 @@ Then run `python tests.py`. Notice you get a `mediacloud-api.log` that tells you
 Version History
 ---------------
 
-* __v2.39.1__: fix topicMediaList to accept q as a param, work on feed-related calls
+* __v2.40.0__: add support for listing topics by name, or by if they are public or not
+* __v2.39.2__: work on feed-related calls
+* __v2.39.1__: fix topicMediaList to accept q as a param
 * __v2.39.0__: new user reg endpoints, handle unicode in GET queries better
 * __v2.38.2__: don't default wordcount to English
 * __v2.38.1__: fix bug in mediaSuggestionsMark for approving media suggestions

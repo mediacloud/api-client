@@ -15,6 +15,19 @@ class ApiTopicTest(AdminApiBaseTest):
         topic_list = self._mc.topicList()
         self.assertTrue(len(topic_list) > 1)
 
+    def testTopicListPublic(self):
+        topic_list = self._mc.topicList(public=True)
+        self.assertTrue(len(topic_list) > 1)
+        for topic in topic_list['topics']:
+            self.assertEqual(topic['is_public'], 1)
+
+    def testTopicListName(self):
+        to_match = "common"
+        topic_list = self._mc.topicList(name=to_match)
+        self.assertTrue(len(topic_list) > 1)
+        for topic in topic_list['topics']:
+            self.assertTrue(to_match in topic['name'])
+
     def testTopicListPaging(self):
         # verify second page doesn't contain any ids from the first page
         topic_list_page_1 = self._mc.topicList()

@@ -535,13 +535,17 @@ class MediaCloud(object):
         '''
         return self._queryForJson(self.V2_API_URL+'topics/single/'+str(topics_id))['topics'][0]
 
-    def topicList(self, link_id=None):
+    def topicList(self, link_id=None, name=None, public=None):
         '''
         List all the controversies
         '''
         params = {}
         if link_id is not None:
             params['link_id'] = link_id
+        if public is not None:
+            params['public'] = 1 if public is True else 0
+        if name is not None:
+            params['name'] = name
         return self._queryForJson(self.V2_API_URL+'topics/list', params)
 
     def topicSnapshotList(self, topics_id):
