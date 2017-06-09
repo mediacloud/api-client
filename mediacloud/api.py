@@ -78,12 +78,12 @@ class MediaCloud(object):
         '''
         return self._queryForJson(self.V2_API_URL+'auth/profile')
 
-    def authLogin(self, username, password):
+    def authLogin(self, email, password):
         '''
         :return: { success: 1, profile: {...}} or {error: msg}
         '''
         params = {
-            'username': username,   # ie. email
+            'email': email,
             'password': password
         }
         return self._queryForJson(self.V2_API_URL+'auth/login', params, 'POST')
@@ -113,13 +113,13 @@ class MediaCloud(object):
         }
         return self._queryForJson(self.V2_API_URL+'auth/activate', params, 'POST')
 
-    def authResendActivationLink(self, email, activation_token):
+    def authResendActivationLink(self, email, activation_url):
         '''
         :return: {success: 1}, or {error: "msg"}
         '''
         params = {
             'email': email,
-            'activation_token': activation_token
+            'activation_url': activation_url
         }
         return self._queryForJson(self.V2_API_URL + 'auth/resend_activation_link', params, 'POST')
 
@@ -924,6 +924,7 @@ class AdminMediaCloud(MediaCloud):
             params['media_id'] = media_id
         return self._queryForJson(self.V2_API_URL+'media/mark_suggestion', params, 'PUT_JSON')
 
+
 def _solr_date_range(start_date, end_date, start_date_inclusive=True, end_date_inclusive=False):
     ret = ''
     if start_date_inclusive:
@@ -939,8 +940,10 @@ def _solr_date_range(start_date, end_date, start_date_inclusive=True, end_date_i
         ret += '}'
     return ret
 
+
 def _zi_time(d):
     return datetime.datetime.combine(d, datetime.time.min).isoformat() + "Z"
+
 
 def _chunkify(data, chunk_size):
     '''
@@ -948,20 +951,24 @@ def _chunkify(data, chunk_size):
     '''
     return [data[x:x+chunk_size] for x in xrange(0, len(data), chunk_size)]
 
+
 def _validate_params(params, valid_params, args):
-    for key, value in args.iteritems():
+    for key in args.keys():
         if key not in valid_params:
             raise ValueError("{} is not a valid argument for this api method".format(key))
-        params[key] = value
+        params[key] = args[key]
     return params
+
 
 def _validate_sort_param(order):
     if order not in [None, 'social', 'inlink']:
         raise ValueError('Sort must be either social or inlink')
 
+
 def _validate_permission_param(permission):
     if permission not in ['none', 'read', 'write', 'admin']:
         raise ValueError('Permission must be none, read, write or admin')
+
 
 def _validate_bool_params(params, *args):
     for arg in args:
@@ -971,15 +978,18 @@ def _validate_bool_params(params, *args):
             params[arg] = 1 if params[arg] is True else 0
     return params
 
+
 def _validate_date_params(params, *args):
     for arg in args:
         if arg in params:
             datetime.datetime.strptime(params[arg], '%Y-%m-%d')    #will throw a ValueError if invalid
     return params
 
+
 def _validate_feed_type(feed_type):
     if feed_type not in ['syndicated', 'web_page']:
             raise ValueError('feed_type must be syndicated or web_page')
+
 
 def _validate_feed_status(feed_status):
     if feed_status not in ['active', 'inactive', 'skipped']:

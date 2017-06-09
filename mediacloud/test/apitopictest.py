@@ -1,12 +1,12 @@
 from mediacloud.test.basetest import AdminApiBaseTest
 
-TEST_TOPIC_ID = 1512 # geostudy topic
+TEST_TOPIC_ID = 1537 # climate change topic
 TEST_TOPIC2_ID = 1019 # common core
 
 class ApiTopicTest(AdminApiBaseTest):
 
     def testTopic(self):
-        topic = self._mc.topic(1)
+        topic = self._mc.topic(TEST_TOPIC_ID)
         self.assertEqual(int(topic['topics_id']), 1)
         self.assertEqual(topic['name'], 'trayvon')
 
