@@ -46,22 +46,6 @@ class MediaCloud(object):
         '''
         self._auth_token = auth_token
 
-    @mediacloud.error.deprecated
-    def userAuthToken(self, username, password):
-        '''
-        Get a auth_token for future requests to use
-        '''
-        self._logger.debug("Requesting new auth token for "+username)
-        response = self._queryForJson(self.V2_API_URL+'auth/single/',
-            {'username':username, 'password':password})
-        response = response[0]
-        if response['result'] == 'found':
-            self._logger.debug(" new token is "+response['token'])
-            return response['token']
-        else:
-            self._logger.warn("AuthToken request for "+username+" failed!")
-            raise RuntimeError(response['result'])
-
     def verifyAuthToken(self):
         try:
             self.tagSetList(0, 1)
