@@ -312,7 +312,7 @@ class MediaCloud(object):
         params['include_stats'] = 1 if include_stats is True else 0
         return self._queryForJson(self.V2_API_URL+'sentences/field_count', params)
 
-    def wordCount(self, solr_query, solr_filter='', languages=None, num_words=500, sample_size=1000, include_stopwords=False, include_stats=False):
+    def wordCount(self, solr_query, solr_filter='', languages=None, num_words=500, sample_size=1000, include_stopwords=False, include_stats=False, ngram_size=1):
         params = {
             'q': solr_query,
             'l': languages,
@@ -320,6 +320,7 @@ class MediaCloud(object):
             'sample_size': sample_size,
             'include_stopwords': 1 if include_stopwords is True else 0,
             'include_stats': 1 if include_stats is True else 0,
+            'ngram_size': ngram_size,
         }
         if len(solr_filter) > 0:
             params['fq'] = solr_filter
@@ -467,7 +468,7 @@ class MediaCloud(object):
             'link_id', 'snapshots_id', 'foci_id', 'timespans_id', 'q']
         _validate_params(params, valid_params, kwargs)
         if 'sort' in params:
-            _validate_sort_param(params['sort'])
+            _validate_topic_sort_param(params['sort'])
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/media/list', params)
 
     def topicStoryList(self, topics_id, **kwargs):
@@ -477,7 +478,7 @@ class MediaCloud(object):
             'foci_id', 'timespans_id']
         _validate_params(params, valid_params, kwargs)
         if 'sort' in params:
-            _validate_sort_param(params['sort'])
+            _validate_topic_sort_param(params['sort'])
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/stories/list', params)
 
     def topicStoryListFacebookData(self, topics_id, **kwargs):
@@ -498,7 +499,7 @@ class MediaCloud(object):
     def topicWordCount(self, topics_id, **kwargs):
         params = {}
         valid_params = ['q', 'fq', 'languages', 'num_words', 'sample_size', 'include_stopwords',
-            'include_stats', 'snapshots_id', 'foci_id', 'timespans_id']
+            'include_stats', 'snapshots_id', 'foci_id', 'timespans_id', 'ngram_size']
         _validate_params(params, valid_params, kwargs)
         _validate_bool_params(params, 'include_stopwords', 'include_stats')
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/wc/list', params)
@@ -600,7 +601,7 @@ class MediaCloud(object):
 
     def topicFocalSetDefinitionDelete(self, topics_id, focal_set_definitions_id):
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_set_definitions/'+
-            focal_set_definitions_id+'/delete', http_method='PUT')
+            str(focal_set_definitions_id)+'/delete', http_method='PUT')
 
     def topicFocalSetDefinitionUpdate(self, topics_id, focal_set_definitions_id, **kwargs):
         params = {}
@@ -948,6 +949,9 @@ def _validate_sort_param(order):
     if order not in [None, 'social', 'inlink']:
         raise ValueError('Sort must be either social or inlink')
 
+def _validate_topic_sort_param(order):
+    if order not in [None, 'inlink', 'bitly', 'facebook', 'twitter', '']:
+        raise ValueError('Invalid sort specified: {}'.format(order))
 
 def _validate_permission_param(permission):
     if permission not in ['none', 'read', 'write', 'admin']:
