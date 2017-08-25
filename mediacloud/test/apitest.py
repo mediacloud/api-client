@@ -10,6 +10,7 @@ TEST_TAG_SET_ID = 1727
 GEO_TAG_SET_ID = 1011
 TEST_MEDIA_SUGGEST_REASON = "!!!! TESTING SUGGESTION !!!!"
 
+
 class ApiBigQueryTest(ApiBaseTest):
 
     def testBigQuery(self):
@@ -18,6 +19,7 @@ class ApiBigQueryTest(ApiBaseTest):
         big_query = " AND ".join(query_pieces)
         results = self._mc.sentenceCount(big_query)
         self.assertTrue(results['count'] > 0)
+
 
 class ApiAllFieldsOptionTest(ApiBaseTest):
 
@@ -35,6 +37,7 @@ class ApiAllFieldsOptionTest(ApiBaseTest):
         self.assertEqual(media['media_id'], 1751)
         self.assertTrue('foreign_rss_links' in media)
         self.assertTrue('url' in media)
+
 
 class AuthTokenTest(ApiBaseTest):
 
@@ -61,6 +64,7 @@ class AuthTokenTest(ApiBaseTest):
         except:
             self.assertTrue(True)
 
+
 class UserProfileTest(ApiBaseTest):
 
     def testUserProfile(self):
@@ -68,6 +72,7 @@ class UserProfileTest(ApiBaseTest):
         self.assertTrue('email' in profile)
         self.assertTrue('auth_roles' in profile)
         self.assertTrue('admin' in profile['auth_roles'])
+
 
 class StatsTest(ApiBaseTest):
 
@@ -85,6 +90,7 @@ class StatsTest(ApiBaseTest):
         ]
         for key in data_keys:
             self.assertTrue(key in stats, "{0} not found".format(key))
+
 
 class PublishDateQueryTest(ApiBaseTest):
 
@@ -112,6 +118,7 @@ class PublishDateQueryTest(ApiBaseTest):
         self.assertTrue(self._mc.sentenceCount(date_query_exclusive_exclusive)['count'] > 0)
         self.assertTrue(self._mc.sentenceCount(date_query_exclusive_inclusive)['count'] > 0)
 
+
 class ApiMediaHealthTest(ApiBaseTest):
 
     def testMediaHealth(self):
@@ -125,6 +132,7 @@ class ApiMediaHealthTest(ApiBaseTest):
     def testNoHealthData(self):
         health = self._mc.mediaHealth(99999999999)  # ie. an invalid id
         self.assertEqual(0, len(health))
+
 
 class ApiMediaTest(ApiBaseTest):
 
@@ -173,6 +181,7 @@ class ApiMediaTest(ApiBaseTest):
         intersection = list(healthy_ids & unhealthy_ids)
         self.assertTrue(len(intersection) == 0)
 
+
 class ApiFeedTest(AdminApiBaseTest):
 
     def testFeedScrape(self):
@@ -187,6 +196,7 @@ class ApiFeedTest(AdminApiBaseTest):
         # verify pending jobs
         scrape_status = self._mc.feedsScrapeStatus(test_media_id)
         self.assertEqual(23, len(scrape_status['job_states']))
+
 
 class AdminApiMediaSuggestionsTest(AdminApiBaseTest):
 
@@ -219,6 +229,7 @@ class AdminApiMediaSuggestionsTest(AdminApiBaseTest):
         self.assertTrue(isinstance(results, list))
         for suggestion in results:
             self.assertTrue('email' in suggestion)
+
 
 class ApiTagsTest(ApiBaseTest):
 
@@ -262,6 +273,7 @@ class ApiTagsTest(ApiBaseTest):
         geo_tags = self._mc.tagList(name_like="geonames_")
         self.assertTrue(len(geo_tags) > 0, "Got %d tags matching 'geonames_'" % len(geo_tags))
 
+
 class ApiTagSetsTest(ApiBaseTest):
 
     def testTagSet(self):
@@ -277,6 +289,7 @@ class ApiTagSetsTest(ApiBaseTest):
         self.assertEqual(first_list[19]['tag_sets_id'], second_list[0]['tag_sets_id'])
         longer_list = self._mc.tagSetList(0, 50)
         self.assertEqual(len(longer_list), 50)
+
 
 class ApiFeedsTest(ApiBaseTest):
 
@@ -294,6 +307,7 @@ class ApiFeedsTest(ApiBaseTest):
         self.assertEqual(first_list[19]['feeds_id'], second_list[0]['feeds_id'])
         longer_list = self._mc.feedList(1, 0, 200)
         self.assertEqual(len(longer_list), 142)
+
 
 class AdminApiMediaTest(AdminApiBaseTest):
 
@@ -326,6 +340,7 @@ class AdminApiMediaTest(AdminApiBaseTest):
         self.assertTrue("url" in results[0])
         self.assertEqual("existing", results[0]['status'])
 
+
 class AdminApiStoriesTest(AdminApiBaseTest):
 
     def testStoryListSort(self):
@@ -335,7 +350,6 @@ class AdminApiStoriesTest(AdminApiBaseTest):
         self.assertEqual(len(results_by_bitly), 20)
         for i in [0,19]:
             self.assertNotEqual(results_by_id[i]['stories_id'], results_by_bitly[i]['stories_id'])
-
 
     def testStoryListWordCount(self):
         results = self._mc.storyList(wc=True)
@@ -431,6 +445,7 @@ class ApiStoriesWordMatrixTest(ApiBaseTest):
         self.assertTrue("word_matrix" in results)
         self.assertTrue("word_list" in results)
 
+
 class ApiStoriesTest(ApiBaseTest):
 
     def testStory(self):
@@ -468,6 +483,7 @@ TOO SLOW TO RUN!
         self.assertNotEqual(len(results), 0)
         # anyway to check the feed id on a story returned?
 '''
+
 
 class AdminApiSentencesTest(AdminApiBaseTest):
 
@@ -525,6 +541,7 @@ class AdminApiSentencesTest(AdminApiBaseTest):
         self.assertEqual(int(results['response']['numFound']), 2205)
         self.assertFalse('docs' in results['response'], 0)
 
+
 class ApiSentencesTest(ApiBaseTest):
 
     def testUnicodeSentenceCount(self):
@@ -580,14 +597,14 @@ class ApiSentencesTest(ApiBaseTest):
         self.assertTrue(len(sentence_results) > 0)
         ignore = [self.assertEqual(tag['tag_sets_id'], GEO_TAG_SET_ID) for tag in sentence_results]
 
+
 class ApiWordCountTest(ApiBaseTest):
 
     QUERY = 'robots'
 
     def testResults(self):
         term_freq = self._mc.wordCount(self.QUERY, self.FILTER_QUERY)
-        self.assertEqual(len(term_freq), 159)
-        self.assertEqual(term_freq[1]['stem'], u'outsourc')
+        self.assertEqual(term_freq[1]['stem'], u'human')
 
     def testSort(self):
         term_freq = self._mc.wordCount(self.QUERY, self.FILTER_QUERY)
@@ -599,23 +616,29 @@ class ApiWordCountTest(ApiBaseTest):
 
     def testNumWords(self):
         term_freq = self._mc.wordCount(self.QUERY, self.FILTER_QUERY)
-        self.assertEqual(len(term_freq), 159)
+        self.assertGreater(len(term_freq), 100)
         term_freq = self._mc.wordCount(self.QUERY, self.FILTER_QUERY, num_words=100)
         self.assertEqual(len(term_freq), 100)
 
     def testStopWords(self):
         term_freq = self._mc.wordCount(self.QUERY, self.FILTER_QUERY)
-        self.assertEqual(term_freq[1]['stem'], u'outsourc')
+        self.assertEqual(term_freq[1]['stem'], u'human')
         term_freq = self._mc.wordCount(self.QUERY, self.FILTER_QUERY, include_stopwords=True)
-        self.assertEqual(term_freq[3]['stem'], u'that')
+        self.assertEqual(term_freq[3]['stem'], u'of')
 
     def testStats(self):
         term_freq = self._mc.wordCount(self.QUERY, self.FILTER_QUERY)
-        self.assertEqual(term_freq[1]['stem'], u'outsourc')
+        self.assertEqual(term_freq[1]['stem'], u'human')
         term_freq = self._mc.wordCount(self.QUERY, self.FILTER_QUERY, include_stats=True)
         self.assertEqual(len(term_freq), 2)
         self.assertTrue('stats' in term_freq.keys())
         self.assertTrue('words' in term_freq.keys())
+
+    def testBigram(self):
+        term_freq = self._mc.wordCount(self.QUERY, self.FILTER_QUERY, ngram_size=2)
+        for term in term_freq:
+            self.assertEqual(len(term['term'].split(' ')), 2)
+
 
 class AdminApiTaggingTest(AdminApiBaseTest):
 
@@ -655,6 +678,7 @@ class AdminApiTaggingTest(AdminApiBaseTest):
         self.assertEqual(modified_tag['name'], TEST_USER_EMAIL)
         self.assertEqual(modified_tag['label'], 'rahulbot')
         self.assertEqual(modified_tag['description'], 'The tag set of Rahul!')
+
 
 class AdminApiTaggingContentTest(AdminApiBaseTest):
 
