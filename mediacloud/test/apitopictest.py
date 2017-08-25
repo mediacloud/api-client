@@ -8,8 +8,8 @@ class ApiTopicTest(AdminApiBaseTest):
 
     def testTopic(self):
         topic = self._mc.topic(TEST_TOPIC_ID)
-        self.assertEqual(int(topic['topics_id']), 1)
-        self.assertEqual(topic['name'], 'trayvon')
+        self.assertEqual(int(topic['topics_id']), 1537)
+        self.assertEqual(topic['name'], 'Climate Change 2016')
 
     def testTopicList(self):
         # verify it pulls some
@@ -27,7 +27,7 @@ class ApiTopicTest(AdminApiBaseTest):
         topic_list = self._mc.topicList(name=to_match)
         self.assertTrue(len(topic_list) > 1)
         for topic in topic_list['topics']:
-            self.assertTrue(to_match in topic['name'])
+            self.assertTrue(to_match in topic['name'].lower())
 
     def testTopicListPaging(self):
         # verify second page doesn't contain any ids from the first page
@@ -46,7 +46,7 @@ class ApiTopicSnapshotTest(AdminApiBaseTest):
     def testTopicSnapshotList(self):
         # make sure it works
         snapshots = self._mc.topicSnapshotList(TEST_TOPIC_ID)
-        self.assertEqual(len(snapshots), 4)
+        self.assertEqual(len(snapshots), 1)
 
 
 class ApiTopicSpiderTest(AdminApiBaseTest):
@@ -177,7 +177,7 @@ class AdminTopicMediaListTest(AdminApiBaseTest):
         response_page_1_ids = [m['media_id'] for m in response_page_1['media']]
         self.assertEqual(len(response_page_1['media']), 10)
         self.assertTrue('link_ids' in response_page_1)
-        response_page_2 = self._mc.topicMediaList(self.TOPIC_ID, link_id=response_page_1_ids['link_ids']['next'],
+        response_page_2 = self._mc.topicMediaList(self.TOPIC_ID, link_id=response_page_1['link_ids']['next'],
                                                   limit=limit)
         response_page_2_ids = [m['media_id'] for m in response_page_2['media']]
         # verify no duplicated media_ids across pages
@@ -185,7 +185,7 @@ class AdminTopicMediaListTest(AdminApiBaseTest):
         self.assertEqual(len(response_page_1_ids)+len(response_page_2_ids), len(combined_ids))
 
     def testTopicMediaListSortSocial(self):
-        response = self._mc.topicMediaList(self.TOPIC_ID, sort='social')
+        response = self._mc.topicMediaList(self.TOPIC_ID, sort='bitly')
         last_bitly_count = 1000000000000
         for media in response['media']:
             self.assertTrue(media['bitly_click_count'] <= last_bitly_count)
@@ -198,6 +198,15 @@ class AdminTopicMediaListTest(AdminApiBaseTest):
             self.assertTrue(media['inlink_count'] <= last_inlink_count)
             last_inlink_count = media['inlink_count']
 
+    def testTopicMediaListSortFacebook(self):
+        response = self._mc.topicMediaList(self.TOPIC_ID, sort='facebook')
+        last_inlink_count = 1000000000000
+        for media in response['media']:
+            self.assertTrue(media['facebook_share_count'] <= last_inlink_count)
+            last_inlink_count = media['facebook_share_count']
+
+    def testTopicMediaListSortTwitter(self):
+        response = self._mc.topicMediaList(self.TOPIC_ID, sort='twitter')
 
 class AdminTopicWordCountTest(AdminApiBaseTest):
     TOPIC_ID = 1
