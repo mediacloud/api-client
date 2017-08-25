@@ -104,7 +104,7 @@ Then run `python tests.py`. Notice you get a `mediacloud-api.log` that tells you
 Version History
 ---------------
 
-* __v2.40.2__: updates to topic stories and media sorting, and ngram_size param to word count endpoints
+* __v2.41.0__: updates to topic stories and media sorting, and ngram_size param to word count endpoints
 * __v2.40.1__: auth api fixes 
 * __v2.40.0__: add support for listing topics by name, or by if they are public or not
 * __v2.39.2__: work on feed-related calls
