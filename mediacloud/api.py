@@ -10,6 +10,7 @@ from mediacloud.tags import StoryTag, SentenceTag, MediaTag
 
 MAX_HTTP_GET_CHARS = 4000   # experimentally determined for our main servers (conservative)
 
+
 class MediaCloud(object):
     '''
     Simple client library for the MediaCloud API v2
@@ -154,7 +155,7 @@ class MediaCloud(object):
         '''
         Details about one media source
         '''
-        return self._queryForJson(self.V2_API_URL+'media/single/'+str(media_id))[0]
+        return self._queryForJson(self.V2_API_URL+'media/single/{}'.format(media_id))[0]
 
     def mediaHealth(self, media_id):
         '''
@@ -209,7 +210,7 @@ class MediaCloud(object):
         '''
         Details about one feed
         '''
-        return self._queryForJson(self.V2_API_URL+'feeds/single/'+str(feeds_id))[0]
+        return self._queryForJson(self.V2_API_URL+'feeds/single/{}'.format(feeds_id))[0]
 
     def feedList(self, media_id, last_feeds_id=0, rows=20):
         '''
@@ -229,7 +230,7 @@ class MediaCloud(object):
         Authenticated Public Users: Details about one story.
         Note that this does NOT include text, nor sentences (due to copyright limitations).
         '''
-        return self._queryForJson(self.V2_API_URL+'stories_public/single/'+str(stories_id))[0]
+        return self._queryForJson(self.V2_API_URL+'stories_public/single/{}'.format(stories_id))[0]
 
     def storyCount(self, solr_query='', solr_filter=''):
         '''
@@ -330,7 +331,7 @@ class MediaCloud(object):
         '''
         Details about one tag
         '''
-        return self._queryForJson(self.V2_API_URL+'tags/single/'+str(tags_id))[0]
+        return self._queryForJson(self.V2_API_URL+'tags/single/{}'.format(tags_id))[0]
 
     def tagList(self, tag_sets_id=None, last_tags_id=0, rows=20, public_only=False, name_like=None, similar_tags_id=None):
         '''
@@ -353,7 +354,7 @@ class MediaCloud(object):
         '''
         Details about one tag set
         '''
-        return self._queryForJson(self.V2_API_URL+'tag_sets/single/'+str(tag_sets_id))[0]
+        return self._queryForJson(self.V2_API_URL+'tag_sets/single/{}'.format(tag_sets_id))[0]
 
     def tagSetList(self, last_tag_sets_id=0, rows=20):
         '''
@@ -366,13 +367,13 @@ class MediaCloud(object):
         '''
         Details about one controversy dump
         '''
-        return self._queryForJson(self.V2_API_URL+'controversy_dumps/single/'+str(controversy_dumps_id))[0]
+        return self._queryForJson(self.V2_API_URL+'controversy_dumps/single/{}'.format(controversy_dumps_id))[0]
 
     def controversyDumpTimeSlice(self, controversy_dump_time_slices_id):
         '''
         Details about one controversy dump time slice
         '''
-        return self._queryForJson(self.V2_API_URL+'controversy_dump_time_slices/single/'+str(controversy_dump_time_slices_id))[0]
+        return self._queryForJson(self.V2_API_URL+'controversy_dump_time_slices/single/{}'.format(controversy_dump_time_slices_id))[0]
 
     def _queryForJson(self, url, params=None, http_method='GET', json_data=None):
         '''
@@ -392,15 +393,15 @@ class MediaCloud(object):
         param_value_length = 0
         for v in params.values():
             try:
-                param_value_length += len(str(v))   # using str call here to compute length of ints
+                param_value_length += len("{}".format(v))   # using str call here to compute length of ints
             except UnicodeEncodeError: # it is a unicode string, so str called failed, but len call will work
                 param_value_length += len(v)
-        param_key_length = sum([len(str(k)) for k in params.keys()])
+        param_key_length = sum([len("{}".format(k)) for k in params.keys()])
         total_url_length = len(url) + param_key_length + param_value_length
         return total_url_length
 
     def _query(self, url, params=None, http_method='GET', json_data=None):
-        self._logger.debug("query "+http_method+" to "+url+" with "+str(params)+" and "+str(json_data))
+        self._logger.debug("query {} to {} with {} and {}".format(http_method, url, params, json_data))
         if params is None:
             params = {}
 #        if (http_method is not 'PUT_JSON') and (not isinstance(params, dict)):
@@ -417,7 +418,7 @@ class MediaCloud(object):
                 else:
                     r = requests.get(url, params=params, headers={'Accept': 'application/json'})
             except Exception as e:
-                self._logger.error('Failed to GET or POST to url '+url+' because '+str(e))
+                self._logger.error('Failed to GET or POST to {} because {}'.format(url, e))
                 raise e
         elif http_method is 'PUT_JSON':
             try:
@@ -440,22 +441,21 @@ class MediaCloud(object):
             try:
                 r = requests.put(url, params=params, headers={'Accept': 'application/json'})
             except Exception as e:
-                self._logger.error('Failed to PUT url '+url+' because '+str(e))
+                self._logger.error('Failed to PUT {} because {}'.format(url, e))
                 raise e
         elif http_method is 'POST': # posts JSON data, needs key in url
             try:
                 url_with_key = url + "?key="+self._auth_token
                 r = requests.post(url_with_key, data=json.dumps(params), headers={'Accept': 'application/json', 'Content-Type': 'application/json'})
             except Exception as e:
-                self._logger.error('Failed to POST url '+url+' because '+str(e))
+                self._logger.error('Failed to POST {} because {}'.format(url, e))
                 raise e
         else:
-            raise ValueError('Error - unsupported HTTP method %s' % http_method)
+            raise ValueError('Error - unsupported HTTP method {}'.format(http_method))
         if r.status_code is not requests.codes['ok']:
-            self._logger.info('Bad HTTP response to '+r.url +' : '+str(r.status_code)  + ' ' +  str(r.reason))
-            self._logger.info('\t' + str(r.content))
-            msg = 'Error - got a HTTP status code of %s with the message "%s", body: %s' % (
-                str(r.status_code), str(r.reason), str(r.text))
+            self._logger.info('Bad HTTP response to {}: {} {}'.format(r.url, r.status_code, r.reason))
+            self._logger.info('\t{}'.format(r.content))
+            msg = 'Error - got a HTTP status code of {} with the message "{}", body: {}'.format(r.status_code, r.reason, r.text)
             raise mediacloud.error.MCException(msg, r.status_code)
         return r
 
@@ -469,7 +469,7 @@ class MediaCloud(object):
         _validate_params(params, valid_params, kwargs)
         if 'sort' in params:
             _validate_topic_sort_param(params['sort'])
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/media/list', params)
+        return self._queryForJson(self.V2_API_URL+'topics/{}/media/list'.format(topics_id), params)
 
     def topicStoryList(self, topics_id, **kwargs):
         params = {}
@@ -479,7 +479,7 @@ class MediaCloud(object):
         _validate_params(params, valid_params, kwargs)
         if 'sort' in params:
             _validate_topic_sort_param(params['sort'])
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/stories/list', params)
+        return self._queryForJson(self.V2_API_URL+'topics/{}/stories/list'.format(topics_id), params)
 
     def topicStoryListFacebookData(self, topics_id, **kwargs):
         '''
@@ -488,13 +488,13 @@ class MediaCloud(object):
         params = {}
         valid_params = ['q', 'limit', 'link_id', 'snapshots_id', 'foci_id', 'timespans_id']
         _validate_params(params, valid_params, kwargs)
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/stories/facebook', params)
+        return self._queryForJson(self.V2_API_URL+'topics/{}/stories/facebook'.format(topics_id), params)
 
     def topicStoryCount(self, topics_id, **kwargs):
         params = {}
         valid_params = ['q', 'snapshots_id', 'foci_id', 'timespans_id']
         _validate_params(params, valid_params, kwargs)
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/stories/count', params)
+        return self._queryForJson(self.V2_API_URL+'topics/{}/stories/count'.format(topics_id), params)
 
     def topicWordCount(self, topics_id, **kwargs):
         params = {}
@@ -502,7 +502,7 @@ class MediaCloud(object):
             'include_stats', 'snapshots_id', 'foci_id', 'timespans_id', 'ngram_size']
         _validate_params(params, valid_params, kwargs)
         _validate_bool_params(params, 'include_stopwords', 'include_stats')
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/wc/list', params)
+        return self._queryForJson(self.V2_API_URL+'topics/{}/wc/list'.format(topics_id), params)
 
     def topicSentenceCount(self, topics_id, **kwargs):
         params = {}
@@ -512,13 +512,13 @@ class MediaCloud(object):
         _validate_bool_params(params, 'split', 'split_daily')
         if 'split' in params and params['split'] is True:
             _validate_date_params(params, 'split_start_date', 'split_end_date')
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/sentences/count', params)
+        return self._queryForJson(self.V2_API_URL+'topics/{}/sentences/count'.format(topics_id), params)
 
     def topic(self, topics_id):
         '''
         Details about one controversy
         '''
-        return self._queryForJson(self.V2_API_URL+'topics/single/'+str(topics_id))['topics'][0]
+        return self._queryForJson(self.V2_API_URL+'topics/single/{}'.format(topics_id))['topics'][0]
 
     def topicList(self, link_id=None, name=None, public=None):
         '''
@@ -534,16 +534,16 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'topics/list', params)
 
     def topicSnapshotList(self, topics_id):
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/snapshots/list')['snapshots']
+        return self._queryForJson(self.V2_API_URL+'topics/{}/snapshots/list'.format(topics_id))['snapshots']
 
     def topicGenerateSnapshot(self, topics_id, **kwargs):
         params = {}
         valid_params = ['note']
         _validate_params(params, valid_params, kwargs)
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/snapshots/generate', params, 'POST')
+        return self._queryForJson(self.V2_API_URL+'topics/{}/snapshots/generate'.format(topics_id), params, 'POST')
 
     def topicSnapshotGenerateStatus(self, topics_id):
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/snapshots/generate_status')
+        return self._queryForJson(self.V2_API_URL+'topics/{}/snapshots/generate_status'.format(topics_id))
 
     def topicCreate(self, name, solr_seed_query, description, start_date, end_date, media_ids=[], media_tags_ids=[], **kwargs):
         valid_optional_params = [ 'max_iterations', 'is_public', 'ch_monitor_id', 'twitter_topics_id']
@@ -567,26 +567,26 @@ class MediaCloud(object):
         ]
         params = {}
         _validate_params(params, valid_params, kwargs)
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/update', params, 'PUT_JSON')
+        return self._queryForJson(self.V2_API_URL+'topics/{}/update'.format(topics_id), params, 'PUT_JSON')
 
     def topicSpider(self, topics_id):
         # this will generate a new snapshot for you
-        return self._queryForJson(self.V2_API_URL + 'topics/'+str(topics_id)+'/spider', {}, 'POST')
+        return self._queryForJson(self.V2_API_URL + 'topics/{}/spider'.format(topics_id), {}, 'POST')
 
     def topicSpiderStatus(self, topics_id):
-        return self._queryForJson(self.V2_API_URL + 'topics/'+str(topics_id)+'/spider_status')
+        return self._queryForJson(self.V2_API_URL + 'topics/{}/spider_status'.format(topics_id))
 
     def topicSpiderIterationsList(self, topics_id):
-        return self._queryForJson(self.V2_API_URL + 'topics/' + str(topics_id) + '/iterations/list')
+        return self._queryForJson(self.V2_API_URL + 'topics/{}/iterations/list'.format(topics_id))
 
     def topicTimespanList(self, topics_id, **kwargs):
         params = {}
         valid_params = ['snapshots_id', 'foci_id', 'timespans_id']
         _validate_params(params, valid_params, kwargs)
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/timespans/list', params)['timespans']
+        return self._queryForJson(self.V2_API_URL+'topics/{}/timespans/list'.format(topics_id), params)['timespans']
 
     def topicFocalSetDefinitionList(self, topics_id):
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_set_definitions/list')['focal_set_definitions']
+        return self._queryForJson(self.V2_API_URL+'topics/{}/focal_set_definitions/list'.format(topics_id))['focal_set_definitions']
 
     def topicFocalSetDefinitionCreate(self, topics_id, name, description, focal_technique):
         params = {
@@ -596,66 +596,66 @@ class MediaCloud(object):
         }
         if params['focal_technique'] not in [self.FOCAL_TECHNIQUE_BOOLEAN_QUERY]:
             raise ValueError('%s is not a valid focal technique' % params['focal_technique'])
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_set_definitions/create',
+        return self._queryForJson(self.V2_API_URL+'topics/{}/focal_set_definitions/create'.format(topics_id),
             params, http_method='POST')['focal_set_definitions'][0]
 
     def topicFocalSetDefinitionDelete(self, topics_id, focal_set_definitions_id):
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_set_definitions/'+
-            str(focal_set_definitions_id)+'/delete', http_method='PUT')
+        return self._queryForJson(self.V2_API_URL+'topics/{}/focal_set_definitions/{}/delete'.format(
+            topics_id, focal_set_definitions_id), http_method='PUT')
 
     def topicFocalSetDefinitionUpdate(self, topics_id, focal_set_definitions_id, **kwargs):
         params = {}
         valid_params = ['name', 'description']
         _validate_params(params, valid_params, kwargs)
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_set_definitions/'+
-            str(focal_set_definitions_id)+'/update', params, http_method='PUT')['focal_set_definitions']
+        return self._queryForJson(self.V2_API_URL+'topics/{}/focal_set_definitions/{}/update'.format(
+            topics_id, focal_set_definitions_id), params, http_method='PUT')['focal_set_definitions']
 
     def topicFocalSetList(self, topics_id, **kwargs):
         params = {}
         valid_params = ['snapshots_id', 'timespans_id', 'foci_id']
         _validate_params(params, valid_params, kwargs)
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focal_sets/list',
+        return self._queryForJson(self.V2_API_URL+'topics/{}/focal_sets/list'.format(topics_id),
             params)['focal_sets']
 
     def topicFocusDefinitionList(self, topics_id, focal_set_definitions_id):
         params = {}
         params['focal_set_definitions_id'] = focal_set_definitions_id
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focus_definitions/list',
+        return self._queryForJson(self.V2_API_URL+'topics/{}/focus_definitions/list'.format(topics_id),
             params)['focus_definitions']
 
     def topicFocusDefinitionCreate(self, topics_id, **kwargs):
         params = {}
         valid_params = ['name', 'description', 'query', 'focal_set_definitions_id']
         _validate_params(params, valid_params, kwargs)
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focus_definitions/create',
+        return self._queryForJson(self.V2_API_URL+'topics/{}/focus_definitions/create'.format(topics_id),
             params, http_method='POST')['focus_definitions']
 
     def topicFocusDefinitionUpdate(self, topics_id, focus_definitions_id, **kwargs):
         params = {}
         valid_params = ['name', 'description', 'query']
         _validate_params(params, valid_params, kwargs)
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focus_definitions/'+
-            str(focus_definitions_id)+'/update', params, http_method='PUT')['focus_definitions']
+        return self._queryForJson(self.V2_API_URL+'topics/{}/focus_definitions/{}/update'.format(
+            topics_id, focus_definitions_id), params, http_method='PUT')['focus_definitions']
 
     def topicFocusDefinitionDelete(self, topics_id, focus_definitions_id):
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/focus_definitions/'+
-            str(focus_definitions_id)+'/delete', http_method='PUT')
+        return self._queryForJson(self.V2_API_URL+'topics/{}/focus_definitions/{}/delete'.format(
+            topics_id, focus_definitions_id), http_method='PUT')
 
     def topicFociList(self, topics_id, focal_sets_id):
         params = {'focal_sets_id': focal_sets_id}
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/foci/list', params)['foci']
+        return self._queryForJson(self.V2_API_URL+'topics/{}/foci/list'.format(topics_id), params)['foci']
 
     def topicMediaMap(self, topics_id, **kwargs):
         params = {}
         valid_params = ['color_field', 'num_media', 'include_weights', 'num_links_per_medium', 'snapshots_id', 'foci_id', 'timespans_id']
         _validate_params(params, valid_params, kwargs)
-        return self._query(self.V2_API_URL+'topics/'+str(topics_id)+'/media/map', params).content
+        return self._query(self.V2_API_URL+'topics/{}/media/map'.format(topics_id), params).content
 
     def userPermissionsList(self):
         return self._queryForJson(self.V2_API_URL+'topics/permissions/user/list')
 
     def topicPermissionsList(self, topics_id):
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/permissions/list')
+        return self._queryForJson(self.V2_API_URL+'topics/{}/permissions/list'.format(topics_id))
 
     def topicPermissionsUpdate(self, topics_id, email, permission):
         _validate_permission_param(permission)
@@ -663,7 +663,7 @@ class MediaCloud(object):
             'email': email,
             'permission': permission
         }
-        return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/permissions/update', params, 'PUT_JSON')
+        return self._queryForJson(self.V2_API_URL+'topics/{}/permissions/update'.format(topics_id), params, 'PUT_JSON')
 
     '''
     # not implemented yet
@@ -686,7 +686,7 @@ class AdminMediaCloud(MediaCloud):
         '''
         Full details about one story.  Handy shortcut to storyList if you want sentences broken out
         '''
-        return self._queryForJson(self.V2_API_URL+'stories/single/'+str(stories_id),
+        return self._queryForJson(self.V2_API_URL+'stories/single/{}'.format(stories_id),
                 {'raw_1st_download': 1 if raw_1st_download else 0,
                  'corenlp': 1 if corenlp else 0,
                  'sentences': 1 if sentences else 0,
@@ -868,7 +868,7 @@ class AdminMediaCloud(MediaCloud):
         for media in media_items:
             for k in media:
                 if k not in valid_params:
-                    raise ValueError('Invalid param in attempt to create media: '+str(k))
+                    raise ValueError('Invalid param in attempt to create media: {}'.format(k))
                 if k in boolean_params:
                     media[k] = 1 if k else 0
             if media['url'] is None or len(media['url']) == 0:
@@ -881,7 +881,7 @@ class AdminMediaCloud(MediaCloud):
         boolean_params = ['is_monitored']
         for k in new_props:
             if k not in valid_params:
-                raise ValueError('Invalid param in attempt to update media: '+str(k))
+                raise ValueError('Invalid param in attempt to update media: {}'.format(k))
             if k in boolean_params:
                 new_props[k] = 1 if k else 0
         if 'url' in new_props and (new_props['url'] is None or len(new_props['url']) == 0):
@@ -899,7 +899,7 @@ class AdminMediaCloud(MediaCloud):
 
     def mediaSuggestionsMark(self, media_suggestions_id, status, mark_reason, media_id=None):
         if status not in ['approved', 'rejected']:
-            raise ValueError('Invalid media suggestion status: '+str(status))
+            raise ValueError('Invalid media suggestion status: {}'.format(status))
         params = {
             'media_suggestions_id': media_suggestions_id,
             'status': status,
@@ -949,9 +949,11 @@ def _validate_sort_param(order):
     if order not in [None, 'social', 'inlink']:
         raise ValueError('Sort must be either social or inlink')
 
+
 def _validate_topic_sort_param(order):
     if order not in [None, 'inlink', 'bitly', 'facebook', 'twitter', '']:
         raise ValueError('Invalid sort specified: {}'.format(order))
+
 
 def _validate_permission_param(permission):
     if permission not in ['none', 'read', 'write', 'admin']:
