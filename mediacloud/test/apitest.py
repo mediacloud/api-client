@@ -473,7 +473,7 @@ class ApiStoriesTest(ApiBaseTest):
 
     def testStoryCount(self):
         results = self._mc.storyCount(self.QUERY, self.FILTER_QUERY)
-        self.assertEqual(results['count'], 735)
+        self.assertEqual(results['count'], 737)
 
 '''
 TOO SLOW TO RUN!
