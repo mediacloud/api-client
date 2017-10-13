@@ -7,6 +7,8 @@ from mediacloud.tags import StoryTag, SentenceTag, MediaTag, TAG_ACTION_ADD, TAG
 
 TEST_USER_EMAIL = "mc-api-test@media.mit.edu"
 TEST_TAG_SET_ID = 1727
+TEST_TAG_ID_1 = 9172171  # mc-api-test@media.mit.edu:test_tag1
+TEST_TAG_ID_2 = 9172168  # mc-api-test@media.mit.edu:test_tag2
 GEO_TAG_SET_ID = 1011
 TEST_MEDIA_SUGGEST_REASON = "!!!! TESTING SUGGESTION !!!!"
 
@@ -379,31 +381,12 @@ class AdminApiStoriesTest(AdminApiBaseTest):
         for story in results:
             self.assertTrue('bitly_click_count' in story)
 
-    def testStoryCoreNlpList(self):
-        results = self._mc.storyCoreNlpList([261784668, 261784669])
-        self.assertEqual(len(results), 2)
-        for story in results:
-            self.assertFalse('story_sentences' in story)
-            self.assertFalse('story_text' in story)
-            self.assertFalse('is_fully_extracted' in story)
-            self.assertTrue('corenlp' in story)
-            self.assertTrue('stories_id' in story)
-
     def testStoryListDefaults(self):
         results = self._mc.storyList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, rows=10)
         for story in results:
             self.assertFalse('story_sentences' in story)
             self.assertFalse('story_text' in story)
             self.assertFalse('is_fully_extracted' in story)
-            self.assertFalse('corenlp' in story)
-
-    def testStoryListWithCoreNlp(self):
-        results = self._mc.storyList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, corenlp=True, rows=10)
-        for story in results:
-            self.assertFalse('story_sentences' in story)
-            self.assertFalse('story_text' in story)
-            self.assertFalse('is_fully_extracted' in story)
-            self.assertTrue('corenlp' in story)
 
     def testStoryListWithSentences(self):
         results = self._mc.storyList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, sentences=True, rows=10)
@@ -411,7 +394,6 @@ class AdminApiStoriesTest(AdminApiBaseTest):
             self.assertTrue('story_sentences' in story)
             self.assertFalse('story_text' in story)
             self.assertFalse('is_fully_extracted' in story)
-            self.assertFalse('corenlp' in story)
 
     def testStoryListWithText(self):
         results = self._mc.storyList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, text=True, rows=10)
@@ -419,7 +401,6 @@ class AdminApiStoriesTest(AdminApiBaseTest):
             self.assertFalse('story_sentences' in story)
             self.assertTrue('story_text' in story)
             self.assertTrue('is_fully_extracted' in story)
-            self.assertFalse('corenlp' in story)
 '''
 TOO SLOW!
     def testStoryListInFeed(self):
@@ -473,7 +454,7 @@ class ApiStoriesTest(ApiBaseTest):
 
     def testStoryCount(self):
         results = self._mc.storyCount(self.QUERY, self.FILTER_QUERY)
-        self.assertEqual(results['count'], 737)
+        self.assertEqual(results['count'], 738)
 
 '''
 TOO SLOW TO RUN!
@@ -528,17 +509,17 @@ class AdminApiSentencesTest(AdminApiBaseTest):
     def testSentenceList(self):
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY)
         self.assertEqual(int(results['responseHeader']['status']), 0)
-        self.assertEqual(int(results['response']['numFound']), 2231)
+        self.assertEqual(int(results['response']['numFound']), 2235)
         self.assertEqual(len(results['response']['docs']), 1000)
 
     def testSentenceListPaging(self):
         # test limiting rows returned
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, 0, 100)
-        self.assertEqual(int(results['response']['numFound']), 2231)
+        self.assertEqual(int(results['response']['numFound']), 2235)
         self.assertEqual(len(results['response']['docs']), 100)
         # test starting offset
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, 5700)
-        self.assertEqual(int(results['response']['numFound']), 2231)
+        self.assertEqual(int(results['response']['numFound']), 2235)
         self.assertFalse('docs' in results['response'], 0)
 
 
@@ -574,20 +555,12 @@ class ApiSentencesTest(ApiBaseTest):
         self.assertEqual(len(results['split']), 154)
 
     def testFieldCount(self):
-        # regular call for sentence counts
-        sentence_results = self._mc.sentenceFieldCount('obama', '+media_id:1')
-        self.assertFalse('stats' in sentence_results)
-        self.assertFalse('counts' in sentence_results)
-        self.assertTrue(len(sentence_results) > 0)
-        ignore = [self.assertTrue(tag['count']) for tag in sentence_results]
         # regular call for story counts
         story_results = self._mc.sentenceFieldCount('obama', '+media_id:1', field='tags_id_stories')
         self.assertFalse('stats' in story_results)
         self.assertFalse('counts' in story_results)
         self.assertTrue(len(story_results) > 0)
         ignore = [self.assertTrue(tag['count']) for tag in story_results]
-        # compare
-        self.assertTrue(len(story_results) != len(sentence_results))
         # with stats
         results = self._mc.sentenceFieldCount('obama', '+media_id:1', include_stats=True)
         self.assertTrue('stats' in results)
@@ -650,7 +623,7 @@ class AdminApiTaggingTest(AdminApiBaseTest):
         self.assertNotEqual(0, len(results))
 
     def testTagUpdate(self):
-        example_tag_id = 9172167
+        example_tag_id = TEST_TAG_ID_1
         # change the name, label and description
         self._mc.updateTag(example_tag_id, 'modified tag', 'modified label', 'modified description')
         modified_tag = self._mc.tag(example_tag_id)
@@ -658,11 +631,11 @@ class AdminApiTaggingTest(AdminApiBaseTest):
         self.assertEqual(modified_tag['label'], 'modified label')
         self.assertEqual(modified_tag['description'], 'modified description')
         # set it back
-        self._mc.updateTag(example_tag_id, 'example tag', 'example label', 'This is an exampel tag used in api client test scripts')
+        self._mc.updateTag(example_tag_id, 'example tag', 'example label', 'This is an example tag used in api client test scripts')
         modified_tag = self._mc.tag(example_tag_id)
         self.assertEqual(modified_tag['tag'], 'example tag')
         self.assertEqual(modified_tag['label'], 'example label')
-        self.assertEqual(modified_tag['description'], 'This is an exampel tag used in api client test scripts')
+        self.assertEqual(modified_tag['description'], 'This is an example tag used in api client test scripts')
 
     def testTagSetUpdate(self):
         example_tag_sets_id = TEST_TAG_SET_ID
@@ -682,74 +655,12 @@ class AdminApiTaggingTest(AdminApiBaseTest):
 
 class AdminApiTaggingContentTest(AdminApiBaseTest):
 
-    def testTagTonsOfSentences(self):
-        test_story_id = 435914244
-        tag_set_name = TEST_USER_EMAIL
-        # grab some sentence_ids to test with
-        orig_story = self._mc.story(test_story_id, sentences=True)
-        self.assertTrue('story_sentences' in orig_story)
-        self.assertTrue(len(orig_story['story_sentences']) > 2)
-        sentence_ids = [s['story_sentences_id'] for s in orig_story['story_sentences'][0:2]]
-        # make a list of a ton of tags
-        desired_tags = []
-        for x in range(0, 80):
-            desired_tags = desired_tags + [SentenceTag(sid, tag_set_name, 'test_tag1', TAG_ACTION_ADD) for sid in sentence_ids]
-        response = self._mc.tagSentences(desired_tags)
-        for item in response:
-            self.assertTrue('success' in item)
-            self.assertEqual(item['success'], 1)
-
-    def testTagSentences(self):
-        test_story_id = 435914244
-        test_tag_id1 = '9172171' # mc-api-test@media.mit.edu:test_tag1
-        test_tag_id2 = '9172168' # mc-api-test@media.mit.edu:test_tag2
-        tag_set_name = TEST_USER_EMAIL
-        # grab some sentence_ids to test with
-        orig_story = self._mc.story(test_story_id, sentences=True)
-        self.assertTrue('story_sentences' in orig_story)
-        self.assertTrue(len(orig_story['story_sentences']) > 2)
-        sentence_ids = [s['story_sentences_id'] for s in orig_story['story_sentences'][0:2]]
-        # add a tag
-        desired_tags = [SentenceTag(sid, tag_set_name, 'test_tag1')
-            for sid in sentence_ids]
-        response = self._mc.tagSentences(desired_tags)
-        for item in response:
-            self.assertTrue('success' in item)
-            self.assertEqual(item['success'], 1)
-        # and verify it worked
-        tagged_story = self._mc.story(test_story_id, sentences=True)
-        tagged_sentences = [s for s in orig_story['story_sentences'] if len(s['tags']) > 0]
-        for s in tagged_sentences:
-            if s['story_sentences_id'] in sentence_ids:
-                self.assertTrue(test_tag_id1 in s['tags'])
-        # now do two tags on each story
-        desired_tags = desired_tags + [SentenceTag(sid, tag_set_name, 'test_tag2')
-            for sid in sentence_ids]
-        response = self._mc.tagSentences(desired_tags)
-        for item in response:
-            self.assertTrue('success' in item)
-            self.assertEqual(item['success'], 1)
-        # and verify it worked
-        tagged_story = self._mc.story(test_story_id, sentences=True)
-        tagged_sentences = [s for s in tagged_story['story_sentences'] if len(s['tags']) > 0]
-        for s in tagged_sentences:
-            if s['story_sentences_id'] in sentence_ids:
-                self.assertTrue(test_tag_id1 in s['tags'])
-                self.assertTrue(test_tag_id2 in s['tags'])
-        # now remove one
-        desired_tags = [SentenceTag(sid, tag_set_name, 'test_tag1')
-            for sid in sentence_ids]
-        response = self._mc.tagSentences(desired_tags, clear_others=True)
-        for item in response:
-            self.assertTrue('success' in item)
-            self.assertEqual(item['success'], 1)
-
     def testTagMedia(self):
         media_to_tag = 4451    # ESPN.com
-        test_tag_id1 = '9172171' # mc-api-test@media.mit.edu:test_tag1
+        test_tag_id1 = TEST_TAG_ID_1
         tag_set_name = TEST_USER_EMAIL
         # add a tag
-        desired_tag = MediaTag(media_to_tag, tag_set_name, 'test_tag1', TAG_ACTION_ADD)
+        desired_tag = MediaTag(media_to_tag, tags_id=test_tag_id1, action=TAG_ACTION_ADD)
         response = self._mc.tagMedia([desired_tag])
         self.assertTrue('success' in response)
         self.assertEqual(response['success'], 1)
@@ -758,7 +669,7 @@ class AdminApiTaggingContentTest(AdminApiBaseTest):
         tags_on_media = [t['tags_id'] for t in story['media_source_tags'] if t['tag_set'] == tag_set_name]
         self.assertTrue(int(test_tag_id1) in tags_on_media)
         # and remove it
-        desired_tag = MediaTag(media_to_tag, tag_set_name, 'test_tag1', TAG_ACTION_REMOVE)
+        desired_tag = MediaTag(media_to_tag, tags_id=test_tag_id1, action=TAG_ACTION_REMOVE)
         response = self._mc.tagMedia([desired_tag])
         self.assertTrue('success' in response)
         self.assertEqual(response['success'], 1)

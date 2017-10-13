@@ -303,9 +303,9 @@ class MediaCloud(object):
             params['split_end_date'] = split_end_date
         return self._queryForJson(self.V2_API_URL+'sentences/count', params)
 
-    def sentenceFieldCount(self, solr_query, solr_filter=' ', sample_size=1000, include_stats=False, field='tags_id_story_sentences', tag_sets_id=None):
+    def sentenceFieldCount(self, solr_query, solr_filter=' ', sample_size=1000, include_stats=False, field='tags_id_stories', tag_sets_id=None):
         '''
-        Right now the fields supported are 'tags_id_stories' or 'tags_id_story_sentences'
+        Right now the fields supported are 'tags_id_stories'
         '''
         params = {'q':solr_query, 'fq':solr_filter, 'sample_size':sample_size, 'field':field}
         if tag_sets_id is not None:
@@ -753,26 +753,6 @@ class AdminMediaCloud(MediaCloud):
                 raise ValueError('To use tagStories you must send in a list of StoryTag objects')
             custom_tags.append(tag.getParams())
         return self._queryForJson(self.V2_API_URL+'stories/put_tags', params, 'PUT_JSON', custom_tags)
-
-    def tagSentences(self, tags=None, clear_others=False):
-        '''
-        Add some tags to sentences. The tags parameter should be a list of SentenceTag objects
-        '''
-        params = {}
-        if clear_others is True:
-            params['clear_tag_sets'] = 1
-        # bath into smaller requests so we don't hit the 414 Request-URI Too Large error
-        if tags is None:
-            tags = {}
-        results = []
-        for tag_chunk in _chunkify(tags, 50):
-            custom_tags = []
-            for tag in tag_chunk:
-                if tag.__class__ is not SentenceTag:
-                    raise ValueError('To use tagSentences you must send in a list of SentenceTag objects')
-                custom_tags.append(tag.getParams())
-            results.append(self._queryForJson(self.V2_API_URL+'sentences/put_tags', params, 'PUT_JSON', custom_tags))
-        return results
 
     def tagMedia(self, tags=None, clear_others=False):
         '''

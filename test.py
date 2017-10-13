@@ -28,7 +28,7 @@ test_classes = [
     api.StatsTest
 ]
 
-# test_classes = [ topic.ApiTopicTest ]
+# test_classes = [ api.AdminApiTaggingContentTest ]
 
 # set up all logging to DEBUG (cause we're running tests here!)
 logging.basicConfig(level=logging.DEBUG)
