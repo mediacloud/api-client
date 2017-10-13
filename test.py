@@ -13,7 +13,7 @@ test_classes = [
     api.ApiMediaHealthTest, api.AdminApiMediaTest, 
     api.ApiMediaTest, api.AdminApiMediaSuggestionsTest,
     api.ApiFeedsTest, api.ApiTagsTest, api.ApiTagSetsTest,
-    api.ApiStoriesTest, api.AdminApiStoriesTest,
+    api.ApiStoriesTest, api.AdminApiStoriesTest, api.AdminApiStoryUpdateTest,
     api.ApiWordCountTest, api.ApiSentencesTest, api.AdminApiSentencesTest,
     storage.MongoStorageTest,
     api.AuthTokenTest, api.UserProfileTest,
@@ -28,7 +28,7 @@ test_classes = [
     api.StatsTest
 ]
 
-#test_classes = [ api.ApiWordCountTest ]
+# test_classes = [ topic.ApiTopicTest ]
 
 # set up all logging to DEBUG (cause we're running tests here!)
 logging.basicConfig(level=logging.DEBUG)

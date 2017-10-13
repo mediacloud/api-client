@@ -520,7 +520,7 @@ class MediaCloud(object):
         '''
         return self._queryForJson(self.V2_API_URL+'topics/single/{}'.format(topics_id))['topics'][0]
 
-    def topicList(self, link_id=None, name=None, public=None):
+    def topicList(self, link_id=None, name=None, public=None, limit=20):
         '''
         List all the controversies
         '''
@@ -531,6 +531,7 @@ class MediaCloud(object):
             params['public'] = 1 if public is True else 0
         if name is not None:
             params['name'] = name
+        params['limit'] = limit
         return self._queryForJson(self.V2_API_URL+'topics/list', params)
 
     def topicSnapshotList(self, topics_id):
@@ -714,6 +715,16 @@ class AdminMediaCloud(MediaCloud):
                  'feeds_id': feeds_id,
                  'show_feeds': 1 if show_feeds is True else 0,
                 })
+
+
+    def storyUpdate(self, stories_id, **kwargs):
+        params = {}
+        valid_params = ['title', 'url', 'guid', 'language', 'description', 'publish_date', 'confirm_date', 'undateable']
+        _validate_params(params, valid_params, kwargs)
+        _validate_bool_params(params, 'confirm_date', 'undateable')
+        params['stories_id'] = stories_id
+        return self._queryForJson(self.V2_API_URL+'stories/update', {}, 'PUT_JSON', params)
+
 
     def sentenceList(self, solr_query, solr_filter='', start=0, rows=1000, sort=MediaCloud.SORT_PUBLISH_DATE_ASC):
         '''

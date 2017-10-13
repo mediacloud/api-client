@@ -800,3 +800,21 @@ class AdminApiTaggingContentTest(AdminApiBaseTest):
             self.assertEqual(chunk_size, len(chunked[x]))
         self.assertEqual(7, len(chunked[10]))
 
+
+class AdminApiStoryUpdateTest(AdminApiBaseTest):
+
+    def testFeedScrape(self):
+        # check the story has a language
+        story = self._mc.story(27456565)
+        original_language = story['language']
+        self.assertEqual(original_language, 'en')
+        # change it to spanish
+        results = self._mc.storyUpdate(27456565, language='es')
+        self.assertEqual(results['success'], 1)
+        story = self._mc.story(27456565)
+        self.assertEqual(story['language'], 'es')
+        # and set it back
+        results = self._mc.storyUpdate(27456565, language=original_language)
+        self.assertEqual(results['success'], 1)
+        story = self._mc.story(27456565)
+        self.assertEqual(story['language'], original_language)

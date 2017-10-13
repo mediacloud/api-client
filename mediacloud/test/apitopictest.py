@@ -14,7 +14,13 @@ class ApiTopicTest(AdminApiBaseTest):
     def testTopicList(self):
         # verify it pulls some
         topic_list = self._mc.topicList()
-        self.assertTrue(len(topic_list) > 1)
+        self.assertTrue(len(topic_list['topics']) > 1)
+        # verify limit param
+        topic_list = self._mc.topicList(limit=2)
+        self.assertEqual(len(topic_list['topics']), 2)
+        # verify limit param
+        topic_list = self._mc.topicList(limit=1)
+        self.assertEqual(len(topic_list['topics']), 1)
 
     def testTopicListPublic(self):
         topic_list = self._mc.topicList(public=True)
