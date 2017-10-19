@@ -11,7 +11,7 @@ TEST_TAG_ID_1 = 9172171  # mc-api-test@media.mit.edu:test_tag1
 TEST_TAG_ID_2 = 9172168  # mc-api-test@media.mit.edu:test_tag2
 GEO_TAG_SET_ID = 1011
 TEST_MEDIA_SUGGEST_REASON = "!!!! TESTING SUGGESTION !!!!"
-
+SAMPLE_STORY_ID = 101183836
 
 class ApiBigQueryTest(ApiBaseTest):
 
@@ -401,6 +401,19 @@ class AdminApiStoriesTest(AdminApiBaseTest):
             self.assertFalse('story_sentences' in story)
             self.assertTrue('story_text' in story)
             self.assertTrue('is_fully_extracted' in story)
+
+    def testStoryRawCliffResults(self):
+        cliff_results = self._mc.storyRawCliffResults([SAMPLE_STORY_ID])
+        self.assertEqual(len(cliff_results), 1)
+        self.assertEqual(cliff_results[0]['stories_id'], SAMPLE_STORY_ID)
+        self.assertEqual(cliff_results[0]['cliff'], "story does not exist")
+
+    def testStoryRawNytThemeResults(self):
+        nyt_theme_results = self._mc.storyRawNytThemeResults([SAMPLE_STORY_ID])
+        self.assertEqual(len(nyt_theme_results), 1)
+        self.assertEqual(nyt_theme_results[0]['stories_id'], SAMPLE_STORY_ID)
+        self.assertEqual(nyt_theme_results[0]['nytlabels'], "story does not exist")
+
 '''
 TOO SLOW!
     def testStoryListInFeed(self):
@@ -714,7 +727,7 @@ class AdminApiTaggingContentTest(AdminApiBaseTest):
 
 class AdminApiStoryUpdateTest(AdminApiBaseTest):
 
-    def testFeedScrape(self):
+    def testStoryUpdate(self):
         # check the story has a language
         story = self._mc.story(27456565)
         original_language = story['language']

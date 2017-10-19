@@ -232,6 +232,12 @@ class MediaCloud(object):
         '''
         return self._queryForJson(self.V2_API_URL+'stories_public/single/{}'.format(stories_id))[0]
 
+    def storyRawCliffResults(self, story_id_list):
+        return self._queryForJson(self.V2_API_URL+'stories/cliff', {'stories_id': story_id_list})
+
+    def storyRawNytThemeResults(self, story_id_list):
+        return self._queryForJson(self.V2_API_URL+'stories/nytlabels', {'stories_id': story_id_list})
+
     def storyCount(self, solr_query='', solr_filter=''):
         '''
         The call returns the number of stories returned by Solr for the specified query
@@ -424,16 +430,14 @@ class MediaCloud(object):
             try:
                 # the json to post could be an array (not a dict), so we need to add the params and the json to post differently
                 data_to_send = None # as json
-                url_with_key = url
+                params_to_send = None # on the URL string
                 if json_data is None:
-                    url_with_key = url_with_key + "?key=" + self._auth_token
+                    params_to_send = { 'key': self._auth_token }
                     data_to_send = params
                 else:
-                    url_with_key = url_with_key + "?" + urllib.urlencode(params)
+                    params_to_send = params
                     data_to_send = json_data
-                    self._logger.info(url_with_key)
-                    self._logger.info(json.dumps(data_to_send))
-                r = requests.put(url_with_key, data=json.dumps(data_to_send), headers={'Accept': 'application/json', 'Content-Type': 'application/json'})
+                r = requests.put(url, params=params_to_send, data=json.dumps(data_to_send), headers={'Accept': 'application/json', 'Content-Type': 'application/json'})
             except Exception as e:
                 self._logger.exception(e)
                 raise e
