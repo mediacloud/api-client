@@ -104,6 +104,8 @@ Then run `python tests.py`. Notice you get a `mediacloud-api.log` that tells you
 Version History
 ---------------
 
+* __v2.43.2__: fix raw story detail cliff and nytlabels endpoints
+* __v2.43.1__: make JSON posts py3 compatible
 * __v2.43.0__: topicList limit option, story-update endpoint, remove story coreNLP support, remove sentence-level tagging
 * __v2.42.0__: add is_logogram option to topic creation and updating
 * __v2.41.0__: updates to topic stories and media sorting, and ngram_size param to word count endpoints
