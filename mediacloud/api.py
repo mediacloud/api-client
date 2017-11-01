@@ -168,15 +168,13 @@ class MediaCloud(object):
 
     def mediaList(self, last_media_id=0, rows=20, name_like=None,
                 timespans_id=None, topic_mode=None, tags_id=None, q=None, include_dups=False,
-                name_or_tag=None, unhealthy=None, similar_media_id=None):
+                unhealthy=None, similar_media_id=None):
         '''
         Page through all media sources
         '''
         params = {'last_media_id':last_media_id, 'rows':rows}
         if name_like is not None:
             params['name'] = name_like
-        if name_or_tag is not None:
-            params['name_or_tag'] = name_or_tag
         if timespans_id is not None:
             params['timespans_id'] = timespans_id
         if topic_mode is not None:
