@@ -263,6 +263,17 @@ class ApiTagsTest(ApiBaseTest):
         public_list = self._mc.tagList(6, rows=200, public_only=True)
         self.assertNotEqual(len(full_list), len(public_list))
 
+    def testTagListMultpleSets(self):
+        search = "Ghana"
+        collection1_id = 5 # collections
+        collection2_id= 556 # GV
+        list_1 = self._mc.tagList(collection1_id, name_like=search)
+        self.assertTrue(len(list_1) > 0)
+        list_2 = self._mc.tagList(collection2_id, name_like=search)
+        self.assertTrue(len(list_2) > 0)
+        combined_list = self._mc.tagList([collection1_id, collection2_id], name_like=search)
+        self.assertEqual(len(combined_list), len(list_1) + len(list_2))
+
     def testTagListSimilar(self):
         collection_tags = self._mc.tagList(similar_tags_id=8876989)
         self.assertEqual(20, len(collection_tags))

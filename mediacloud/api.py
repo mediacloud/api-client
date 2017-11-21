@@ -339,7 +339,7 @@ class MediaCloud(object):
 
     def tagList(self, tag_sets_id=None, last_tags_id=0, rows=20, public_only=False, name_like=None, similar_tags_id=None):
         '''
-        List all the tags in one tag set
+        List all the tags in one tag set, of multipe if tag_sets_id is an array
         '''
         params = {
             'last_tags_id': last_tags_id
