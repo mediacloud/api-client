@@ -150,7 +150,7 @@ class ApiMediaTest(ApiBaseTest):
 
     def testMediaListWithName(self):
         matchingList = self._mc.mediaList(name_like='new york times')
-        self.assertEqual(len(matchingList), 1)
+        self.assertEqual(len(matchingList), 2)
 
     def testMediaList(self):
         first_list = self._mc.mediaList()
@@ -206,7 +206,7 @@ class AdminApiMediaSuggestionsTest(AdminApiBaseTest):
         suggest_result = self._mc.mediaSuggest("https://rahulbotics",
                                         name="Rahulbotics",
                                         reason=TEST_MEDIA_SUGGEST_REASON,
-                                        collections=[9353679])
+                                        tags_ids=[9353679])
         self.assertTrue('success' in suggest_result)
         self.assertEqual(1, int(suggest_result['success']))
         list_result = self._mc.mediaSuggestionsList()
@@ -221,7 +221,7 @@ class AdminApiMediaSuggestionsTest(AdminApiBaseTest):
         results = self._mc.mediaSuggest("https://rahulbotics",
                                         name="Rahulbotics",
                                         reason=TEST_MEDIA_SUGGEST_REASON,
-                                        collections=[9353679])
+                                        tags_ids=[9353679])
         self.assertTrue('success' in results)
         self.assertEqual(1, int(results['success']))
 
@@ -417,13 +417,13 @@ class AdminApiStoriesTest(AdminApiBaseTest):
         cliff_results = self._mc.storyRawCliffResults([SAMPLE_STORY_ID])
         self.assertEqual(len(cliff_results), 1)
         self.assertEqual(cliff_results[0]['stories_id'], SAMPLE_STORY_ID)
-        self.assertEqual(cliff_results[0]['cliff'], "story does not exist")
+        self.assertEqual(cliff_results[0]['cliff'], "story is not annotated")
 
     def testStoryRawNytThemeResults(self):
         nyt_theme_results = self._mc.storyRawNytThemeResults([SAMPLE_STORY_ID])
         self.assertEqual(len(nyt_theme_results), 1)
         self.assertEqual(nyt_theme_results[0]['stories_id'], SAMPLE_STORY_ID)
-        self.assertEqual(nyt_theme_results[0]['nytlabels'], "story does not exist")
+        self.assertEqual(nyt_theme_results[0]['nytlabels'], "story is not annotated")
 
 '''
 TOO SLOW!
@@ -478,7 +478,7 @@ class ApiStoriesTest(ApiBaseTest):
 
     def testStoryCount(self):
         results = self._mc.storyCount(self.QUERY, self.FILTER_QUERY)
-        self.assertEqual(results['count'], 738)
+        self.assertEqual(results['count'], 741)
 
 '''
 TOO SLOW TO RUN!
@@ -533,17 +533,17 @@ class AdminApiSentencesTest(AdminApiBaseTest):
     def testSentenceList(self):
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY)
         self.assertEqual(int(results['responseHeader']['status']), 0)
-        self.assertEqual(int(results['response']['numFound']), 2235)
+        self.assertEqual(int(results['response']['numFound']), 2240)
         self.assertEqual(len(results['response']['docs']), 1000)
 
     def testSentenceListPaging(self):
         # test limiting rows returned
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, 0, 100)
-        self.assertEqual(int(results['response']['numFound']), 2235)
+        self.assertEqual(int(results['response']['numFound']), 2240)
         self.assertEqual(len(results['response']['docs']), 100)
         # test starting offset
         results = self._mc.sentenceList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, 5700)
-        self.assertEqual(int(results['response']['numFound']), 2235)
+        self.assertEqual(int(results['response']['numFound']), 2240)
         self.assertFalse('docs' in results['response'], 0)
 
 
