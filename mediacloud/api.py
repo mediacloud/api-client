@@ -191,16 +191,16 @@ class MediaCloud(object):
             params['q'] = q
         return self._queryForJson(self.V2_API_URL+'media/list', params)
 
-    def mediaSuggest(self, url, name=None, feed_url=None, reason=None, collections=[]):
-        for c in collections:
-            if not isinstance(c, int):
-                raise ValueError('The collections must be a list of ids')
+    def mediaSuggest(self, url, name=None, feed_url=None, reason=None, tags_ids=[]):
+        for tags_id in tags_ids:
+            if not isinstance(tags_id, int):
+                raise ValueError('The tags_ids must be a list of ids')
         params = {
             'url': url,
             'name': name,
             'feed_url': feed_url,
             'reason': reason,
-            'collection': collections
+            'tags_ids': tags_ids
         }
         return self._queryForJson(self.V2_API_URL+'media/submit_suggestion', params, 'POST')
 
