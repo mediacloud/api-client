@@ -20,6 +20,7 @@ test_classes = [
     api.ApiAllFieldsOptionTest,
     api.PublishDateQueryTest,
     api.AdminApiTaggingContentTest, api.AdminApiTaggingTest,
+    api.ApiStoryAPSyndicatedTest,
     topic.AdminTopicSentenceCountTest,
     topic.ApiTopicTest, topic.ApiTopicSnapshotTest, topic.ApiTopicTimespanTest,
     topic.AdminTopicStoryListTest, topic.AdminTopicMediaListTest, topic.AdminTopicWordCountTest,
@@ -28,7 +29,7 @@ test_classes = [
     api.StatsTest
 ]
 
-# test_classes = [ api.AdminApiTaggingContentTest ]
+#test_classes = [api.ApiStoryAPSyndicatedTest]
 
 # set up all logging to DEBUG (cause we're running tests here!)
 logging.basicConfig(level=logging.DEBUG)
