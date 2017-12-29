@@ -678,6 +678,12 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'topics/'+str(topics_id)+'/timespans/add_dates', params, 'POST')
     '''
 
+    def storyIsSyndicatedFromAP(self, content):
+        params = {
+            'content': content,
+        }
+        return self._queryForJson(self.V2_API_URL+'util/is_syndicated_ap', params, 'PUT_JSON')
+
 
 class AdminMediaCloud(MediaCloud):
     '''

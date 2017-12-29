@@ -1,9 +1,10 @@
-import json
 import time
 import datetime
+
 import mediacloud.api
+from mediacloud.test import load_text_from_fixture
 from mediacloud.test.basetest import ApiBaseTest, AdminApiBaseTest
-from mediacloud.tags import StoryTag, SentenceTag, MediaTag, TAG_ACTION_ADD, TAG_ACTION_REMOVE
+from mediacloud.tags import StoryTag, MediaTag, TAG_ACTION_ADD, TAG_ACTION_REMOVE
 
 TEST_USER_EMAIL = "mc-api-test@media.mit.edu"
 TEST_TAG_SET_ID = 1727
@@ -753,3 +754,16 @@ class AdminApiStoryUpdateTest(AdminApiBaseTest):
         self.assertEqual(results['success'], 1)
         story = self._mc.story(27456565)
         self.assertEqual(story['language'], original_language)
+
+
+class ApiStoryAPSyndicatedTest(ApiBaseTest):
+
+    def testIsSyndicated(self):
+        text = load_text_from_fixture("sample_story_ap.txt")
+        results = self._mc.storyIsSyndicatedFromAP(text)
+        self.assertEqual(results['is_syndicated'], 1)
+
+    def testIsNotSyndicated(self):
+        text = load_text_from_fixture("sample_story_not_ap.txt")
+        results = self._mc.storyIsSyndicatedFromAP(text)
+        self.assertEqual(results['is_syndicated'], 0)
