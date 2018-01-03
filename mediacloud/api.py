@@ -549,7 +549,7 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'topics/{}/snapshots/generate_status'.format(topics_id))
 
     def topicCreate(self, name, solr_seed_query, description, start_date, end_date, media_ids=[], media_tags_ids=[], **kwargs):
-        valid_optional_params = [ 'max_iterations', 'is_public', 'ch_monitor_id', 'twitter_topics_id', 'is_logogram']
+        valid_optional_params = [ 'max_iterations', 'is_public', 'ch_monitor_id', 'twitter_topics_id', 'is_logogram', 'max_stories']
         params = {}
         params['name'] = name
         params['solr_seed_query'] = solr_seed_query
@@ -566,7 +566,7 @@ class MediaCloud(object):
     def topicUpdate(self, topics_id, **kwargs):
         valid_params = [
             'name', 'solr_seed_query', 'description', 'start_date', 'end_date', 'media_ids', 'media_tags_ids',
-            'max_iterations', 'is_public', 'ch_monitor_id', 'twitter_topics_id', 'is_logogram'
+            'max_iterations', 'is_public', 'ch_monitor_id', 'twitter_topics_id', 'is_logogram', 'max_stories'
         ]
         params = {}
         _validate_params(params, valid_params, kwargs)

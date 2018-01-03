@@ -11,6 +11,15 @@ class ApiTopicTest(AdminApiBaseTest):
         self.assertEqual(int(topic['topics_id']), 1537)
         self.assertEqual(topic['name'], 'Climate Change 2016')
 
+    def testTopicHasMaxStories(self):
+        topic = self._mc.topic(TEST_TOPIC_ID)
+        self.assertTrue('max_stories' in topic)
+        try:
+            int(topic['max_stories'])
+            self.assertTrue(True)
+        except ValueError:
+            self.assertTrue(False, "max_stories value of '{}' is not an int ".format(topic['max_stories']))
+
     def testTopicList(self):
         # verify it pulls some
         topic_list = self._mc.topicList()
