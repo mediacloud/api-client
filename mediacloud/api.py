@@ -1,14 +1,20 @@
 import logging
 import json
 import datetime
-import urllib
 import requests
 import mediacloud
 import mediacloud.error
 
-from mediacloud.tags import StoryTag, SentenceTag, MediaTag
+from mediacloud.tags import StoryTag, MediaTag
 
 MAX_HTTP_GET_CHARS = 4000   # experimentally determined for our main servers (conservative)
+
+# Tag set ids for metadata about media in our system
+TAG_SETS_ID_PUBLICATION_COUNTRY = 1935  # holds the country of publication of a source
+TAG_SETS_ID_PUBLICATION_STATE = 1962  # holds the state of publication of a source (only US and India right now)
+TAG_SETS_ID_PRIMARY_LANGUAGE = 1969  # holds the primary language of a source
+TAG_SETS_ID_COUNTRY_OF_FOCUS = 1970  # holds the primary focus on what country for a source
+TAG_SETS_ID_MEDIA_TYPE = 1972  # holds what type of media source this is (broadcast, online, etc)
 
 
 class MediaCloud(object):
@@ -155,7 +161,9 @@ class MediaCloud(object):
         '''
         Details about one media source
         '''
-        return self._queryForJson(self.V2_API_URL+'media/single/{}'.format(media_id))[0]
+        results = self._queryForJson(self.V2_API_URL+'media/single/{}'.format(media_id))
+        results_with_metadata = self._add_metadata_tags_to_media_list(results)
+        return results_with_metadata[0]
 
     def mediaHealth(self, media_id):
         '''
@@ -189,7 +197,29 @@ class MediaCloud(object):
             params['tags_id'] = tags_id
         if q is not None:
             params['q'] = q
-        return self._queryForJson(self.V2_API_URL+'media/list', params)
+        results = self._queryForJson(self.V2_API_URL+'media/list', params)
+        results_with_metadata = self._add_metadata_tags_to_media_list(results)
+        return results_with_metadata
+
+    def _add_metadata_tags_to_media_list(self, media_list):
+        metadata = {}
+        for m in media_list:
+            metadata['pub_country'] = self._first_tag_on_media(m, TAG_SETS_ID_PUBLICATION_COUNTRY)
+            metadata['pub_state'] = self._first_tag_on_media(m, TAG_SETS_ID_PUBLICATION_STATE)
+            metadata['language'] = self._first_tag_on_media(m, TAG_SETS_ID_PRIMARY_LANGUAGE)
+            metadata['about_country'] = self._first_tag_on_media(m, TAG_SETS_ID_COUNTRY_OF_FOCUS)
+            metadata['media_type'] = self._first_tag_on_media(m, TAG_SETS_ID_MEDIA_TYPE)
+            m['metadata'] = metadata
+        return media_list
+
+    def _first_tag_on_media(self, media_source, tag_sets_id):
+        # Find the first tag on a media source from a set, or None if it doesn't have one
+        tags = self._tags_on_media(media_source, tag_sets_id)
+        return tags[0] if len(tags) > 0 else None
+
+    def _tags_on_media(self, media_source, tag_sets_id):
+        # Find all the tags from a set on a media source
+        return [t for t in media_source['media_source_tags'] if t['tag_sets_id'] == tag_sets_id]
 
     def mediaSuggest(self, url, name=None, feed_url=None, reason=None, tags_ids=[]):
         for tags_id in tags_ids:

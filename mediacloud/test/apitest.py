@@ -14,6 +14,7 @@ GEO_TAG_SET_ID = 1011
 TEST_MEDIA_SUGGEST_REASON = "!!!! TESTING SUGGESTION !!!!"
 SAMPLE_STORY_ID = 101183836
 
+
 class ApiBigQueryTest(ApiBaseTest):
 
     def testBigQuery(self):
@@ -144,14 +145,19 @@ class ApiMediaTest(ApiBaseTest):
         self.assertNotEqual(media, None)
         self.assertEqual(int(media['media_id']), 1)
         self.assertEqual(media['name'], 'New York Times')
-        self.assertTrue("is_monitored", media)
-        self.assertTrue("editor_notes", media)
-        self.assertTrue("public_notes", media)
+        self.assertTrue("is_monitored" in media)
+        self.assertTrue("editor_notes" in media)
+        self.assertTrue("public_notes" in media)
         self.assertTrue(len(media['media_source_tags']) > 0)
+        self.assertTrue("pub_country" in media['metadata'])
+        self.assertTrue("pub_state" in media['metadata'])
+        self.assertTrue("language" in media['metadata'])
+        self.assertTrue("about_country" in media['metadata'])
+        self.assertTrue("media_type" in media['metadata'])
 
     def testMediaListWithName(self):
-        matchingList = self._mc.mediaList(name_like='new york times')
-        self.assertEqual(len(matchingList), 2)
+        matching_list = self._mc.mediaList(name_like='new york times')
+        self.assertEqual(len(matching_list), 2)
 
     def testMediaList(self):
         first_list = self._mc.mediaList()
@@ -160,6 +166,12 @@ class ApiMediaTest(ApiBaseTest):
             self.assertTrue("is_monitored", media)
             self.assertTrue("editor_notes", media)
             self.assertTrue("public_notes", media)
+            self.assertTrue(len(media['media_source_tags']) > 0)
+            self.assertTrue("pub_country" in media['metadata'])
+            self.assertTrue("pub_state" in media['metadata'])
+            self.assertTrue("language" in media['metadata'])
+            self.assertTrue("about_country" in media['metadata'])
+            self.assertTrue("media_type" in media['metadata'])
         self.assertNotEqual(first_list, None)
         self.assertEqual(len(first_list), 20)
         last_page_one_media_id = int(first_list[19]['media_id'])-1
@@ -173,8 +185,8 @@ class ApiMediaTest(ApiBaseTest):
         self.assertEqual(len(longer_list), 200)
 
     def testMediaListWithTagId(self):
-        matchingList = self._mc.mediaList(tags_id=8875027)  # US MSM
-        self.assertTrue(len(matchingList) > 0)
+        matching_list = self._mc.mediaList(tags_id=8875027)  # US MSM
+        self.assertTrue(len(matching_list) > 0)
 
     def testMediaListUnhealthy(self):
         # make sure no overlap in healthy and unhealthy first page of results
