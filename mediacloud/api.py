@@ -1,20 +1,15 @@
-import logging
-import json
 import datetime
+import json
+import logging
 import requests
+
 import mediacloud
 import mediacloud.error
-
-from mediacloud.tags import StoryTag, MediaTag
+from mediacloud.tags import StoryTag, MediaTag, TAG_SET_PUBLICATION_COUNTRY, TAG_SET_PUBLICATION_STATE, \
+    TAG_SET_PRIMARY_LANGUAGE, TAG_SET_COUNTRY_OF_FOCUS, TAG_SET_MEDIA_TYPE, TAG_SET_DATE_GUESS_METHOD, \
+    TAG_SET_EXTRACTOR_VERSION, TAG_SET_GEOCODER_VERSION, TAG_SET_NYT_THEMES_VERSION
 
 MAX_HTTP_GET_CHARS = 4000   # experimentally determined for our main servers (conservative)
-
-# Tag set ids for metadata about media in our system
-TAG_SETS_ID_PUBLICATION_COUNTRY = 1935  # holds the country of publication of a source
-TAG_SETS_ID_PUBLICATION_STATE = 1962  # holds the state of publication of a source (only US and India right now)
-TAG_SETS_ID_PRIMARY_LANGUAGE = 1969  # holds the primary language of a source
-TAG_SETS_ID_COUNTRY_OF_FOCUS = 1970  # holds the primary focus on what country for a source
-TAG_SETS_ID_MEDIA_TYPE = 1972  # holds what type of media source this is (broadcast, online, etc)
 
 
 class MediaCloud(object):
@@ -162,7 +157,7 @@ class MediaCloud(object):
         Details about one media source
         '''
         results = self._queryForJson(self.V2_API_URL+'media/single/{}'.format(media_id))
-        results_with_metadata = self._add_metadata_tags_to_media_list(results)
+        results_with_metadata = self._addMetadataTagsToMediaList(results)
         return results_with_metadata[0]
 
     def mediaHealth(self, media_id):
@@ -198,26 +193,26 @@ class MediaCloud(object):
         if q is not None:
             params['q'] = q
         results = self._queryForJson(self.V2_API_URL+'media/list', params)
-        results_with_metadata = self._add_metadata_tags_to_media_list(results)
+        results_with_metadata = self._addMetadataTagsToMediaList(results)
         return results_with_metadata
 
-    def _add_metadata_tags_to_media_list(self, media_list):
-        metadata = {}
+    def _addMetadataTagsToMediaList(self, media_list):
         for m in media_list:
-            metadata['pub_country'] = self._first_tag_on_media(m, TAG_SETS_ID_PUBLICATION_COUNTRY)
-            metadata['pub_state'] = self._first_tag_on_media(m, TAG_SETS_ID_PUBLICATION_STATE)
-            metadata['language'] = self._first_tag_on_media(m, TAG_SETS_ID_PRIMARY_LANGUAGE)
-            metadata['about_country'] = self._first_tag_on_media(m, TAG_SETS_ID_COUNTRY_OF_FOCUS)
-            metadata['media_type'] = self._first_tag_on_media(m, TAG_SETS_ID_MEDIA_TYPE)
+            metadata = {}
+            metadata['pub_country'] = self._firstTagOnMedia(m, TAG_SET_PUBLICATION_COUNTRY)
+            metadata['pub_state'] = self._firstTagOnMedia(m, TAG_SET_PUBLICATION_STATE)
+            metadata['language'] = self._firstTagOnMedia(m, TAG_SET_PRIMARY_LANGUAGE)
+            metadata['about_country'] = self._firstTagOnMedia(m, TAG_SET_COUNTRY_OF_FOCUS)
+            metadata['media_type'] = self._firstTagOnMedia(m, TAG_SET_MEDIA_TYPE)
             m['metadata'] = metadata
         return media_list
 
-    def _first_tag_on_media(self, media_source, tag_sets_id):
+    def _firstTagOnMedia(self, media_source, tag_sets_id):
         # Find the first tag on a media source from a set, or None if it doesn't have one
-        tags = self._tags_on_media(media_source, tag_sets_id)
+        tags = self._tagsOnMedia(media_source, tag_sets_id)
         return tags[0] if len(tags) > 0 else None
 
-    def _tags_on_media(self, media_source, tag_sets_id):
+    def _tagsOnMedia(self, media_source, tag_sets_id):
         # Find all the tags from a set on a media source
         return [t for t in media_source['media_source_tags'] if t['tag_sets_id'] == tag_sets_id]
 
@@ -258,7 +253,9 @@ class MediaCloud(object):
         Authenticated Public Users: Details about one story.
         Note that this does NOT include text, nor sentences (due to copyright limitations).
         '''
-        return self._queryForJson(self.V2_API_URL+'stories_public/single/{}'.format(stories_id))[0]
+        stories = self._queryForJson(self.V2_API_URL+'stories_public/single/{}'.format(stories_id))
+        stories_with_metadata = self._addMetadataTagsToStoryList(stories)
+        return stories_with_metadata[0]
 
     def storyRawCliffResults(self, story_id_list):
         return self._queryForJson(self.V2_API_URL+'stories/cliff', {'stories_id': story_id_list})
@@ -287,7 +284,7 @@ class MediaCloud(object):
         '''
         Authenticated Public Users: Search for stories and page through results
         '''
-        return self._queryForJson(self.V2_API_URL+'stories_public/list',
+        stories = self._queryForJson(self.V2_API_URL+'stories_public/list',
                 {'q': solr_query,
                  'fq': solr_filter,
                  'last_processed_stories_id': last_processed_stories_id,
@@ -297,6 +294,27 @@ class MediaCloud(object):
                  'feeds_id': feeds_id,
                  'show_feeds': 1 if show_feeds is True else 0,
                 })
+        stories_with_metadata = self._addMetadataTagsToStoryList(stories)
+        return stories_with_metadata
+
+    def _addMetadataTagsToStoryList(self, story_list):
+        for s in story_list:
+            metadata = {}
+            metadata['date_guess_method'] = self._firstTagOnStory(s, TAG_SET_DATE_GUESS_METHOD)
+            metadata['extractor_version'] = self._firstTagOnStory(s, TAG_SET_EXTRACTOR_VERSION)
+            metadata['geocoder_version'] = self._firstTagOnStory(s, TAG_SET_GEOCODER_VERSION)
+            metadata['nyt_themes_version'] = self._firstTagOnStory(s, TAG_SET_NYT_THEMES_VERSION)
+            s['metadata'] = metadata
+        return story_list
+
+    def _firstTagOnStory(self, story, tag_sets_id):
+        # Find the first tag on a story from a set, or None if it doesn't have one
+        tags = self._tagsOnStory(story, tag_sets_id)
+        return tags[0] if len(tags) > 0 else None
+
+    def _tagsOnStory(self, story, tag_sets_id):
+        # Find all the tags from a set on a media source
+        return [t for t in story['story_tags'] if t['tag_sets_id'] == tag_sets_id]
 
     def storyCoreNlpList(self, story_id_list):
         '''
@@ -501,7 +519,9 @@ class MediaCloud(object):
         _validate_params(params, valid_params, kwargs)
         if 'sort' in params:
             _validate_topic_sort_param(params['sort'])
-        return self._queryForJson(self.V2_API_URL+'topics/{}/media/list'.format(topics_id), params)
+        media = self._queryForJson(self.V2_API_URL+'topics/{}/media/list'.format(topics_id), params)
+        # can't add metadata here because this call doesn't return tags :-(
+        return media
 
     def topicStoryList(self, topics_id, **kwargs):
         params = {}
@@ -511,7 +531,9 @@ class MediaCloud(object):
         _validate_params(params, valid_params, kwargs)
         if 'sort' in params:
             _validate_topic_sort_param(params['sort'])
-        return self._queryForJson(self.V2_API_URL+'topics/{}/stories/list'.format(topics_id), params)
+        stories = self._queryForJson(self.V2_API_URL+'topics/{}/stories/list'.format(topics_id), params)
+        # can't add in metadata here because the tags aren't returned from this call :-(
+        return stories
 
     def topicStoryListFacebookData(self, topics_id, **kwargs):
         '''
@@ -738,22 +760,23 @@ class AdminMediaCloud(MediaCloud):
         '''
         Search for stories and page through results
         '''
-        return self._queryForJson(self.V2_API_URL+'stories/list',
-                {'q': solr_query,
-                 'fq': solr_filter,
-                 'last_processed_stories_id': last_processed_stories_id,
-                 'rows': rows,
-                 'raw_1st_download': 1 if raw_1st_download else 0,
-                 'corenlp': 1 if corenlp else 0,    # this is slow - use storyCoreNlList instead
-                 'sentences': 1 if sentences else 0,
-                 'text': 1 if text else 0,
-                 'ap_stories_id': 1 if ap_stories_id else 0,
-                 'sort': sort,
-                 'wc': 1 if wc is True else 0,
-                 'feeds_id': feeds_id,
-                 'show_feeds': 1 if show_feeds is True else 0,
-                })
-
+        stories = self._queryForJson(self.V2_API_URL+'stories/list',
+                                     {'q': solr_query,
+                                      'fq': solr_filter,
+                                      'last_processed_stories_id': last_processed_stories_id,
+                                      'rows': rows,
+                                      'raw_1st_download': 1 if raw_1st_download else 0,
+                                      'corenlp': 1 if corenlp else 0,    # this is slow - use storyCoreNlList instead
+                                      'sentences': 1 if sentences else 0,
+                                      'text': 1 if text else 0,
+                                      'ap_stories_id': 1 if ap_stories_id else 0,
+                                      'sort': sort,
+                                      'wc': 1 if wc is True else 0,
+                                      'feeds_id': feeds_id,
+                                      'show_feeds': 1 if show_feeds is True else 0,
+                                      })
+        stories_with_metadata = self._addMetadataTagsToStoryList(stories)
+        return stories_with_metadata
 
     def storyUpdate(self, stories_id, **kwargs):
         params = {}

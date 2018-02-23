@@ -104,6 +104,7 @@ Then run `python tests.py`. Notice you get a `mediacloud-api.log` that tells you
 Version History
 ---------------
 
+* __v2.47.0__: add labelled metadata to story list results
 * __v2.46.0__: add labelled metadata to media list and media results
 * __v2.45.0__: add new `max_stories` param to topic read, create and update endpoints
 * __v2.44.0__: add new `storyIsSyndicatedFromAP` endpoint and tests

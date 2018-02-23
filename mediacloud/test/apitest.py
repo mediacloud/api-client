@@ -404,6 +404,10 @@ class AdminApiStoriesTest(AdminApiBaseTest):
         self.assertNotEqual(len(results), 0)
         for story in results:
             self.assertTrue('bitly_click_count' in story)
+            self.assertTrue('date_guess_method' in story['metadata'])
+            self.assertTrue('extractor_version' in story['metadata'])
+            self.assertTrue('geocoder_version' in story['metadata'])
+            self.assertTrue('nyt_themes_version' in story['metadata'])
 
     def testStoryListDefaults(self):
         results = self._mc.storyList(ApiBaseTest.QUERY, ApiBaseTest.FILTER_QUERY, rows=10)
@@ -430,13 +434,14 @@ class AdminApiStoriesTest(AdminApiBaseTest):
         cliff_results = self._mc.storyRawCliffResults([SAMPLE_STORY_ID])
         self.assertEqual(len(cliff_results), 1)
         self.assertEqual(cliff_results[0]['stories_id'], SAMPLE_STORY_ID)
-        self.assertEqual(cliff_results[0]['cliff'], "story is not annotated")
+        self.assertTrue('results' in cliff_results[0]['cliff'])
+        self.assertTrue('organizations' in cliff_results[0]['cliff']['results'])
 
     def testStoryRawNytThemeResults(self):
         nyt_theme_results = self._mc.storyRawNytThemeResults([SAMPLE_STORY_ID])
         self.assertEqual(len(nyt_theme_results), 1)
         self.assertEqual(nyt_theme_results[0]['stories_id'], SAMPLE_STORY_ID)
-        self.assertEqual(nyt_theme_results[0]['nytlabels'], "story is not annotated")
+        self.assertTrue('descriptors600' in nyt_theme_results[0]['nytlabels'])
 
 '''
 TOO SLOW!
