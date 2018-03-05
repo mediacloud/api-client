@@ -615,6 +615,9 @@ class MediaCloud(object):
             raise ValueError('You have to specify media_ids or media_tags_ids')
         return self._queryForJson(self.V2_API_URL+'topics/create', params, 'POST')
 
+    def topicReset(self, topics_id):
+        self._queryForJson(self.V2_API_URL + 'topics/{}/reset'.format(topics_id), http_method='PUT')
+
     def topicUpdate(self, topics_id, **kwargs):
         valid_params = [
             'name', 'solr_seed_query', 'description', 'start_date', 'end_date', 'media_ids', 'media_tags_ids',
