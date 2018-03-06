@@ -616,7 +616,7 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'topics/create', params, 'POST')
 
     def topicReset(self, topics_id):
-        self._queryForJson(self.V2_API_URL + 'topics/{}/reset'.format(topics_id), http_method='PUT')
+        return self._queryForJson(self.V2_API_URL + 'topics/{}/reset'.format(topics_id), http_method='PUT')
 
     def topicUpdate(self, topics_id, **kwargs):
         valid_params = [

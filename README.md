@@ -104,7 +104,8 @@ Then run `python tests.py`. Notice you get a `mediacloud-api.log` that tells you
 Version History
 ---------------
 
-* __v2.48.0__: add dangerous topic reset function
+* __v2.49.0__: fix return value in `topicReset`
+* __v2.48.0__: add dangerous `topicReset` function
 * __v2.47.0__: add labelled metadata to story list results
 * __v2.46.0__: add labelled metadata to media list and media results
 * __v2.45.0__: add new `max_stories` param to topic read, create and update endpoints
