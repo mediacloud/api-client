@@ -104,6 +104,7 @@ Then run `python tests.py`. Notice you get a `mediacloud-api.log` that tells you
 Version History
 ---------------
 
+* __v2.50.0__: added profiling timing at debug log level
 * __v2.49.0__: fix return value in `topicReset`
 * __v2.48.0__: add dangerous `topicReset` function
 * __v2.47.0__: add labelled metadata to story list results
