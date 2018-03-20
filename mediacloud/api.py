@@ -57,7 +57,7 @@ class MediaCloud(object):
         except mediacloud.error.MCException:
             return False
         except Exception as exception:
-            logger.warn("AuthToken verify failed: %s", exception)
+            logger.warn(u"AuthToken verify failed: %s", exception)
         return False
 
     def userProfile(self):
@@ -173,10 +173,11 @@ class MediaCloud(object):
 
     def mediaList(self, last_media_id=0, rows=20, name_like=None,
                 timespans_id=None, topic_mode=None, tags_id=None, q=None, include_dups=False,
-                unhealthy=None, similar_media_id=None):
+                unhealthy=None, similar_media_id=None, sort=None):
         '''
-        Page through all media sources
+        Page through all media sources.
         '''
+        valid_sort_options = ['id', 'num_stories']
         params = {'last_media_id':last_media_id, 'rows':rows}
         if name_like is not None:
             params['name'] = name_like
@@ -194,7 +195,15 @@ class MediaCloud(object):
             params['tags_id'] = tags_id
         if q is not None:
             params['q'] = q
+        if (sort is not None) and (sort not in valid_sort_options):
+            raise ValueError('Sort must be either id num_stories')
+        else:
+            params['sort'] = sort
+
         results = self._queryForJson(self.V2_API_URL+'media/list', params)
+        for m in results:  # cleanup from string to float
+            m['num_sentences_90'] = float(m['num_sentences_90'])
+            m['num_stories_90'] = float(m['num_stories_90'])
         results_with_metadata = self._addMetadataTagsToMediaList(results)
         return results_with_metadata
 
@@ -438,7 +447,7 @@ class MediaCloud(object):
         response_json = response.json()
         # print json.dumps(response_json, indent=2)
         if 'error' in response_json:
-            logger.error('Error in response from server on request to '+url+' : '+response_json['error'])
+            logger.error(u'Error in response from server on request to {}: {}'.format(url, response_json['error']))
             raise mediacloud.error.MCException(response_json['error'], requests.codes['ok'])
         return response_json
 
@@ -456,7 +465,7 @@ class MediaCloud(object):
 
     def _query(self, url, params=None, http_method='GET', json_data=None):
         start_time = time.time()
-        logger.debug("query {} to {} with {} and {}".format(http_method, url, params, json_data))
+        logger.debug(u"query {} to {} with {} and {}".format(http_method, url, params, json_data))
         if params is None:
             params = {}
 #        if (http_method is not 'PUT_JSON') and (not isinstance(params, dict)):
@@ -473,7 +482,7 @@ class MediaCloud(object):
                 else:
                     r = requests.get(url, params=params, headers={'Accept': 'application/json'})
             except Exception as e:
-                logger.error('Failed to GET or POST to {} because {}'.format(url, e))
+                logger.error(u'Failed to GET or POST to {} because {}'.format(url, e))
                 raise e
         elif http_method is 'PUT_JSON':
             try:
@@ -494,23 +503,23 @@ class MediaCloud(object):
             try:
                 r = requests.put(url, params=params, headers={'Accept': 'application/json'})
             except Exception as e:
-                logger.error('Failed to PUT {} because {}'.format(url, e))
+                logger.error(u'Failed to PUT {} because {}'.format(url, e))
                 raise e
         elif http_method is 'POST': # posts JSON data, needs key in url
             try:
                 url_with_key = url + "?key="+self._auth_token
                 r = requests.post(url_with_key, data=json.dumps(params), headers={'Accept': 'application/json', 'Content-Type': 'application/json'})
             except Exception as e:
-                logger.error('Failed to POST {} because {}'.format(url, e))
+                logger.error(u'Failed to POST {} because {}'.format(url, e))
                 raise e
         else:
             raise ValueError('Error - unsupported HTTP method {}'.format(http_method))
         end_time = time.time()
-        logger.debug("Profiling: {}s for {} to {} (with {} / {})".format(end_time - start_time, http_method, url, params, json.dumps(json_data)))
+        logger.debug(u"Profiling: {}s for {} to {} (with {} / {})".format(end_time - start_time, http_method, url, params, json.dumps(json_data)))
         if r.status_code is not requests.codes['ok']:
-            logger.info('Bad HTTP response to {}: {} {}'.format(r.url, r.status_code, r.reason))
-            logger.info('\t{}'.format(r.content))
-            msg = 'Error - got a HTTP status code of {} with the message "{}", body: {}'.format(r.status_code, r.reason, r.text)
+            logger.info(u'Bad HTTP response to {}: {} {}'.format(r.url, r.status_code, r.reason))
+            logger.info(u'\t{}'.format(r.content))
+            msg = u'Error - got a HTTP status code of {} with the message "{}", body: {}'.format(r.status_code, r.reason, r.text)
             raise mediacloud.error.MCException(msg, r.status_code)
         return r
 

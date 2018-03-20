@@ -155,6 +155,24 @@ class ApiMediaTest(ApiBaseTest):
         self.assertTrue("about_country" in media['metadata'])
         self.assertTrue("media_type" in media['metadata'])
 
+    def testMediaListSort(self):
+        # test default sort
+        default_list = self._mc.mediaList(name_like="guardian")
+        for idx, m in enumerate(default_list[1:]):
+            self.assertTrue(default_list[idx]['media_id'] < m['media_id'],
+                            "{}:#{} < {}:#{}?".format(idx, default_list[idx]['media_id'], idx+1, m['media_id']))
+        # test num_stories sort
+        sorted_list = self._mc.mediaList(name_like="guardian", sort='num_stories')
+        for idx, m in enumerate(sorted_list[1:]):
+            self.assertTrue(sorted_list[idx]['num_stories_90'] > m['num_stories_90'],
+                            "{}:#{} > {}:#{}?".format(idx, sorted_list[idx]['num_stories_90'], idx + 1, m['num_stories_90']))
+        # test invalid sort options
+        try:
+            self._mc.mediaList("guardian", sort='!!!!!')
+            self.assertTrue(False)
+        except ValueError:
+            self.assertTrue(True)
+
     def testMediaListWithName(self):
         matching_list = self._mc.mediaList(name_like='new york times')
         self.assertEqual(len(matching_list), 2)
