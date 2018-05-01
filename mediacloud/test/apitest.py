@@ -672,6 +672,11 @@ class ApiWordCountTest(ApiBaseTest):
         for term in term_freq:
             self.assertEqual(len(term['term'].split(' ')), 2)
 
+    def testRandomSeed(self):
+        term_freq = self._mc.wordCount(self.QUERY, self.FILTER_QUERY)
+        random_term_freq = self._mc.wordCount(self.QUERY, self.FILTER_QUERY, random_seed=20)
+        self.assertEqual(len(term_freq), len(random_term_freq))
+
 
 class AdminApiTaggingTest(AdminApiBaseTest):
 

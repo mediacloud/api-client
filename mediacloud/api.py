@@ -376,7 +376,7 @@ class MediaCloud(object):
         params['include_stats'] = 1 if include_stats is True else 0
         return self._queryForJson(self.V2_API_URL+'sentences/field_count', params)
 
-    def wordCount(self, solr_query, solr_filter='', languages=None, num_words=500, sample_size=1000, include_stopwords=False, include_stats=False, ngram_size=1):
+    def wordCount(self, solr_query, solr_filter='', languages=None, num_words=500, sample_size=1000, include_stopwords=False, include_stats=False, ngram_size=1, random_seed=None):
         params = {
             'q': solr_query,
             'l': languages,
@@ -385,6 +385,7 @@ class MediaCloud(object):
             'include_stopwords': 1 if include_stopwords is True else 0,
             'include_stats': 1 if include_stats is True else 0,
             'ngram_size': ngram_size,
+            'random_seed': int(random_seed) if random_seed is not None else None
         }
         if len(solr_filter) > 0:
             params['fq'] = solr_filter
@@ -437,6 +438,10 @@ class MediaCloud(object):
         Details about one controversy dump time slice
         '''
         return self._queryForJson(self.V2_API_URL+'controversy_dump_time_slices/single/{}'.format(controversy_dump_time_slices_id))[0]
+
+    def _queryForFile(self, url, params=None, http_method='GET', json_data=None):
+        response = self._query(url, params, http_method, json_data)
+        return response.content
 
     def _queryForJson(self, url, params=None, http_method='GET', json_data=None):
         '''
@@ -613,6 +618,9 @@ class MediaCloud(object):
 
     def topicSnapshotGenerateStatus(self, topics_id):
         return self._queryForJson(self.V2_API_URL+'topics/{}/snapshots/generate_status'.format(topics_id))
+
+    def topicSnapshotWord2VecModel(self, topics_id, snapshots_id, model_id):
+        return self._queryForFile(self.V2_API_URL+'topics/{}/snapshots/{}/word2vec_model/{}'.format(topics_id, snapshots_id, model_id))
 
     def topicCreate(self, name, solr_seed_query, description, start_date, end_date, media_ids=[], media_tags_ids=[], **kwargs):
         valid_optional_params = [ 'max_iterations', 'is_public', 'ch_monitor_id', 'twitter_topics_id', 'is_logogram', 'max_stories']

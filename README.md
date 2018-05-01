@@ -104,6 +104,8 @@ Then run `python tests.py`. Notice you get a `mediacloud-api.log` that tells you
 Version History
 ---------------
 
+* __v2.53.0__: add random_seed option to wordCount call
+* __v2.52.0__: added new topicSnapshotWord2VecModel endpoint
 * __v2.51.0__: added sort options to mediaList
 * __v2.50.0__: added profiling timing at debug log level
 * __v2.49.0__: fix return value in `topicReset`
