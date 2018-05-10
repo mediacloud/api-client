@@ -53,7 +53,7 @@ class ApiTopicTest(AdminApiBaseTest):
         self.assertGreater(len(topic_list_page_2), 1)
         page_2_ids = [t['topics_id'] for t in topic_list_page_2['topics']]
         self.assertTrue(len(set(page_1_ids).intersection(set(page_2_ids))), 0)
-    
+
 
 class ApiTopicSnapshotTest(AdminApiBaseTest):
 
