@@ -3,17 +3,26 @@ import unittest
 import logging
 import sys
 
-import mediacloud.test.apitest as api
 import mediacloud.test.api_story_test
 import mediacloud.test.api_sentence_test
 import mediacloud.test.api_media_test
-import mediacloud.test.apitopictest as topic
-import mediacloud.test.storagetest as storage
+import mediacloud.test.api_misc_test
+import mediacloud.test.api_user_test
+import mediacloud.test.api_word_count_test
+import mediacloud.test.api_feed_test
+import mediacloud.test.api_topic_test
+import mediacloud.test.storage_test
 
 modules = [mediacloud.test.api_story_test,
            mediacloud.test.api_sentence_test,
            mediacloud.test.api_media_test,
-           api, topic, storage
+           mediacloud.test.api_misc_test,
+           mediacloud.test.api_user_test,
+           mediacloud.test.api_word_count_test,
+           mediacloud.test.api_feed_test,
+           mediacloud.test.api_tags_test,
+           mediacloud.test.api_topic_test,
+           mediacloud.test.storage_test
         ]
 
 # set up all logging to DEBUG (cause we're running tests here!)

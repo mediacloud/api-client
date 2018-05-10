@@ -208,3 +208,14 @@ class AdminApiTaggingContentTest(AdminApiBaseTest):
         story = self._mc.story(TEST_STORY_ID, sentences=True)   # make sure it worked
         tags_on_story = [t for t in story['story_tags'] if t['tag_set'] == tag_set_name]
         self.assertEqual(1, len(tags_on_story))
+
+
+class ApiBigQueryTest(ApiBaseTest):
+
+    def testBigQuery(self):
+        query_to_repeat = "(publish_date:[2016-05-16T00:00:00Z TO 2016-05-17T00:00:00Z]) AND (tags_id_media:(8875027))"
+        query_pieces = [query_to_repeat for x in range(0, 110)]    # "110" was determined experimentally
+        big_query = " AND ".join(query_pieces)
+        results = self._mc.storyCount(big_query)
+        self.assertTrue(results['count'] > 0)
+

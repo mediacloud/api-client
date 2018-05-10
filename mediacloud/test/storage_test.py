@@ -1,8 +1,8 @@
-
 import unittest
 import os
 import json
 from mediacloud.storage import *
+
 
 class StorageTest(unittest.TestCase):
 
@@ -138,6 +138,7 @@ class StorageTest(unittest.TestCase):
     def _getFakeStorySentences(self,page=1):
         my_file = open(os.path.dirname(os.path.realpath(__file__))+'/fixtures/sentences_by_story_'+str(page)+'.json', 'r')
         return json.loads( my_file.read() )
+
 
 class MongoStorageTest(StorageTest):
 
