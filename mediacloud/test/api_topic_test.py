@@ -13,7 +13,7 @@ class ApiTopicTest(AdminApiBaseTest):
 
     def testTopicHasMaxStories(self):
         topic = self._mc.topic(TEST_TOPIC_ID)
-        self.assertTrue('max_stories' in topic)
+        self.assertIn('max_stories', topic)
         try:
             int(topic['max_stories'])
             self.assertTrue(True)
@@ -23,7 +23,7 @@ class ApiTopicTest(AdminApiBaseTest):
     def testTopicList(self):
         # verify it pulls some
         topic_list = self._mc.topicList()
-        self.assertTrue(len(topic_list['topics']) > 1)
+        self.assertGreater(len(topic_list['topics']), 1)
         # verify limit param
         topic_list = self._mc.topicList(limit=2)
         self.assertEqual(len(topic_list['topics']), 2)
@@ -33,27 +33,27 @@ class ApiTopicTest(AdminApiBaseTest):
 
     def testTopicListPublic(self):
         topic_list = self._mc.topicList(public=True)
-        self.assertTrue(len(topic_list) > 1)
+        self.assertGreater(len(topic_list), 1)
         for topic in topic_list['topics']:
             self.assertEqual(topic['is_public'], 1)
 
     def testTopicListName(self):
         to_match = "common"
         topic_list = self._mc.topicList(name=to_match)
-        self.assertTrue(len(topic_list) > 1)
+        self.assertGreater(len(topic_list), 1)
         for topic in topic_list['topics']:
-            self.assertTrue(to_match in topic['name'].lower())
+            self.assertIn(to_match.lower(), topic['name'].lower())
 
     def testTopicListPaging(self):
         # verify second page doesn't contain any ids from the first page
         topic_list_page_1 = self._mc.topicList()
         page_1_ids = [t['topics_id'] for t in topic_list_page_1['topics']]
-        self.assertTrue(len(topic_list_page_1) > 1)
+        self.assertGreater(len(topic_list_page_1), 1)
         topic_list_page_2 = self._mc.topicList(topic_list_page_1['link_ids']['next'])
-        self.assertTrue(len(topic_list_page_2) > 1)
+        self.assertGreater(len(topic_list_page_2), 1)
         page_2_ids = [t['topics_id'] for t in topic_list_page_2['topics']]
         for page_2_topic_id in page_2_ids:
-            self.assertTrue(page_2_topic_id not in page_1_ids)
+            self.assertNotIn(page_2_topic_id, page_1_ids)
 
 
 class ApiTopicSnapshotTest(AdminApiBaseTest):
@@ -68,7 +68,7 @@ class ApiTopicSpiderTest(AdminApiBaseTest):
 
     def testTopicSpiderStatus(self):
         results = self._mc.topicSpiderStatus(TEST_TOPIC2_ID)
-        self.assertTrue('job_states' in results)
+        self.assertIn('job_states', results)
 
 '''
     def testTopicSpiderIterationsList(self):
@@ -88,7 +88,7 @@ class ApiTopicTimespanTest(AdminApiBaseTest):
     def testTopicTimespanList(self):
         # verify it pulls data
         timespans = self._mc.topicTimespanList(1)
-        self.assertTrue(len(timespans) > 1)
+        self.assertGreater(len(timespans), 1)
 
 
 class AdminTopicStoryListTest(AdminApiBaseTest):
@@ -98,23 +98,23 @@ class AdminTopicStoryListTest(AdminApiBaseTest):
         response = self._mc.topicStoryListFacebookData(self.TOPIC_ID)
         self.assertEqual(len(response['counts']), 20)
         for story in response['counts']:
-            self.assertTrue('facebook_api_collect_date' in story)
-            self.assertTrue('facebook_comment_count' in story)
-            self.assertTrue('facebook_share_count' in story)
-            self.assertTrue('stories_id' in story)
+            self.assertIn('facebook_api_collect_date', story)
+            self.assertIn('facebook_comment_count', story)
+            self.assertIn('facebook_share_count', story)
+            self.assertIn('stories_id', story)
 
     def testTopicStoryList(self):
         response = self._mc.topicStoryList(self.TOPIC_ID)
         self.assertEqual(len(response['stories']), 20)
         for story in response['stories']:
-            self.assertTrue('date_is_reliable' in story)
+            self.assertIn('date_is_reliable', story)
 
     def testTopicStoryListPaging(self):
         limit = 50
         response_page_1 = self._mc.topicStoryList(self.TOPIC_ID, limit=limit)
         response_page_1_ids = [m['stories_id'] for m in response_page_1['stories']]
         self.assertEqual(len(response_page_1['stories']), 50)
-        self.assertTrue('link_ids' in response_page_1)
+        self.assertIn('link_ids', response_page_1)
         response_page_2 = self._mc.topicStoryList(self.TOPIC_ID, link_id=response_page_1['link_ids']['next'],
                                                   limit=limit)
         response_page_2_ids = [m['stories_id'] for m in response_page_2['stories']]
@@ -132,21 +132,21 @@ class AdminTopicStoryListTest(AdminApiBaseTest):
         response = self._mc.topicStoryList(self.TOPIC_ID, limit=500, sort='inlink')
         last_inlink_count = 1000000000000
         for story in response['stories']:
-            self.assertTrue(story['inlink_count'] <= last_inlink_count)
+            self.assertLessEqual(story['inlink_count'], last_inlink_count)
             last_inlink_count = story['inlink_count']
 
     def testTopicStoryListSortFacebook(self):
         response = self._mc.topicStoryList(self.TOPIC_ID, limit=500, sort='facebook')
         last_inlink_count = 1000000000000
         for story in response['stories']:
-            self.assertTrue(story['facebook_share_count'] <= last_inlink_count)
+            self.assertLessEqual(story['facebook_share_count'], last_inlink_count)
             last_inlink_count = story['facebook_share_count']
 
     def testTopicStoryListSortTwitter(self):
         response = self._mc.topicStoryList(self.TOPIC_ID, limit=500, sort='twitter')
         last_inlink_count = 1000000000000
         for story in response['stories']:
-            self.assertTrue(story['normalized_tweet_count'] <= last_inlink_count)
+            self.assertLessEqual(story['normalized_tweet_count'], last_inlink_count)
             last_inlink_count = story['normalized_tweet_count']
 
 
@@ -155,12 +155,12 @@ class AdminTopicStoryCountTest(AdminApiBaseTest):
 
     def testTopicStoryCount(self):
         response = self._mc.topicStoryCount(self.TOPIC_ID)
-        self.assertTrue('count' in response)
-        self.assertTrue(response['count'] > 0)
+        self.assertIn('count', response)
+        self.assertGreater(response, 0)
         response2 = self._mc.topicStoryCount(self.TOPIC_ID, q='Obama')
-        self.assertTrue('count' in response2)
-        self.assertTrue(response2['count'] > 0)
-        self.assertTrue(response['count'] > response2['count'])
+        self.assertIn('count', response2)
+        self.assertGreater(response2, 0)
+        self.assertGreater(response, response2)
 
 
 class AdminTopicMediaListTest(AdminApiBaseTest):
@@ -168,10 +168,10 @@ class AdminTopicMediaListTest(AdminApiBaseTest):
 
     def testTopicMediaList(self):
         response = self._mc.topicMediaList(self.TOPIC_ID)
-        self.assertTrue('link_ids' in response)
-        self.assertTrue('media' in response)
+        self.assertIn('link_ids', response)
+        self.assertIn('media', response)
         for media in response['media']:
-            self.assertTrue('media_id' in media)
+            self.assertIn('media_id', media)
 
     def testTopicMediaListLimit(self):
         response = self._mc.topicMediaList(self.TOPIC_ID)
@@ -184,7 +184,7 @@ class AdminTopicMediaListTest(AdminApiBaseTest):
         response_page_1 = self._mc.topicMediaList(self.TOPIC_ID, limit=limit)
         response_page_1_ids = [m['media_id'] for m in response_page_1['media']]
         self.assertEqual(len(response_page_1['media']), 10)
-        self.assertTrue('link_ids' in response_page_1)
+        self.assertIn('link_ids', response_page_1)
         response_page_2 = self._mc.topicMediaList(self.TOPIC_ID, link_id=response_page_1['link_ids']['next'],
                                                   limit=limit)
         response_page_2_ids = [m['media_id'] for m in response_page_2['media']]
@@ -194,20 +194,25 @@ class AdminTopicMediaListTest(AdminApiBaseTest):
 
     def testTopicMediaListSortInlink(self):
         response = self._mc.topicMediaList(self.TOPIC_ID, sort='inlink')
-        last_inlink_count = 1000000000000
+        last_count = 1000000000000
         for media in response['media']:
-            self.assertTrue(media['inlink_count'] <= last_inlink_count)
-            last_inlink_count = media['inlink_count']
+            self.assertLessEqual(media['inlink_count'], last_count)
+            last_count = media['inlink_count']
 
     def testTopicMediaListSortFacebook(self):
         response = self._mc.topicMediaList(self.TOPIC_ID, sort='facebook')
-        last_inlink_count = 1000000000000
+        last_count = 1000000000000
         for media in response['media']:
-            self.assertTrue(media['facebook_share_count'] <= last_inlink_count)
-            last_inlink_count = media['facebook_share_count']
+            self.assertLessEqual(media['facebook_share_count'], last_count)
+            last_count = media['facebook_share_count']
 
     def testTopicMediaListSortTwitter(self):
         response = self._mc.topicMediaList(self.TOPIC_ID, sort='twitter')
+        last_count = 1000000000000
+        for media in response['media']:
+            self.assertLessEqual(media['simple_tweet_count'], last_count)
+            last_count = media['simple_tweet_count']
+
 
 class AdminTopicWordCountTest(AdminApiBaseTest):
     TOPIC_ID = 1
@@ -222,7 +227,7 @@ class AdminTopicWordCountTest(AdminApiBaseTest):
         # verify sorted in desc order
         last_count = 10000000000
         for freq in term_freq:
-            self.assertTrue(last_count >= freq['count'])
+            self.assertGreaterEqual(last_count, freq['count'])
             last_count = freq['count']
 
     def testNumWords(self):
@@ -234,24 +239,8 @@ class AdminTopicWordCountTest(AdminApiBaseTest):
         self.assertEqual(len(term_freq), 1000)
 
 
-class AdminTopicSentenceCountTest(AdminApiBaseTest):
-    TOPIC_ID = 1
-
-    def testSentenceCount(self):
-        results = self._mc.topicSentenceCount(self.TOPIC_ID)
-        self.assertTrue(int(results['count']) > 1000)
-        results = self._mc.topicSentenceCount(self.TOPIC_ID, snapshots_id=365)
-        self.assertTrue(int(results['count']) > 1000)
-
-    def testSentenceCountSplit(self):
-        results = self._mc.topicSentenceCount(self.TOPIC_ID, q='*', fq='*', split=True,
-                                              split_start_date='2013-01-01', split_end_date='2016-01-01')
-        self.assertEqual(results['split']['gap'], '+7DAYS')
-        self.assertEqual(len(results['split']), 160)
-
-
 class AdminTopicMediaMapTest(AdminApiBaseTest):
 
     def testMediaMap(self):
         results = self._mc.topicMediaMap(TEST_TOPIC2_ID)
-        self.assertTrue('gexf' in results)
+        self.assertIn('gexf', results)
