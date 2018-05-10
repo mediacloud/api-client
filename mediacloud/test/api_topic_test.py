@@ -52,8 +52,7 @@ class ApiTopicTest(AdminApiBaseTest):
         topic_list_page_2 = self._mc.topicList(topic_list_page_1['link_ids']['next'])
         self.assertGreater(len(topic_list_page_2), 1)
         page_2_ids = [t['topics_id'] for t in topic_list_page_2['topics']]
-        for page_2_topic_id in page_2_ids:
-            self.assertNotIn(page_2_topic_id, page_1_ids)
+        self.assertTrue(len(set(page_1_ids).intersection(set(page_2_ids))), 0)
 
 
 class ApiTopicSnapshotTest(AdminApiBaseTest):
