@@ -128,13 +128,6 @@ class AdminTopicStoryListTest(AdminApiBaseTest):
         response2 = self._mc.topicStoryList(self.TOPIC_ID, limit=67)
         self.assertEqual(len(response2['stories']), 67)
 
-    def testTopicStoryListSortBitly(self):
-        response = self._mc.topicStoryList(self.TOPIC_ID, limit=500, sort='bitly')
-        last_bitly_count = 1000000000000
-        for story in response['stories']:
-            self.assertTrue(story['bitly_click_count'] <= last_bitly_count)
-            last_bitly_count = story['bitly_click_count']
-
     def testTopicStoryListSortInlink(self):
         response = self._mc.topicStoryList(self.TOPIC_ID, limit=500, sort='inlink')
         last_inlink_count = 1000000000000
@@ -198,13 +191,6 @@ class AdminTopicMediaListTest(AdminApiBaseTest):
         # verify no duplicated media_ids across pages
         combined_ids = set(response_page_1_ids+response_page_2_ids)
         self.assertEqual(len(response_page_1_ids)+len(response_page_2_ids), len(combined_ids))
-
-    def testTopicMediaListSortSocial(self):
-        response = self._mc.topicMediaList(self.TOPIC_ID, sort='bitly')
-        last_bitly_count = 1000000000000
-        for media in response['media']:
-            self.assertTrue(media['bitly_click_count'] <= last_bitly_count)
-            last_bitly_count = media['bitly_click_count']
 
     def testTopicMediaListSortInlink(self):
         response = self._mc.topicMediaList(self.TOPIC_ID, sort='inlink')

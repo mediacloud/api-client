@@ -20,13 +20,13 @@ class MediaCloud(object):
     Simple client library for the MediaCloud API v2
     '''
 
-    V2_API_URL = "https://api.mediacloud.org/api/v2/"
+    V2_API_URL = "http://mcnlp.media.mit.edu:8123/api/v2/"
+    #V2_API_URL = "http://api.mediacloud.org/api/v2/"
 
     SORT_PUBLISH_DATE_ASC = "publish_date_asc"
     SORT_PUBLISH_DATE_DESC = "publish_date_desc"
     SORT_RANDOM = "random"
     SORT_PROCESSED_STORIES_ID = "processed_stories_id"
-    SORT_BITLY_CLICK_COUNT = "bitly_click_count"
 
     MSG_CORE_NLP_NOT_ANNOTATED = "story is not annotated"
 
@@ -274,13 +274,15 @@ class MediaCloud(object):
     def storyRawNytThemeResults(self, story_id_list):
         return self._queryForJson(self.V2_API_URL+'stories/nytlabels', {'stories_id': story_id_list})
 
-    def storyCount(self, solr_query='', solr_filter=''):
+    def storyCount(self, solr_query='', solr_filter='', split=None, split_period=None):
         '''
         The call returns the number of stories returned by Solr for the specified query
         '''
         return self._queryForJson(self.V2_API_URL+'stories_public/count',
                 {'q': solr_query,
-                 'fq': solr_filter
+                 'fq': solr_filter,
+                 'split': 1 if split is True else 0,
+                 'split_period': _validate_split_period_param(split_period)
                 })
 
     def storyPublicList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
@@ -353,28 +355,13 @@ class MediaCloud(object):
                 raise ValueError('Error - stopword_length must be "tiny", "short" or "long"')
         return self._queryForJson(self.V2_API_URL+'stories_public/word_matrix/', params)
 
-    def sentenceCount(self, solr_query, solr_filter=' ', split=False, split_start_date=None, split_end_date=None, split_daily=False):
-        if split not in [True, False]:
-            raise ValueError('split much be a boolean True or False')
-        params = {'q': solr_query, 'fq': solr_filter}
-        params['split'] = 1 if split is True else 0
-        params['split_daily'] = 1 if split_daily is True else 0
-        if split is True:
-            datetime.datetime.strptime(split_start_date, '%Y-%m-%d')    #will throw a ValueError if invalid
-            datetime.datetime.strptime(split_end_date, '%Y-%m-%d')    #will throw a ValueError if invalid
-            params['split_start_date'] = split_start_date
-            params['split_end_date'] = split_end_date
-        return self._queryForJson(self.V2_API_URL+'sentences/count', params)
-
-    def sentenceFieldCount(self, solr_query, solr_filter=' ', sample_size=1000, include_stats=False, field='tags_id_stories', tag_sets_id=None):
-        '''
-        Right now the fields supported are 'tags_id_stories'
-        '''
-        params = {'q':solr_query, 'fq':solr_filter, 'sample_size':sample_size, 'field':field}
+    def storyTagCount(self, solr_query='', solr_filter='', limit=None, tag_sets_id=None):
+        params = {'q':solr_query, 'fq':solr_filter}
+        if limit is not None:
+            params['limit'] = limit
         if tag_sets_id is not None:
             params['tag_sets_id'] = tag_sets_id
-        params['include_stats'] = 1 if include_stats is True else 0
-        return self._queryForJson(self.V2_API_URL+'sentences/field_count', params)
+        return self._queryForJson(self.V2_API_URL+'stories/tag_count', params)
 
     def wordCount(self, solr_query, solr_filter='', languages=None, num_words=500, sample_size=1000, include_stopwords=False, include_stats=False, ngram_size=1, random_seed=None):
         params = {
@@ -528,8 +515,12 @@ class MediaCloud(object):
             raise mediacloud.error.MCException(msg, r.status_code)
         return r
 
-    def publish_date_query(self, start_date, end_date, start_date_inclusive=True, end_date_inclusive=False):
-        return 'publish_date:' + _solr_date_range(start_date, end_date, start_date_inclusive, end_date_inclusive)
+    def publish_date_query(self, start_date, end_date, start_date_inclusive=True, end_date_inclusive=False,
+                           field='publish_day'):
+        valid_date_fields = ['publish_day', 'publish_week', 'publish_month', 'publish_year']
+        if field not in valid_date_fields:
+            raise mediacloud.error.MCException("Not a valid date field {}".format(field))
+        return field+':' + _solr_date_range(start_date, end_date, start_date_inclusive, end_date_inclusive)
 
     def topicMediaList(self, topics_id, **kwargs):
         params = {}
@@ -565,8 +556,11 @@ class MediaCloud(object):
 
     def topicStoryCount(self, topics_id, **kwargs):
         params = {}
-        valid_params = ['q', 'snapshots_id', 'foci_id', 'timespans_id']
+        valid_params = ['q', 'snapshots_id', 'foci_id', 'timespans_id', 'split', 'split_period']
         _validate_params(params, valid_params, kwargs)
+        _validate_bool_params(params, 'split')
+        if 'split_period' in params:
+            params['split_period'] = _validate_split_period_param(params['split_period'])
         return self._queryForJson(self.V2_API_URL+'topics/{}/stories/count'.format(topics_id), params)
 
     def topicWordCount(self, topics_id, **kwargs):
@@ -576,16 +570,6 @@ class MediaCloud(object):
         _validate_params(params, valid_params, kwargs)
         _validate_bool_params(params, 'include_stopwords', 'include_stats')
         return self._queryForJson(self.V2_API_URL+'topics/{}/wc/list'.format(topics_id), params)
-
-    def topicSentenceCount(self, topics_id, **kwargs):
-        params = {}
-        valid_params = ['q', 'fq', 'split', 'split_start_date', 'split_end_date',
-            'snapshots_id', 'foci_id', 'timespans_id']
-        _validate_params(params, valid_params, kwargs)
-        _validate_bool_params(params, 'split', 'split_daily')
-        if 'split' in params and params['split'] is True:
-            _validate_date_params(params, 'split_start_date', 'split_end_date')
-        return self._queryForJson(self.V2_API_URL+'topics/{}/sentences/count'.format(topics_id), params)
 
     def topic(self, topics_id):
         '''
@@ -811,7 +795,6 @@ class AdminMediaCloud(MediaCloud):
         params['stories_id'] = stories_id
         return self._queryForJson(self.V2_API_URL+'stories/update', {}, 'PUT_JSON', params)
 
-
     def sentenceList(self, solr_query, solr_filter='', start=0, rows=1000, sort=MediaCloud.SORT_PUBLISH_DATE_ASC):
         '''
         Search for sentences and page through results
@@ -1022,13 +1005,19 @@ def _validate_params(params, valid_params, args):
     return params
 
 
+def _validate_split_period_param(period):
+    if period not in [None, 'day', 'week', 'month', 'year']:
+        raise ValueError('Invalid story count split period - "{}"'.format(period))
+    return period
+
+
 def _validate_sort_param(order):
     if order not in [None, 'social', 'inlink']:
         raise ValueError('Sort must be either social or inlink')
 
 
 def _validate_topic_sort_param(order):
-    if order not in [None, 'inlink', 'bitly', 'facebook', 'twitter', '']:
+    if order not in [None, 'inlink', 'facebook', 'twitter', '']:
         raise ValueError('Invalid sort specified: {}'.format(order))
 
 

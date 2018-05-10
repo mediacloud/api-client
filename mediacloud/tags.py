@@ -6,14 +6,27 @@ TAG_SET_PRIMARY_LANGUAGE = 1969  # holds the primary language of a source
 TAG_SET_COUNTRY_OF_FOCUS = 1970  # holds the primary focus on what country for a source
 TAG_SET_MEDIA_TYPE = 1972  # holds what type of media source this is (broadcast, online, etc)
 
+# Tag set ids for information about a story
+TAG_SET_NYT_THEMES = 1963  # the tag set the top 600 labels from our NYT-corpus-trained model
+TAG_SET_CLIFF_PLACES = 1011  # the tag set all the geographic country and state tags are in
+TAG_SET_CLIFF_ORGS = 2388  # the tag set with organizational entities
+TAG_SET_CLIFF_PEOPLE = 2389  # the tag set with people entities
+
 # Tag set ids for metadata about stories in our system
 TAG_SET_DATE_GUESS_METHOD = 508
 TAG_SET_EXTRACTOR_VERSION = 1354
 TAG_SET_GEOCODER_VERSION = 1937
+TAG_CLIFF_CLAVIN_2_3_0 = 9353691  # the tag that indicates a story was tagged by the CLIFF version 2.3.0
+TAG_CLIFF_CLAVIN_2_4_1 = 9696677  # the tag that indicates a story was tagged by the CLIFF version 2.4.1
 TAG_SET_NYT_THEMES_VERSION = 1964
+TAG_NYT_LABELER_1_0_0 = 9360669  # the tag that indicates a story was tagged by the NYT labeller version 1
+
+# Tag ids for information about a story
+TAG_STORY_UNDATEABLE = 8877812  # if a story has this tag, that means it was undateable
+
 
 '''
-These are helpers for calling media/story/sentence tag update methods.  These wrappers exist
+These are helpers for calling media/story tag update methods.  These wrappers exist
 because you can specify this by tag/tag-set name, or by tag-id.  Because you don't want to mess
 these calls up, I found it helpful to fomarlize this, instead of just accepting a dict from the
 caller (which might be missing params).
@@ -56,19 +69,7 @@ class StoryTag(TagSpec):
         super(StoryTag, self).__init__(tag_set_name, tag_name, action, tags_id)
 
     def getParams(self):
-        params = { 'stories_id': self.stories_id }
-        params.update(self.getBaseParams())
-        return params
-
-
-class SentenceTag(TagSpec):
-
-    def __init__(self, story_sentences_id, tag_set_name=None, tag_name=None, action=TAG_ACTION_ADD, tags_id=None):
-        self.story_sentences_id = story_sentences_id
-        super(SentenceTag, self).__init__(tag_set_name, tag_name, action, tags_id)
-
-    def getParams(self):
-        params = { 'story_sentences_id': self.story_sentences_id }
+        params = {'stories_id': self.stories_id }
         params.update(self.getBaseParams())
         return params
 
@@ -80,6 +81,6 @@ class MediaTag(TagSpec):
         super(MediaTag, self).__init__(tag_set_name, tag_name, action, tags_id)
 
     def getParams(self):
-        params = { 'media_id': self.media_id }
+        params = {'media_id': self.media_id }
         params.update(self.getBaseParams())
         return params
