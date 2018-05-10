@@ -1,6 +1,11 @@
 import time
 from mediacloud.test.basetest import ApiBaseTest, AdminApiBaseTest
 
+TEST_USER_EMAIL = "mc-api-test@media.mit.edu"
+TEST_TAG_SET_ID = 1727
+TEST_TAG_ID_1 = 9172171  # mc-api-test@media.mit.edu:test_tag1
+TEST_TAG_ID_2 = 9172168  # mc-api-test@media.mit.edu:test_tag2
+
 
 class ApiTagsTest(ApiBaseTest):
 
@@ -34,12 +39,12 @@ class ApiTagsTest(ApiBaseTest):
 
     def testTagListMultpleSets(self):
         search = "Ghana"
-        collection1_id = 5 # collections
-        collection2_id= 556 # GV
+        collection1_id = 15765102  # collections
+        collection2_id = 556  # GV
         list_1 = self._mc.tagList(collection1_id, name_like=search)
-        self.assertTrue(len(list_1) > 0)
+        self.assertGreater(len(list_1), 0)
         list_2 = self._mc.tagList(collection2_id, name_like=search)
-        self.assertTrue(len(list_2) > 0)
+        self.assertGreater(len(list_2), 0)
         combined_list = self._mc.tagList([collection1_id, collection2_id], name_like=search)
         self.assertEqual(len(combined_list), len(list_1) + len(list_2))
 

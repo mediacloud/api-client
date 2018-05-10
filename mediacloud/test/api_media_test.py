@@ -48,8 +48,7 @@ class ApiMediaTest(ApiBaseTest):
         # test num_stories sort
         sorted_list = self._mc.mediaList(name_like="guardian", sort='num_stories')
         for idx, m in enumerate(sorted_list[1:]):
-            self.assertTrue(sorted_list[idx]['num_stories_90'] > m['num_stories_90'],
-                            "{}:#{} > {}:#{}?".format(idx, sorted_list[idx]['num_stories_90'], idx + 1, m['num_stories_90']))
+            self.assertGreaterEqual(sorted_list[idx]['num_stories_90'], m['num_stories_90'])
         # test invalid sort options
         try:
             self._mc.mediaList("guardian", sort='!!!!!')

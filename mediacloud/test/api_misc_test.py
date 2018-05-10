@@ -3,11 +3,12 @@ import datetime
 from mediacloud.test.basetest import ApiBaseTest
 import mediacloud
 
+
 class StatsTest(ApiBaseTest):
 
     def testStats(self):
         stats = self._mc.stats()
-        data_keys  = [
+        data_keys = [
             "total_downloads",
             "total_sentences",
             "active_crawled_feeds",
@@ -18,7 +19,7 @@ class StatsTest(ApiBaseTest):
             "stats_date"
         ]
         for key in data_keys:
-            self.assertTrue(key in stats, "{0} not found".format(key))
+            self.assertIn(key, stats)
 
 
 class PublishDateQueryTest(ApiBaseTest):
@@ -65,15 +66,15 @@ class ApiAllFieldsOptionTest(ApiBaseTest):
         media = self._mc.media(1751)
         self.assertNotEqual(media, None)
         self.assertEqual(media['media_id'], 1751)
-        self.assertFalse('foreign_rss_links' in media)
-        self.assertTrue('url' in media)
+        self.assertNotIn('foreign_rss_links', media)
+        self.assertIn('url', media)
         # do an all fields regular query and verify extra fields are there
         self._mc.setAllFields(True)
         media = self._mc.media(1751)
         self.assertNotEqual(media, None)
         self.assertEqual(media['media_id'], 1751)
-        self.assertTrue('foreign_rss_links' in media)
-        self.assertTrue('url' in media)
+        self.assertIn('foreign_rss_links', media)
+        self.assertIn('url', media)
 
 
 class AdminApiChunkifyTest(ApiBaseTest):
