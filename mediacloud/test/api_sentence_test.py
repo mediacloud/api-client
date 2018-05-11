@@ -1,10 +1,10 @@
 import datetime
 
-from mediacloud.test.basetest import ApiBaseTest, AdminApiBaseTest
+from mediacloud.test.basetest import AdminApiBaseTest
 from mediacloud.test import QUERY_LAST_WEEK
 
 SENTENCE_COUNT = 100
-QUERY_TEST = "puppy"    # can't use * here because of regex match parsing
+QUERY_TEST = "*"
 
 
 class AdminApiSentencesTest(AdminApiBaseTest):
@@ -21,7 +21,7 @@ class AdminApiSentencesTest(AdminApiBaseTest):
 
     def testSentenceListPaging(self):
         results_page1 = self._mc.sentenceList(QUERY_TEST, QUERY_LAST_WEEK, 0, 10)
-        self.assertEqual(len(results_page1), 10)
+        self.assertGreater(len(results_page1), 10)
         page1_sentence_ids = [s['story_sentences_id'] for s in results_page1]
         results_page2 = self._mc.sentenceList(QUERY_TEST, QUERY_LAST_WEEK, 10, 10)
         page2_sentence_ids = [s['story_sentences_id'] for s in results_page2]
