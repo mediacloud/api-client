@@ -20,8 +20,7 @@ class MediaCloud(object):
     Simple client library for the MediaCloud API v2
     '''
 
-    V2_API_URL = "http://mcnlp.media.mit.edu:8123/api/v2/"
-    #V2_API_URL = "http://api.mediacloud.org/api/v2/"
+    V2_API_URL = "http://api.mediacloud.org/api/v2/"
 
     SORT_PUBLISH_DATE_ASC = "publish_date_asc"
     SORT_PUBLISH_DATE_DESC = "publish_date_desc"
