@@ -1,55 +1,57 @@
 #! /usr/bin/env python
 import unittest
 import logging
-import sys
 
-import mediacloud.test.apitest as api
-import mediacloud.test.apitopictest as topic
-import mediacloud.test.storagetest as storage
+import mediacloud.test.api_story_test
+import mediacloud.test.api_sentence_test
+import mediacloud.test.api_media_test
+import mediacloud.test.api_misc_test
+import mediacloud.test.api_user_test
+import mediacloud.test.api_word_count_test
+import mediacloud.test.api_feed_test
+import mediacloud.test.api_tags_test
+import mediacloud.test.api_topic_test
+import mediacloud.test.storage_test
 
-test_classes = [
-    api.ApiBigQueryTest,
-    api.ApiStoriesWordMatrixTest,
-    api.ApiMediaHealthTest, api.AdminApiMediaTest, 
-    api.ApiMediaTest, api.AdminApiMediaSuggestionsTest,
-    api.ApiFeedsTest, api.ApiTagsTest, api.ApiTagSetsTest,
-    api.ApiStoriesTest, api.AdminApiStoriesTest, api.AdminApiStoryUpdateTest,
-    api.ApiWordCountTest, api.ApiSentencesTest, api.AdminApiSentencesTest,
-    storage.MongoStorageTest,
-    api.AuthTokenTest, api.UserProfileTest,
-    api.ApiAllFieldsOptionTest,
-    api.PublishDateQueryTest,
-    api.AdminApiTaggingContentTest, api.AdminApiTaggingTest,
-    api.ApiStoryAPSyndicatedTest,
-    topic.AdminTopicSentenceCountTest,
-    topic.ApiTopicTest, topic.ApiTopicSnapshotTest, topic.ApiTopicTimespanTest,
-    topic.AdminTopicStoryListTest, topic.AdminTopicMediaListTest, topic.AdminTopicWordCountTest,
-    topic.AdminTopicStoryCountTest, topic.AdminTopicMediaMapTest,
-    topic.ApiTopicSpiderTest,
-    api.StatsTest
-]
+logger = logging.getLogger(__name__)
 
-#test_classes = [topic.AdminTopicMediaListTest, topic.AdminTopicStoryListTest, api.ApiMediaTest, api.AdminApiStoriesTest]
+modules = [mediacloud.test.api_story_test,
+           mediacloud.test.api_sentence_test,
+           mediacloud.test.api_media_test,
+           mediacloud.test.api_misc_test,
+           mediacloud.test.api_user_test,
+           mediacloud.test.api_word_count_test,
+           mediacloud.test.api_feed_test,
+           mediacloud.test.api_tags_test,
+           mediacloud.test.api_topic_test,
+           mediacloud.test.storage_test
+        ]
 
-# set up all logging to DEBUG (cause we're running tests here!)
+# set up all logging to DEBUG (cause we're running tests here and they can provide clues!)
 logging.basicConfig(level=logging.DEBUG)
 log_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 log_handler = logging.FileHandler('mediacloud-api-tesapi.log')
 log_handler.setFormatter(log_formatter)
 # set up mediacloud logging to the file
 mc_logger = logging.getLogger('mediacloud')
-mc_logger.propagate = False
+mc_logger.propagate = True
 mc_logger.addHandler(log_handler)
+mc_logger.level = logging.DEBUG
 # set up requests logging to the file
 requests_logger = logging.getLogger('requests')
-requests_logger.propagate = False
+requests_logger.propagate = True
 requests_logger.addHandler(log_handler)
+requests_logger.level = logging.DEBUG
 
 # now run all the tests
-suites = [unittest.TestLoader().loadTestsFromTestCase(test_class) for test_class in test_classes]
+suites = [unittest.TestLoader().loadTestsFromModule(module) for module in modules]
+
+failed_suites_count = 0
 
 if __name__ == "__main__":
-    suite = unittest.TestSuite(suites)
-    test_result = unittest.TextTestRunner(verbosity=2).run(suite)
-    if not test_result.wasSuccessful():
-        sys.exit(1)
+    for suite in suites:
+        test_result = unittest.TextTestRunner(verbosity=3).run(suite)
+        if not test_result.wasSuccessful():
+            failed_suites_count = failed_suites_count + 1
+
+logger.info("Ran {} suites. {} failed.".format(len(suites), failed_suites_count))
