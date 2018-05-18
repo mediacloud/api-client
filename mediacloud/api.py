@@ -534,7 +534,7 @@ class MediaCloud(object):
 
     def topicStoryList(self, topics_id, **kwargs):
         params = {}
-        valid_params = ['q', 'fq', ''sort', 'stories_id', 'link_to_stories_id', 'link_from_stories_id',
+        valid_params = ['q', 'fq', 'sort', 'stories_id', 'link_to_stories_id', 'link_from_stories_id',
             'link_to_media_id', 'link_from_media_id', 'media_id', 'limit', 'link_id', 'snapshots_id',
             'foci_id', 'timespans_id']
         _validate_params(params, valid_params, kwargs)
