@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.0.2
+
+* fix dumb typo
+
 ### v3.0.1
 
 * add `fq` as a valid param on a few more topicStory calls
