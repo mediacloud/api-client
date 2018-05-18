@@ -534,7 +534,7 @@ class MediaCloud(object):
 
     def topicStoryList(self, topics_id, **kwargs):
         params = {}
-        valid_params = ['q', 'sort', 'stories_id', 'link_to_stories_id', 'link_from_stories_id',
+        valid_params = ['q', 'fq', ''sort', 'stories_id', 'link_to_stories_id', 'link_from_stories_id',
             'link_to_media_id', 'link_from_media_id', 'media_id', 'limit', 'link_id', 'snapshots_id',
             'foci_id', 'timespans_id']
         _validate_params(params, valid_params, kwargs)
@@ -549,13 +549,13 @@ class MediaCloud(object):
         For technical reasons this data is too hard to include in the topicStoryList results :-(
         '''
         params = {}
-        valid_params = ['q', 'limit', 'link_id', 'snapshots_id', 'foci_id', 'timespans_id']
+        valid_params = ['q', 'fq', 'limit', 'link_id', 'snapshots_id', 'foci_id', 'timespans_id']
         _validate_params(params, valid_params, kwargs)
         return self._queryForJson(self.V2_API_URL+'topics/{}/stories/facebook'.format(topics_id), params)
 
     def topicStoryCount(self, topics_id, **kwargs):
         params = {}
-        valid_params = ['q', 'snapshots_id', 'foci_id', 'timespans_id', 'split', 'split_period']
+        valid_params = ['q', 'fq', 'snapshots_id', 'foci_id', 'timespans_id', 'split', 'split_period']
         _validate_params(params, valid_params, kwargs)
         _validate_bool_params(params, 'split')
         if 'split_period' in params:
