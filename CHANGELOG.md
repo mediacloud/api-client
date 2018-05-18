@@ -3,6 +3,8 @@ Version History
 
 ### v3.0.0
 
+This release is not backwards-compatible.  You will likely need to update your code.
+
 * switch to story-based search
 * remove sentence endpoints
 * add `storyCount` split options to replace `sentenceCount` with a `split` param

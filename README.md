@@ -1,7 +1,7 @@
 MediaCloud Python API Client
 ============================
 
-This is the source code of the python client for the [MediaCloud API v2](https://github.com/berkmancenter/mediacloud/blob/master/doc/api_2_0_spec/api_2_0_spec.md).
+This is a python client for accessing the [MediaCloud API v2](https://github.com/berkmancenter/mediacloud/blob/master/doc/api_2_0_spec/api_2_0_spec.md).
 
 Usage
 -----
@@ -11,53 +11,46 @@ First [sign up for an API key](https://core.mediacloud.org/login/register).  The
 pip install mediacloud
 ```
 
+Check `CHANGELOG.md` for a detailed history of changes.
+
 Examples
 --------
 
-To get the first 2000 the stories associated with a query and dump the output to json:
+Find out how many stories in the top US online news sites mentioned "Zimbabwe" in the last year:
+```python
+import mediacloud
+mc = mediacloud.api.MediaCloud('MY_API_KEY')
+res = mc.storyCount('zimbabwe AND president AND tags_id_media:58722749', 'publish_date:[NOW-1YEAR TO NOW]')
+print res['count']  # prints the number of stories found
+```
+
+Get 2000 stories from the NYT about a topic in 2018 and dump the output to json:
+
 ```python
 import mediacloud, json, datetime
 mc = mediacloud.api.MediaCloud('MY_API_KEY')
 
-fetch_size = 1000
+fetch_size = 500
 stories = []
 last_processed_stories_id = 0
 while len(stories) < 2000:
-    fetched_stories = mc.storyList('( obama AND policy ) OR ( whitehouse AND policy)', 
-                                   solr_filter=[ mc.publish_date_query( datetime.date(2013,1,1), datetime.date(2015,1,1)), 
-                                                                         'tags_id_media:1'],
-                                    last_processed_stories_id=last_processed_stories_id, rows= fetch_size)
-    stories.extend( fetched_stories)
+    fetched_stories = mc.storyList('trump AND "north korea" AND media_id:1', 
+                                   solr_filter=mc.publish_date_query(datetime.date(2018,1,1), datetime.date(2019,1,1)),
+                                   last_processed_stories_id=last_processed_stories_id, rows= fetch_size)
+    stories.extend(fetched_stories)
     if len( fetched_stories) < fetch_size:
         break
-    
     last_processed_stories_id = stories[-1]['processed_stories_id']
-    
 print json.dumps(stories)
 ```
 
-Find out how many sentences in the US mainstream media that mentioned "Zimbabwe" and "president" in 2013:
+Find the most commonly used words in stories from the US top online news sites that mentioned "Zimbabwe" and "president" in 2013:
 ```python
 import mediacloud, datetime
 mc = mediacloud.api.MediaCloud('MY_API_KEY')
-res = mc.sentenceCount('( zimbabwe AND president)', solr_filter=[mc.publish_date_query( datetime.date( 2013, 1, 1), datetime.date( 2014, 1, 1) ), 'tags_id_media:1' ])
-print res['count'] # prints the number of sentences found
-```
-
-Alternatively, this query could be specified as follows
-```python
-import mediacloud
-mc = mediacloud.api.MediaCloud('MY_API_KEY')
-results = mc.sentenceCount('( zimbabwe AND president)', '+publish_date:[2013-01-01T00:00:00Z TO 2014-01-01T00:00:00Z} AND +tags_id_media:1')
-print results['count']
-```
-
-Find the most commonly used words in sentences from the US mainstream media that mentioned "Zimbabwe" and "president" in 2013:
-```python
-import mediacloud, datetime
-mc = mediacloud.api.MediaCloud('MY_API_KEY')
-words = mc.wordCount('( zimbabwe AND president)',  solr_filter=[mc.publish_date_query( datetime.date( 2013, 1, 1), datetime.date( 2014, 1, 1) ), 'tags_id_media:1' ] )
-print words[0]  #prints the most common word
+words = mc.wordCount('zimbabwe AND president AND tags_id_media:58722749',
+                     mc.publish_date_query( datetime.date( 2013, 1, 1), datetime.date( 2014, 1, 1)))
+print words[0]  # prints the most common word
 ```
 
 To find out all the details about one particular story by id:
@@ -73,12 +66,13 @@ To save the first 100 stories from one day to a database:
 import mediacloud, datetime
 mc = mediacloud.api.MediaCloud('MY_API_KEY')
 db = mediacloud.storage.MongoStoryDatabase('one_day')
-stories = mc.storyList(mc.publish_date_query( datetime.date (2014, 01, 01), datetime.date(2014,01,02) ), last_processed_stories_id=0,rows=100)
+stories = mc.storyList('*', mc.publish_date_query( datetime.date (2014, 01, 01), datetime.date(2014,01,02) ),
+                       last_processed_stories_id=0,rows=100)
 [db.addStory(s) for s in stories]
 print db.storyCount()
 ```
 
-Take a look at the `apitest.py` and `storagetest.py` for more detailed examples.
+Take a look at the test in the `mediacloud/test/` module for more detailed examples.
 
 Development
 -----------
@@ -88,9 +82,9 @@ If you are interested in adding code to this module, first clone [the GitHub rep
 ## Testing
 
 First run all the tests.  Copy `mc-client.config.template` to `mc-client.config` and edit it.
-Then run `python tests.py`. Notice you get a `mediacloud-api.log` that tells you about each query it runs.
+Then run `python tests.py`.
 
-## Distribution
+## Distributing a New Version
 
 1. Run `python test.py` to make sure all the test pass
 2. Update the version number in `mediacloud/__init__.py`
