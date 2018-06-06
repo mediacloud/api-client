@@ -1,6 +1,14 @@
 Version History
 ===============
 
+### v3.0.4
+
+* add ability to move tags from one tag_set to another (use the `tag_sets_id` argumet to `updateTag` method)
+
+### v3.0.3
+
+* fix https problem that was making POST calls fail
+
 ### v3.0.2
 
 * fix dumb typo
