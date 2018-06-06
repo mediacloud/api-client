@@ -20,7 +20,7 @@ class MediaCloud(object):
     Simple client library for the MediaCloud API v2
     '''
 
-    V2_API_URL = "http://api.mediacloud.org/api/v2/"
+    V2_API_URL = "https://api.mediacloud.org/api/v2/"
 
     SORT_PUBLISH_DATE_ASC = "publish_date_asc"
     SORT_PUBLISH_DATE_DESC = "publish_date_desc"
@@ -851,12 +851,15 @@ class AdminMediaCloud(MediaCloud):
         }
         return self._queryForJson(self.V2_API_URL+'tags/create', params, 'POST')
 
-    def updateTag(self, tags_id, name=None, label=None, description=None, is_static=None, show_on_media=None, show_on_stories=None):
+    def updateTag(self, tags_id, name=None, label=None, description=None, is_static=None, show_on_media=None,
+                  show_on_stories=None, tag_sets_id=None):
         params = { 'tags_id': tags_id }
         if name is not None:
             params['tag'] = name
         if label is not None:
             params['label'] = label
+        if tag_sets_id is not None:
+            params['tag_sets_id'] = tag_sets_id
         if description is not None:
             params['description'] = description
         if is_static is not None:
