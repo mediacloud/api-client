@@ -889,21 +889,19 @@ class AdminMediaCloud(MediaCloud):
 
         return self._queryForJson(self.V2_API_URL+'tag_sets/update/', {}, 'PUT_JSON', params)
 
-    def feedCreate(self, media_id, name, url, feed_type='syndicated', feed_status='active'):
+    def feedCreate(self, media_id, name, url, feed_type='syndicated', active=True):
         _validate_feed_type(feed_type)
-        _validate_feed_status(feed_status)
         params = {
             'media_id': media_id,
             'name': name,
             'url': url,
             'feed_type': feed_type,
-            'feed_status': feed_status
+            'active': active,
         }
         return self._queryForJson(self.V2_API_URL+'feeds/create', params, 'POST')
 
-    def feedUpdate(self, feeds_id, name=None, url=None, feed_type='syndicated', feed_status='active'):
+    def feedUpdate(self, feeds_id, name=None, url=None, feed_type='syndicated', active=True):
         _validate_feed_type(feed_type)
-        _validate_feed_status(feed_status)
         params = { 'feeds_id': feeds_id}
         if name is not None:
             params['name'] = name
@@ -911,8 +909,8 @@ class AdminMediaCloud(MediaCloud):
             params['url'] = url
         if feed_type is not None:
             params['feed_type'] = feed_type
-        if feed_status is not None:
-            params['feed_status'] = feed_status
+        if active is not None:
+            params['active'] = active
         return self._queryForJson(self.V2_API_URL+'feeds/update', params, 'PUT_JSON')
 
     def feedsScrape(self, media_id):
@@ -1047,8 +1045,3 @@ def _validate_date_params(params, *args):
 def _validate_feed_type(feed_type):
     if feed_type not in ['syndicated', 'web_page']:
             raise ValueError('feed_type must be syndicated or web_page')
-
-
-def _validate_feed_status(feed_status):
-    if feed_status not in ['active', 'inactive', 'skipped']:
-        raise ValueError('feed_status must be active, inactive, or skipped')
