@@ -895,7 +895,7 @@ class AdminMediaCloud(MediaCloud):
             'media_id': media_id,
             'name': name,
             'url': url,
-            'feed_type': feed_type,
+            'type': feed_type,
             'active': active,
         }
         return self._queryForJson(self.V2_API_URL+'feeds/create', params, 'POST')
@@ -908,7 +908,7 @@ class AdminMediaCloud(MediaCloud):
         if url is not None:
             params['url'] = url
         if feed_type is not None:
-            params['feed_type'] = feed_type
+            params['type'] = feed_type
         if active is not None:
             params['active'] = active
         return self._queryForJson(self.V2_API_URL+'feeds/update', params, 'PUT_JSON')
