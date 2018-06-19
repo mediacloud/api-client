@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.1.0
+
+* updated feed management for new backend API changes
+
 ### v3.0.4
 
 * add ability to move tags from one tag_set to another (use the `tag_sets_id` argumet to `updateTag` method)
