@@ -6,6 +6,12 @@ TEST_FEED_ID = 1
 
 class ApiFeedTest(AdminApiBaseTest):
 
+    def testFeedInfo(self):
+        results = self._mc.feedList(TEST_MEDIA_ID)
+        self.assertIn('type', results[0])
+        self.assertIn('active', results[0])
+        self.assertIsInstance(results[0]['active'], bool)
+
     def testFeedScrape(self):
         # queue scrape job
         results = self._mc.feedsScrape(TEST_MEDIA_ID)
