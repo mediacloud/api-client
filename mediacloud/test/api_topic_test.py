@@ -149,6 +149,17 @@ class AdminTopicStoryListTest(AdminApiBaseTest):
             last_inlink_count = story['normalized_tweet_count']
 
 
+class TopicStoryLinksText(AdminApiBaseTest):
+
+    def testStoryLinks(self):
+        results = self._mc.topicStoryLinks(TEST_TOPIC_ID)
+        self.assertGreater(len(results['links']), 0)
+
+    def testStoryLinksLimit(self):
+        results = self._mc.topicStoryLinks(TEST_TOPIC_ID, limit=100)
+        self.assertEqual(len(results['links']), 100)
+
+
 class AdminTopicStoryCountTest(AdminApiBaseTest):
     TOPIC_ID = 1
 
@@ -171,6 +182,15 @@ class AdminTopicMediaListTest(AdminApiBaseTest):
         self.assertIn('media', response)
         for media in response['media']:
             self.assertIn('media_id', media)
+
+    def testTopicMediaListMetadata(self):
+        response = self._mc.topicMediaList(self.TOPIC_ID)
+        for media in response['media']:
+            self.assertIn("pub_country", media['metadata'])
+            self.assertIn("pub_state", media['metadata'])
+            self.assertIn("language", media['metadata'])
+            self.assertIn("about_country", media['metadata'])
+            self.assertIn("media_type", media['metadata'])
 
     def testTopicMediaListLimit(self):
         response = self._mc.topicMediaList(self.TOPIC_ID)
@@ -211,6 +231,17 @@ class AdminTopicMediaListTest(AdminApiBaseTest):
         for media in response['media']:
             self.assertLessEqual(media['simple_tweet_count'], last_count)
             last_count = media['simple_tweet_count']
+
+
+class TopicMediaLinksText(AdminApiBaseTest):
+
+    def testMediaLinks(self):
+        results = self._mc.topicMediaLinks(TEST_TOPIC_ID)
+        self.assertGreater(len(results['links']), 0)
+
+    def testMediaLinksLimit(self):
+        results = self._mc.topicMediaLinks(TEST_TOPIC_ID, limit=100)
+        self.assertEqual(len(results['links']), 100)
 
 
 class AdminTopicWordCountTest(AdminApiBaseTest):

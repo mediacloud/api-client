@@ -6,7 +6,6 @@ TESTING_COLLECTION = 9353679
 TEST_MEDIA_SUGGEST_REASON = "!!!! TESTING SUGGESTION !!!!"
 TEST_TAG_ID_1 = 9172171  # mc-api-test@media.mit.edu:test_tag1
 
-
 class ApiMediaHealthTest(ApiBaseTest):
 
     def testMediaHealth(self):

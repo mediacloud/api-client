@@ -14,11 +14,10 @@ MAX_HTTP_GET_CHARS = 4000   # experimentally determined for our main servers (co
 
 logger = logging.getLogger(__name__)
 
-
+'''
+Simple client library for the MediaCloud API v2
+'''
 class MediaCloud(object):
-    '''
-    Simple client library for the MediaCloud API v2
-    '''
 
     V2_API_URL = "https://api.mediacloud.org/api/v2/"
 
@@ -528,9 +527,18 @@ class MediaCloud(object):
         _validate_params(params, valid_params, kwargs)
         if 'sort' in params:
             _validate_topic_sort_param(params['sort'])
-        media = self._queryForJson(self.V2_API_URL+'topics/{}/media/list'.format(topics_id), params)
-        # can't add metadata here because this call doesn't return tags :-(
-        return media
+        results = self._queryForJson(self.V2_API_URL+'topics/{}/media/list'.format(topics_id), params)
+        # add in parsed out metadata to make life for users easier
+        results['media'] = self._addMetadataTagsToMediaList(results['media'])
+        return results
+
+    def topicMediaLinks(self, topics_id, **kwargs):
+        params = {}
+        valid_params = ['snapshots_id', 'foci_id', 'timespans_id', 'limit',]
+        _validate_params(params, valid_params, kwargs)
+        links = self._queryForJson(self.V2_API_URL+'topics/{}/media/links'.format(topics_id), params)
+        # returns media_ids... you'll have to add the media information yourself :-(
+        return links
 
     def topicStoryList(self, topics_id, **kwargs):
         params = {}
@@ -543,6 +551,14 @@ class MediaCloud(object):
         stories = self._queryForJson(self.V2_API_URL+'topics/{}/stories/list'.format(topics_id), params)
         # can't add in metadata here because the tags aren't returned from this call :-(
         return stories
+
+    def topicStoryLinks(self, topics_id, **kwargs):
+        params = {}
+        valid_params = ['snapshots_id', 'foci_id', 'timespans_id', 'limit',]
+        _validate_params(params, valid_params, kwargs)
+        links = self._queryForJson(self.V2_API_URL+'topics/{}/stories/links'.format(topics_id), params)
+        # returns stories_ids... you'll have to add the story information yourself :-(
+        return links
 
     def topicStoryListFacebookData(self, topics_id, **kwargs):
         '''
