@@ -1,37 +1,45 @@
 Version History
 ===============
 
+### v3.2.0
+
+* adds topicStoryLinks and topicMediaLinks endpoints
+
+### v3.1.1
+
+* adds in parsed out metadata to the topicMediaList call (under a `metadata` property on each item)
+
 ### v3.1.0
 
-* updated feed management for new backend API changes
+* updates feed management for new backend API changes
 
 ### v3.0.4
 
-* add ability to move tags from one tag_set to another (use the `tag_sets_id` argumet to `updateTag` method)
+* adds ability to move tags from one tag_set to another (use the `tag_sets_id` argumet to `updateTag` method)
 
 ### v3.0.3
 
-* fix https problem that was making POST calls fail
+* fixes https problem that was making POST calls fail
 
 ### v3.0.2
 
-* fix dumb typo
+* fixes dumb typo
 
 ### v3.0.1
 
-* add `fq` as a valid param on a few more topicStory calls
+* adds `fq` as a valid param on a few more topicStory calls
 
 ### v3.0.0
 
 This release is not backwards-compatible.  You will likely need to update your code.
 
-* switch to story-based search
-* remove sentence endpoints
-* add `storyCount` split options to replace `sentenceCount` with a `split` param
-* add in `storyTagCount` to replace `sentenceFieldCount`
-* add support for specifying date range by time/day/week/month; default to `publish_day` searching
-* being refactoring tests into individual modules by content type (story, sentence, tag, etc.)
-* begin removing references to specific content (by id) so we can test on non-production databases
+* switches to story-based search
+* removes sentence endpoints
+* adds `storyCount` split options to replace `sentenceCount` with a `split` param
+* adds in `storyTagCount` to replace `sentenceFieldCount`
+* adds support for specifying date range by time/day/week/month; default to `publish_day` searching
+* begins refactoring tests into individual modules by content type (story, sentence, tag, etc.)
+* begins removing references to specific content (by id) so we can test on non-production databases
 
 Previous Versions
 -----------------
