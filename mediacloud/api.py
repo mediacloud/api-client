@@ -372,7 +372,7 @@ class MediaCloud(object):
             'ngram_size': ngram_size,
             'random_seed': int(random_seed) if random_seed is not None else None
         }
-        if len(solr_filter) > 0:
+        if solr_filter and len(solr_filter) > 0:
             params['fq'] = solr_filter
         return self._queryForJson(self.V2_API_URL+'wc/list', params)
 
@@ -508,7 +508,7 @@ class MediaCloud(object):
         logger.debug(u"Profiling: {}s for {} to {} (with {} / {})".format(end_time - start_time, http_method, url, params, json.dumps(json_data)))
         if r.status_code is not requests.codes['ok']:
             logger.info(u'Bad HTTP response to {}: {} {}'.format(r.url, r.status_code, r.reason))
-            logger.info(u'\t{}'.format(r.content))
+            # logger.info(u'\t{}'.format(r.content))
             msg = u'Error - got a HTTP status code of {} with the message "{}", body: {}'.format(r.status_code, r.reason, r.text)
             raise mediacloud.error.MCException(msg, r.status_code)
         return r
@@ -534,7 +534,7 @@ class MediaCloud(object):
 
     def topicMediaLinks(self, topics_id, **kwargs):
         params = {}
-        valid_params = ['snapshots_id', 'foci_id', 'timespans_id', 'limit',]
+        valid_params = ['snapshots_id', 'foci_id', 'timespans_id', 'limit', 'link_id']
         _validate_params(params, valid_params, kwargs)
         links = self._queryForJson(self.V2_API_URL+'topics/{}/media/links'.format(topics_id), params)
         # returns media_ids... you'll have to add the media information yourself :-(
@@ -554,7 +554,7 @@ class MediaCloud(object):
 
     def topicStoryLinks(self, topics_id, **kwargs):
         params = {}
-        valid_params = ['snapshots_id', 'foci_id', 'timespans_id', 'limit',]
+        valid_params = ['snapshots_id', 'foci_id', 'timespans_id', 'limit', 'link_id']
         _validate_params(params, valid_params, kwargs)
         links = self._queryForJson(self.V2_API_URL+'topics/{}/stories/links'.format(topics_id), params)
         # returns stories_ids... you'll have to add the story information yourself :-(
