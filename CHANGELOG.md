@@ -1,6 +1,18 @@
 Version History
 ===============
 
+### v3.2.3
+
+* fix bug related to word counts with no `fq` param
+
+### v3.2.2
+
+* fix bug related to paging over topicMediaLinks and topicStoryLinks
+
+### v3.2.1
+
+* adds paging support to topicStoryLinks and topicMediaLinks
+
 ### v3.2.0
 
 * adds topicStoryLinks and topicMediaLinks endpoints
