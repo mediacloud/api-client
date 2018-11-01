@@ -149,7 +149,7 @@ class AdminTopicStoryListTest(AdminApiBaseTest):
             last_inlink_count = story['normalized_tweet_count']
 
 
-class TopicStoryLinksText(AdminApiBaseTest):
+class TopicStoryLinksTest(AdminApiBaseTest):
 
     def testStoryLinks(self):
         results = self._mc.topicStoryLinks(TEST_TOPIC_ID)
@@ -158,6 +158,12 @@ class TopicStoryLinksText(AdminApiBaseTest):
     def testStoryLinksLimit(self):
         results = self._mc.topicStoryLinks(TEST_TOPIC_ID, limit=100)
         self.assertEqual(len(results['links']), 100)
+
+    def testStoryLinksPaging(self):
+        results = self._mc.topicStoryLinks(TEST_TOPIC_ID)
+        self.assertGreater(len(results['links']), 0)
+        results2 = self._mc.topicStoryLinks(TEST_TOPIC_ID, link_id=results['link_ids']['next'])
+        self.assertGreater(len(results2['links']), 0)
 
 
 class AdminTopicStoryCountTest(AdminApiBaseTest):
@@ -242,6 +248,12 @@ class TopicMediaLinksText(AdminApiBaseTest):
     def testMediaLinksLimit(self):
         results = self._mc.topicMediaLinks(TEST_TOPIC_ID, limit=100)
         self.assertEqual(len(results['links']), 100)
+
+    def testMediaLinksPaging(self):
+        results = self._mc.topicMediaLinks(TEST_TOPIC_ID)
+        self.assertGreater(len(results['links']), 0)
+        results2 = self._mc.topicMediaLinks(TEST_TOPIC_ID, link_id=results['link_ids']['next'])
+        self.assertGreater(len(results2['links']), 0)
 
 
 class AdminTopicWordCountTest(AdminApiBaseTest):
