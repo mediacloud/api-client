@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.3.0
+
+* new user management admin endpoints
+
 ### v3.2.3
 
 * fix bug related to word counts with no `fq` param
