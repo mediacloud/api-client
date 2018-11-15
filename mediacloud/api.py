@@ -985,6 +985,29 @@ class AdminMediaCloud(MediaCloud):
             params['media_id'] = media_id
         return self._queryForJson(self.V2_API_URL+'media/mark_suggestion', params, 'PUT_JSON')
 
+    def user(self, auth_users_id):
+        return self._queryForJson(self.V2_API_URL + 'users/single/{}'.format(auth_users_id))
+
+    def userList(self, auth_users_id=None, search=None):
+        # search shuld be email or full_name
+        # auth_users_id should be an array
+        params = {}
+        if auth_users_id:
+            params['auth_users_id'] = auth_users_id
+        if search:
+            params['search'] = search
+        return self._queryForJson(self.V2_API_URL + 'users/list', params)
+
+    def userUpdate(self, auth_users_id, **kwargs):
+        params = {'auth_users_id': auth_users_id}
+        valid_params = ['full_name', 'email', 'notes', 'roles']
+        _validate_params(params, valid_params, kwargs)
+        return self._queryForJson(self.V2_API_URL + 'users/update', params, 'PUT_JSON')
+
+    def validUserRoles(self):
+        # list all the possible roles that exist for users
+        return self._queryForJson(self.V2_API_URL + 'users/list_roles')
+
 
 def _solr_date_range(start_date, end_date, start_date_inclusive=True, end_date_inclusive=False):
     ret = ''

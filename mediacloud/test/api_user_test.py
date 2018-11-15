@@ -1,4 +1,9 @@
-from mediacloud.test.basetest import ApiBaseTest
+import random
+
+from mediacloud.test.basetest import ApiBaseTest, AdminApiBaseTest
+
+TEST_USER_EMAIL = "mediacloud-testing@media.mit.edu"
+TEST_USER_ID = 435
 
 
 class UserProfileTest(ApiBaseTest):
@@ -35,3 +40,35 @@ class AuthTokenTest(ApiBaseTest):
         except:
             self.assertTrue(True)
 
+
+class UserProfileTest(AdminApiBaseTest):
+
+    def testUser(self):
+        results = self._mc.user(TEST_USER_ID)
+        self.assertIn('users', results)
+        self.assertEqual(len(results['users']), 1)
+        self.assertIn('email', results['users'][0])
+        self.assertEqual(results['users'][0]['email'], TEST_USER_EMAIL)
+
+    def testUserList(self):
+        results = self._mc.userList(search=TEST_USER_EMAIL)
+        self.assertIn('users', results)
+        self.assertEqual(len(results['users']), 1)
+        self.assertIn('email', results['users'][0])
+        self.assertEqual(results['users'][0]['email'], TEST_USER_EMAIL)
+
+    def testUserListRoles(self):
+        results = self._mc.validUserRoles()
+        self.assertIn('roles', results)
+        self.assertGreater(len(results['roles']), 0)
+
+    def testUserUpdate(self):
+        # test updating the user's note
+        new_note = "testing user - {}".format(random.randint(1, 101))
+        results = self._mc.user(TEST_USER_ID)
+        self.assertNotEqual(results['users'][0]['notes'], new_note)
+        results = self._mc.userUpdate(TEST_USER_ID, notes=new_note)
+        self.assertIn('success', results)
+        self.assertTrue(results['success'], 1)
+        results = self._mc.user(TEST_USER_ID)
+        self.assertEqual(results['users'][0]['notes'], new_note)
