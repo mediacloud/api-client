@@ -57,6 +57,18 @@ class UserProfileTest(AdminApiBaseTest):
         self.assertIn('email', results['users'][0])
         self.assertEqual(results['users'][0]['email'], TEST_USER_EMAIL)
 
+    def testUserListPaging(self):
+        page1 = self._mc.userList()
+        self.assertIn('users', page1)
+        page1_ids = [u['auth_users_id'] for u in page1['users']]
+        self.assertIn('link_ids', page1)
+        self.assertIn('next', page1['link_ids'])
+        page2 = self._mc.userList(link_id = page1['link_ids']['next'])
+        page2_ids = [u['auth_users_id'] for u in page2['users']]
+        # make sure pages don't overlap
+        intersection = list(set(page1_ids) & set(page2_ids))
+        self.assertEqual(0, len(intersection))
+
     def testUserListRoles(self):
         results = self._mc.validUserRoles()
         self.assertIn('roles', results)

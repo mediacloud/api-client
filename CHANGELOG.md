@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.3.1
+
+* add paging to user list endpoint 
+
 ### v3.3.0
 
 * new user management admin endpoints

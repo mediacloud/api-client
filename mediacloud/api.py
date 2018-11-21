@@ -988,7 +988,7 @@ class AdminMediaCloud(MediaCloud):
     def user(self, auth_users_id):
         return self._queryForJson(self.V2_API_URL + 'users/single/{}'.format(auth_users_id))
 
-    def userList(self, auth_users_id=None, search=None):
+    def userList(self, auth_users_id=None, search=None, link_id=None):
         # search shuld be email or full_name
         # auth_users_id should be an array
         params = {}
@@ -996,6 +996,8 @@ class AdminMediaCloud(MediaCloud):
             params['auth_users_id'] = auth_users_id
         if search:
             params['search'] = search
+        if link_id:
+            params['link_id'] = link_id
         return self._queryForJson(self.V2_API_URL + 'users/list', params)
 
     def userUpdate(self, auth_users_id, **kwargs):
