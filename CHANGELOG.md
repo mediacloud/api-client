@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.4.0
+
+* add more options to user update endpoint, and user deletion endpoint  
+
 ### v3.3.1
 
 * add paging to user list endpoint 

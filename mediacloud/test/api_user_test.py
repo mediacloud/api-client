@@ -49,6 +49,10 @@ class UserProfileTest(AdminApiBaseTest):
         self.assertEqual(len(results['users']), 1)
         self.assertIn('email', results['users'][0])
         self.assertEqual(results['users'][0]['email'], TEST_USER_EMAIL)
+        self.assertIn('weekly_requests_limit', results['users'][0])
+        self.assertIn('active', results['users'][0])
+        self.assertIn('max_topic_stories', results['users'][0])
+        self.assertEqual(results['users'][0]['active'], 1)
 
     def testUserList(self):
         results = self._mc.userList(search=TEST_USER_EMAIL)
@@ -84,3 +88,8 @@ class UserProfileTest(AdminApiBaseTest):
         self.assertTrue(results['success'], 1)
         results = self._mc.user(TEST_USER_ID)
         self.assertEqual(results['users'][0]['notes'], new_note)
+
+# verified this one manually
+#    def testUserDelete(self):
+#        results = self._mc.userDelete(3835)
+#        self.assertEqual(results['success'], 1)

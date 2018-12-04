@@ -1002,9 +1002,14 @@ class AdminMediaCloud(MediaCloud):
 
     def userUpdate(self, auth_users_id, **kwargs):
         params = {'auth_users_id': auth_users_id}
-        valid_params = ['full_name', 'email', 'notes', 'roles']
+        valid_params = ['full_name', 'email', 'notes', 'roles', 'max_topic_stories', 'weekly_requests_limit', 'active']
         _validate_params(params, valid_params, kwargs)
+        _validate_bool_params(params, 'active')
         return self._queryForJson(self.V2_API_URL + 'users/update', params, 'PUT_JSON')
+
+    def userDelete(self, user_id):
+        params = {'auth_users_id': user_id}
+        return self._queryForJson(self.V2_API_URL + 'users/delete', params, 'PUT_JSON')
 
     def validUserRoles(self):
         # list all the possible roles that exist for users
