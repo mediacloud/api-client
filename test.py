@@ -25,23 +25,21 @@ modules = [mediacloud.test.api_story_test,
            mediacloud.test.api_tags_test,
            mediacloud.test.api_topic_test,
            mediacloud.test.storage_test
-        ]
+           ]
 
-# set up all logging to DEBUG (cause we're running tests here and they can provide clues!)
-logging.basicConfig(level=logging.DEBUG)
+# set up ogging
+logging.basicConfig(level=logging.WARN)
 log_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 log_handler = logging.FileHandler('mediacloud-api-tesapi.log')
 log_handler.setFormatter(log_formatter)
-# set up mediacloud logging to the file
 mc_logger = logging.getLogger('mediacloud')
 mc_logger.propagate = True
 mc_logger.addHandler(log_handler)
-mc_logger.level = logging.DEBUG
-# set up requests logging to the file
+mc_logger.level = logging.WARN
 requests_logger = logging.getLogger('requests')
 requests_logger.propagate = True
 requests_logger.addHandler(log_handler)
-requests_logger.level = logging.DEBUG
+requests_logger.level = logging.WARN
 
 # now run all the tests
 suites = [unittest.TestLoader().loadTestsFromModule(module) for module in modules]
