@@ -1,7 +1,7 @@
 PYLINT := env PYTHONPATH=$(PYTHONPATH) pylint
 
 install:
-	pip install -r requirements.pip
+	pip install -r requirements.txt
 
 lint:
 	$(PYLINT) mediacloud
