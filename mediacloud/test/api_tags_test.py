@@ -19,19 +19,19 @@ class ApiTagsTest(ApiBaseTest):
         # verify it only pulls tags from that one set
         first_list = self._mc.tagList(597)
         self.assertEqual(len(first_list), 20)
-        ignore = [self.assertEqual(tag['tag_sets_id'], 597) for tag in first_list]
+        [self.assertEqual(tag['tag_sets_id'], 597) for tag in first_list]
         # make sure paging through a set works right
         second_list = self._mc.tagList(597, int(first_list[19]['tags_id'])-1)
         self.assertEqual(len(second_list), 20)
-        ignore = [self.assertEqual(tag['tag_sets_id'], 597) for tag in second_list]
+        [self.assertEqual(tag['tag_sets_id'], 597) for tag in second_list]
         self.assertEqual(first_list[19]['tags_id'], second_list[0]['tags_id'])
         # make sure you can pull a longer list of tags
         longer_list = self._mc.tagList(597, 0, 150)
         self.assertEqual(len(longer_list), 150)
-        ignore = [self.assertEqual(tag['tag_sets_id'], 597) for tag in longer_list]
+        [self.assertEqual(tag['tag_sets_id'], 597) for tag in longer_list]
         longest_list = self._mc.tagList(597, 0, 200)
         self.assertEqual(len(longest_list), 173)
-        ignore = [self.assertEqual(tag['tag_sets_id'], 597) for tag in longest_list]
+        [self.assertEqual(tag['tag_sets_id'], 597) for tag in longest_list]
         # try getting only the public tags in the set
         full_list = self._mc.tagList(6, rows=200)
         public_list = self._mc.tagList(6, rows=200, public_only=True)
@@ -64,9 +64,9 @@ class ApiTagsTest(ApiBaseTest):
 class ApiTagSetsTest(ApiBaseTest):
 
     def testTagSet(self):
-        tagSet = self._mc.tagSet(597)
-        self.assertEqual(tagSet['tag_sets_id'], 597)
-        self.assertEqual(tagSet['name'], 'gv_country')
+        tag_set = self._mc.tagSet(597)
+        self.assertEqual(tag_set['tag_sets_id'], 597)
+        self.assertEqual(tag_set['name'], 'gv_country')
 
     def testTagSetList(self):
         first_list = self._mc.tagSetList()
@@ -96,7 +96,8 @@ class AdminApiTaggingTest(AdminApiBaseTest):
         self.assertEqual(modified_tag['label'], 'modified label')
         self.assertEqual(modified_tag['description'], 'modified description')
         # set it back
-        self._mc.updateTag(example_tag_id, 'example tag', 'example label', 'This is an example tag used in api client test scripts')
+        self._mc.updateTag(example_tag_id, 'example tag', 'example label',
+                           'This is an example tag used in api client test scripts')
         modified_tag = self._mc.tag(example_tag_id)
         self.assertEqual(modified_tag['tag'], 'example tag')
         self.assertEqual(modified_tag['label'], 'example label')
@@ -116,6 +117,3 @@ class AdminApiTaggingTest(AdminApiBaseTest):
         self.assertEqual(modified_tag['name'], TEST_USER_EMAIL)
         self.assertEqual(modified_tag['label'], 'rahulbot')
         self.assertEqual(modified_tag['description'], 'The tag set of Rahul!')
-
-
-

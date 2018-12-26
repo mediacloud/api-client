@@ -1,3 +1,4 @@
+# pylint: disable=too-many-arguments
 
 # Tag set ids for metadata about media in our system
 TAG_SET_PUBLICATION_COUNTRY = 1935  # holds the country of publication of a source
@@ -69,7 +70,7 @@ class StoryTag(TagSpec):
         super(StoryTag, self).__init__(tag_set_name, tag_name, action, tags_id)
 
     def getParams(self):
-        params = {'stories_id': self.stories_id }
+        params = {'stories_id': self.stories_id}
         params.update(self.getBaseParams())
         return params
 
@@ -81,6 +82,6 @@ class MediaTag(TagSpec):
         super(MediaTag, self).__init__(tag_set_name, tag_name, action, tags_id)
 
     def getParams(self):
-        params = {'media_id': self.media_id }
+        params = {'media_id': self.media_id}
         params.update(self.getBaseParams())
         return params

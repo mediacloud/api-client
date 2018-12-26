@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.4.1
+
+* setup for CI - added linting and automated release tasks via makefile  
+
 ### v3.4.0
 
 * add more options to user update endpoint, and user deletion endpoint  

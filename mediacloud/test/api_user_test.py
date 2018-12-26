@@ -41,7 +41,7 @@ class AuthTokenTest(ApiBaseTest):
             self.assertTrue(True)
 
 
-class UserProfileTest(AdminApiBaseTest):
+class UserAuthTest(AdminApiBaseTest):
 
     def testUser(self):
         results = self._mc.user(TEST_USER_ID)
@@ -67,7 +67,7 @@ class UserProfileTest(AdminApiBaseTest):
         page1_ids = [u['auth_users_id'] for u in page1['users']]
         self.assertIn('link_ids', page1)
         self.assertIn('next', page1['link_ids'])
-        page2 = self._mc.userList(link_id = page1['link_ids']['next'])
+        page2 = self._mc.userList(link_id=page1['link_ids']['next'])
         page2_ids = [u['auth_users_id'] for u in page2['users']]
         # make sure pages don't overlap
         intersection = list(set(page1_ids) & set(page2_ids))

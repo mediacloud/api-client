@@ -1,8 +1,8 @@
 import datetime
 import json
 import logging
-import requests
 import time
+import requests
 
 import mediacloud
 import mediacloud.error
@@ -14,9 +14,8 @@ MAX_HTTP_GET_CHARS = 4000   # experimentally determined for our main servers (co
 
 logger = logging.getLogger(__name__)
 
-'''
-Simple client library for the MediaCloud API v2
-'''
+
+# Simple client library for the MediaCloud API v2
 class MediaCloud(object):
 
     V2_API_URL = "https://api.mediacloud.org/api/v2/"
@@ -28,24 +27,22 @@ class MediaCloud(object):
 
     MSG_CORE_NLP_NOT_ANNOTATED = "story is not annotated"
 
-    SENTENCE_PUBLISH_DATE_FORMAT = "%Y-%m-%d %H:%M:%S" # use with datetime.datetime.strptime
+    SENTENCE_PUBLISH_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"  # use with datetime.datetime.strptime
 
     FOCAL_TECHNIQUE_BOOLEAN_QUERY = "Boolean Query"
 
     def __init__(self, auth_token=None, all_fields=False):
+        self._all_fields = None
+        self._auth_token = None
         self.setAuthToken(auth_token)
         self.setAllFields(all_fields)
 
     def setAllFields(self, all_fields):
-        '''
-        Specify the value of the all_fields param to use for all future requests
-        '''
+        # Specify the value of the all_fields param to use for all future requests
         self._all_fields = all_fields
 
     def setAuthToken(self, auth_token):
-        '''
-        Specify the auth_token to use for all future requests
-        '''
+        # Specify the auth_token to use for all future requests        '''
         self._auth_token = auth_token
 
     def verifyAuthToken(self):
@@ -59,15 +56,11 @@ class MediaCloud(object):
         return False
 
     def userProfile(self):
-        '''
-        :return: basic info about the current user, including their roles
-        '''
+        # :return: basic info about the current user, including their roles
         return self._queryForJson(self.V2_API_URL+'auth/profile')
 
     def authLogin(self, email, password):
-        '''
-        :return: { success: 1, profile: {...}} or {error: msg}
-        '''
+        # :return: { success: 1, profile: {...}} or {error: msg}
         params = {
             'email': email,
             'password': password
@@ -75,9 +68,7 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'auth/login', params, 'POST')
 
     def authRegister(self, email, password, full_name, notes, subscribe_to_newsletter, activation_url):
-        '''
-        :return: {success: 1}, or {error: "msg"}
-        '''
+        # :return: {success: 1}, or {error: "msg"}
         params = {
             'email': email,
             'password': password,
@@ -90,9 +81,7 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'auth/register', params, 'POST')
 
     def authActivate(self, email, activation_token):
-        '''
-        :return: { success: 1, profile: {...}} or {error: msg}
-        '''
+        # :return: { success: 1, profile: {...}} or {error: msg}
         params = {
             'email': email,
             'activation_token': activation_token
@@ -100,9 +89,7 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'auth/activate', params, 'POST')
 
     def authResendActivationLink(self, email, activation_url):
-        '''
-        :return: {success: 1}, or {error: "msg"}
-        '''
+        # :return: {success: 1}, or {error: "msg"}
         params = {
             'email': email,
             'activation_url': activation_url
@@ -110,9 +97,7 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL + 'auth/resend_activation_link', params, 'POST')
 
     def authSendPasswordResetLink(self, email, password_reset_url):
-        '''
-        :return: {success: 1}, or {error: "msg"}
-        '''
+        # :return: {success: 1}, or {error: "msg"}
         params = {
             'email': email,
             'password_reset_url': password_reset_url
@@ -120,9 +105,7 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL + 'auth/send_password_reset_link', params, 'POST')
 
     def authResetPassword(self, email, password_reset_token, new_password):
-        '''
-        :return: {success: 1}, or {error: "msg"}
-        '''
+        # :return: {success: 1}, or {error: "msg"}
         params = {
             'email': email,
             'password_reset_token': password_reset_token,
@@ -131,9 +114,7 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL + 'auth/reset_password', params, 'POST')
 
     def authChangePassword(self, old_password, new_password):
-        '''
-        :return: { success: 1, profile: {...}} or {error: msg}
-        '''
+        # :return: { success: 1, profile: {...}} or {error: msg}
         params = {
             'old_password': old_password,
             'new_password': new_password
@@ -141,42 +122,32 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL + 'auth/change_password', params, 'POST')
 
     def authResetApiKey(self):
-        '''
-        :return: {success: 1}, or {error: "msg"}
-        '''
+        # :return: {success: 1}, or {error: "msg"}
         return self._queryForJson(self.V2_API_URL + 'auth/reset_api_key', {}, 'POST')
 
     def stats(self):
-        '''
-        High-level stats about the system
-        '''
+        # High-level stats about the system
         return self._queryForJson(self.V2_API_URL+'stats/list')
 
     def media(self, media_id):
-        '''
-        Details about one media source
-        '''
+        # Details about one media source
         results = self._queryForJson(self.V2_API_URL+'media/single/{}'.format(media_id))
         results_with_metadata = self._addMetadataTagsToMediaList(results)
         return results_with_metadata[0]
 
     def mediaHealth(self, media_id):
-        '''
-        Details about one media source
-        '''
-        results = self._queryForJson(self.V2_API_URL+'mediahealth/list', {'media_id':media_id})
-        if len(results) > 0:
+        # Details about one media source
+        results = self._queryForJson(self.V2_API_URL+'mediahealth/list', {'media_id': media_id})
+        if results:
             return results[0]
         return results
 
     def mediaList(self, last_media_id=0, rows=20, name_like=None,
-                timespans_id=None, topic_mode=None, tags_id=None, q=None, include_dups=False,
-                unhealthy=None, similar_media_id=None, sort=None):
-        '''
-        Page through all media sources.
-        '''
+                  timespans_id=None, topic_mode=None, tags_id=None, q=None, include_dups=False,
+                  unhealthy=None, similar_media_id=None, sort=None):
+        # Page through all media sources.
         valid_sort_options = ['id', 'num_stories']
-        params = {'last_media_id':last_media_id, 'rows':rows}
+        params = {'last_media_id': last_media_id, 'rows': rows}
         if name_like is not None:
             params['name'] = name_like
         if timespans_id is not None:
@@ -207,21 +178,23 @@ class MediaCloud(object):
 
     def _addMetadataTagsToMediaList(self, media_list):
         for m in media_list:
-            metadata = {}
-            metadata['pub_country'] = self._firstTagOnMedia(m, TAG_SET_PUBLICATION_COUNTRY)
-            metadata['pub_state'] = self._firstTagOnMedia(m, TAG_SET_PUBLICATION_STATE)
-            metadata['language'] = self._firstTagOnMedia(m, TAG_SET_PRIMARY_LANGUAGE)
-            metadata['about_country'] = self._firstTagOnMedia(m, TAG_SET_COUNTRY_OF_FOCUS)
-            metadata['media_type'] = self._firstTagOnMedia(m, TAG_SET_MEDIA_TYPE)
+            metadata = {
+                'pub_country': self._firstTagOnMedia(m, TAG_SET_PUBLICATION_COUNTRY),
+                'pub_state': self._firstTagOnMedia(m, TAG_SET_PUBLICATION_STATE),
+                'language': self._firstTagOnMedia(m, TAG_SET_PRIMARY_LANGUAGE),
+                'about_country': self._firstTagOnMedia(m, TAG_SET_COUNTRY_OF_FOCUS),
+                'media_type': self._firstTagOnMedia(m, TAG_SET_MEDIA_TYPE),
+            }
             m['metadata'] = metadata
         return media_list
 
     def _firstTagOnMedia(self, media_source, tag_sets_id):
         # Find the first tag on a media source from a set, or None if it doesn't have one
         tags = self._tagsOnMedia(media_source, tag_sets_id)
-        return tags[0] if len(tags) > 0 else None
+        return tags[0] if tags else None
 
-    def _tagsOnMedia(self, media_source, tag_sets_id):
+    @staticmethod
+    def _tagsOnMedia(media_source, tag_sets_id):
         # Find all the tags from a set on a media source
         return [t for t in media_source['media_source_tags'] if t['tag_sets_id'] == tag_sets_id]
 
@@ -239,29 +212,21 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'media/submit_suggestion', params, 'POST')
 
     def feed(self, feeds_id):
-        '''
-        Details about one feed
-        '''
+        # Details about one feed
         return self._queryForJson(self.V2_API_URL+'feeds/single/{}'.format(feeds_id))[0]
 
     def feedList(self, media_id, last_feeds_id=0, rows=20):
-        '''
-        Page through all the feeds of one media source
-        '''
+        # Page through all the feeds of one media source
         return self._queryForJson(self.V2_API_URL+'feeds/list',
-            {'media_id':media_id, 'last_feeds_id':last_feeds_id, 'rows':rows})
+                                  {'media_id': media_id, 'last_feeds_id': last_feeds_id, 'rows': rows})
 
     def storyPublic(self, stories_id):
-        '''
-        Maintained for backwards compatability
-        '''
+        # Maintained for backwards compatability
         return self.story(stories_id)
 
     def story(self, stories_id):
-        '''
-        Authenticated Public Users: Details about one story.
-        Note that this does NOT include text, nor sentences (due to copyright limitations).
-        '''
+        # Authenticated Public Users: Details about one story.
+        # Note that this does NOT include text, nor sentences (due to copyright limitations).
         stories = self._queryForJson(self.V2_API_URL+'stories_public/single/{}'.format(stories_id))
         stories_with_metadata = self._addMetadataTagsToStoryList(stories)
         return stories_with_metadata[0]
@@ -273,76 +238,70 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'stories/nytlabels', {'stories_id': story_id_list})
 
     def storyCount(self, solr_query='', solr_filter='', split=None, split_period=None):
-        '''
-        The call returns the number of stories returned by Solr for the specified query
-        '''
+        # The call returns the number of stories returned by Solr for the specified query
         return self._queryForJson(self.V2_API_URL+'stories_public/count',
-                {'q': solr_query,
-                 'fq': solr_filter,
-                 'split': 1 if split is True else 0,
-                 'split_period': _validate_split_period_param(split_period)
-                })
+                                  {'q': solr_query,
+                                   'fq': solr_filter,
+                                   'split': 1 if split is True else 0,
+                                   'split_period': _validate_split_period_param(split_period)
+                                  })
 
     def storyPublicList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
-            wc=False, feeds_id=None, sort=SORT_PROCESSED_STORIES_ID, show_feeds=False):
-        '''
-        Maintained for backwards compatability
-        '''
+                        wc=False, feeds_id=None, sort=SORT_PROCESSED_STORIES_ID):
+        # Maintained for backwards compatability
         return self.storyList(solr_query, solr_filter, last_processed_stories_id, rows, wc, feeds_id, sort)
 
     def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
-            wc=False, feeds_id=None, sort=SORT_PROCESSED_STORIES_ID, show_feeds=False):
-        '''
-        Authenticated Public Users: Search for stories and page through results
-        '''
+                  wc=False, feeds_id=None, sort=SORT_PROCESSED_STORIES_ID, show_feeds=False):
+        # Authenticated Public Users: Search for stories and page through results
         stories = self._queryForJson(self.V2_API_URL+'stories_public/list',
-                {'q': solr_query,
-                 'fq': solr_filter,
-                 'last_processed_stories_id': last_processed_stories_id,
-                 'rows': rows,
-                 'sort': sort,
-                 'wc': 1 if wc is True else 0,
-                 'feeds_id': feeds_id,
-                 'show_feeds': 1 if show_feeds is True else 0,
-                })
+                                     {'q': solr_query,
+                                      'fq': solr_filter,
+                                      'last_processed_stories_id': last_processed_stories_id,
+                                      'rows': rows,
+                                      'sort': sort,
+                                      'wc': 1 if wc is True else 0,
+                                      'feeds_id': feeds_id,
+                                      'show_feeds': 1 if show_feeds is True else 0,
+                                     })
         stories_with_metadata = self._addMetadataTagsToStoryList(stories)
         return stories_with_metadata
 
     def _addMetadataTagsToStoryList(self, story_list):
         for s in story_list:
-            metadata = {}
-            metadata['date_guess_method'] = self._firstTagOnStory(s, TAG_SET_DATE_GUESS_METHOD)
-            metadata['extractor_version'] = self._firstTagOnStory(s, TAG_SET_EXTRACTOR_VERSION)
-            metadata['geocoder_version'] = self._firstTagOnStory(s, TAG_SET_GEOCODER_VERSION)
-            metadata['nyt_themes_version'] = self._firstTagOnStory(s, TAG_SET_NYT_THEMES_VERSION)
+            metadata = {
+                'date_guess_method': self._firstTagOnStory(s, TAG_SET_DATE_GUESS_METHOD),
+                'extractor_version': self._firstTagOnStory(s, TAG_SET_EXTRACTOR_VERSION),
+                'geocoder_version': self._firstTagOnStory(s, TAG_SET_GEOCODER_VERSION),
+                'nyt_themes_version': self._firstTagOnStory(s, TAG_SET_NYT_THEMES_VERSION)
+            }
             s['metadata'] = metadata
         return story_list
 
     def _firstTagOnStory(self, story, tag_sets_id):
         # Find the first tag on a story from a set, or None if it doesn't have one
         tags = self._tagsOnStory(story, tag_sets_id)
-        return tags[0] if len(tags) > 0 else None
+        return tags[0] if tags else None
 
-    def _tagsOnStory(self, story, tag_sets_id):
+    @staticmethod
+    def _tagsOnStory(story, tag_sets_id):
         # Find all the tags from a set on a media source
         return [t for t in story['story_tags'] if t['tag_sets_id'] == tag_sets_id]
 
     def storyCoreNlpList(self, story_id_list):
-        '''
-        The stories/corenlp call takes as many stories_id= parameters as you want to pass it,
-        and it returns the corenlp for each.
-        {stories_id => 1, corenlp => {<corenlp data> } }
-        If no corenlp annotation is available for a given story, the json element for that story looks like:
-        {stories_id => 1, corenlp => 'story is not annotated' }
-        '''
+        # The stories/corenlp call takes as many stories_id= parameters as you want to pass it,
+        # and it returns the corenlp for each.
+        # {stories_id => 1, corenlp => {<corenlp data> } }
+        # If no corenlp annotation is available for a given story, the json element for that story looks like:
+        # {stories_id => 1, corenlp => 'story is not annotated' }
         return self._queryForJson(self.V2_API_URL+'stories/corenlp',
-            {'stories_id': story_id_list})
+                                  {'stories_id': story_id_list})
 
     def storyWordMatrix(self, solr_query='', solr_filter='', rows=1000, max_words=None, stopword_length=None):
-        '''
-        Helpful to feed term-document-matrix driven analyses, like TF-IDF.
-        '''
-        params = {'q':solr_query, 'fq':solr_filter}
+        # Helpful to feed term-document-matrix driven analyses, like TF-IDF.
+        params = dict()
+        params['q'] = solr_query
+        params['fq'] = solr_filter
         params['rows'] = rows
         if max_words is not None:
             params['max_words'] = max_words
@@ -354,14 +313,15 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'stories_public/word_matrix/', params)
 
     def storyTagCount(self, solr_query='', solr_filter='', limit=None, tag_sets_id=None):
-        params = {'q':solr_query, 'fq':solr_filter}
+        params = {'q': solr_query, 'fq': solr_filter}
         if limit is not None:
             params['limit'] = limit
         if tag_sets_id is not None:
             params['tag_sets_id'] = tag_sets_id
         return self._queryForJson(self.V2_API_URL+'stories/tag_count', params)
 
-    def wordCount(self, solr_query, solr_filter='', languages=None, num_words=500, sample_size=1000, include_stopwords=False, include_stats=False, ngram_size=1, random_seed=None):
+    def wordCount(self, solr_query, solr_filter='', languages=None, num_words=500, sample_size=1000,
+                  include_stopwords=False, include_stats=False, ngram_size=1, random_seed=None):
         params = {
             'q': solr_query,
             'l': languages,
@@ -372,24 +332,21 @@ class MediaCloud(object):
             'ngram_size': ngram_size,
             'random_seed': int(random_seed) if random_seed is not None else None
         }
-        if solr_filter and len(solr_filter) > 0:
+        if solr_filter:
             params['fq'] = solr_filter
         return self._queryForJson(self.V2_API_URL+'wc/list', params)
 
     def tag(self, tags_id):
-        '''
-        Details about one tag
-        '''
+        # Details about one tag
         return self._queryForJson(self.V2_API_URL+'tags/single/{}'.format(tags_id))[0]
 
-    def tagList(self, tag_sets_id=None, last_tags_id=0, rows=20, public_only=False, name_like=None, similar_tags_id=None):
-        '''
-        List all the tags in one tag set, of multipe if tag_sets_id is an array
-        '''
+    def tagList(self, tag_sets_id=None, last_tags_id=0, rows=20, public_only=False, name_like=None,
+                similar_tags_id=None):
+        # List all the tags in one tag set, of multipe if tag_sets_id is an array
         params = {
-            'last_tags_id': last_tags_id
-            , 'rows': rows
-            , 'public': 1 if public_only is True else 0
+            'last_tags_id': last_tags_id,
+            'rows': rows,
+            'public': 1 if public_only is True else 0
         }
         if tag_sets_id is not None:
             params['tag_sets_id'] = tag_sets_id
@@ -400,38 +357,29 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'tags/list', params)
 
     def tagSet(self, tag_sets_id):
-        '''
-        Details about one tag set
-        '''
+        # Details about one tag set
         return self._queryForJson(self.V2_API_URL+'tag_sets/single/{}'.format(tag_sets_id))[0]
 
     def tagSetList(self, last_tag_sets_id=0, rows=20):
-        '''
-        List all the tag sets
-        '''
+        # List all the tag sets
         return self._queryForJson(self.V2_API_URL+'tag_sets/list',
-            {'last_tag_sets_id': last_tag_sets_id, 'rows':rows})
+                                  {'last_tag_sets_id': last_tag_sets_id, 'rows': rows})
 
     def controversyDump(self, controversy_dumps_id):
-        '''
-        Details about one controversy dump
-        '''
+        # Details about one controversy dump
         return self._queryForJson(self.V2_API_URL+'controversy_dumps/single/{}'.format(controversy_dumps_id))[0]
 
     def controversyDumpTimeSlice(self, controversy_dump_time_slices_id):
-        '''
-        Details about one controversy dump time slice
-        '''
-        return self._queryForJson(self.V2_API_URL+'controversy_dump_time_slices/single/{}'.format(controversy_dump_time_slices_id))[0]
+        # Details about one controversy dump time slice
+        return self._queryForJson(self.V2_API_URL+'controversy_dump_time_slices/single/{}'.format(
+            controversy_dump_time_slices_id))[0]
 
     def _queryForFile(self, url, params=None, http_method='GET', json_data=None):
         response = self._query(url, params, http_method, json_data)
         return response.content
 
     def _queryForJson(self, url, params=None, http_method='GET', json_data=None):
-        '''
-        Helper that returns queries to the API as real objects
-        '''
+        # Helper that returns queries to the API as real objects
         response = self._query(url, params, http_method, json_data)
         # print response.content
         response_json = response.json()
@@ -441,13 +389,14 @@ class MediaCloud(object):
             raise mediacloud.error.MCException(response_json['error'], requests.codes['ok'])
         return response_json
 
-    def _url_length(self, url, params):
+    @staticmethod
+    def _url_length(url, params):
         # this has to be smart to handle ints, ascii strings, and unicode strings
         param_value_length = 0
         for v in params.values():
             try:
                 param_value_length += len("{}".format(v))   # using str call here to compute length of ints
-            except UnicodeEncodeError: # it is a unicode string, so str called failed, but len call will work
+            except UnicodeEncodeError:  # it is a unicode string, so str called failed, but len call will work
                 param_value_length += len(v)
         param_key_length = sum([len("{}".format(k)) for k in params.keys()])
         total_url_length = len(url) + param_key_length + param_value_length
@@ -460,11 +409,11 @@ class MediaCloud(object):
             params = {}
 #        if (http_method is not 'PUT_JSON') and (not isinstance(params, dict)):
 #            raise ValueError('Queries must include a dict of parameters')
-        if ('key' not in params) and (http_method is not 'POST'):
+        if ('key' not in params) and (http_method != 'POST'):
             params['key'] = self._auth_token
         if self._all_fields:
             params['all_fields'] = 1
-        if http_method is 'GET':
+        if http_method == 'GET':
             # automatically switch to POST if request too long
             try:
                 if self._url_length(url, params) > MAX_HTTP_GET_CHARS:
@@ -474,46 +423,50 @@ class MediaCloud(object):
             except Exception as e:
                 logger.error(u'Failed to GET or POST to {} because {}'.format(url, e))
                 raise e
-        elif http_method is 'PUT_JSON':
+        elif http_method == 'PUT_JSON':
             try:
-                # the json to post could be an array (not a dict), so we need to add the params and the json to post differently
-                data_to_send = None # as json
-                params_to_send = None # on the URL string
+                # the json to post could be an array (not a dict), so we need to add the params and
+                # the json to post differently
                 if json_data is None:
-                    params_to_send = { 'key': self._auth_token }
+                    params_to_send = {'key': self._auth_token}
                     data_to_send = params
                 else:
                     params_to_send = params
                     data_to_send = json_data
-                r = requests.put(url, params=params_to_send, data=json.dumps(data_to_send), headers={'Accept': 'application/json', 'Content-Type': 'application/json'})
+                r = requests.put(url, params=params_to_send, data=json.dumps(data_to_send),
+                                 headers={'Accept': 'application/json', 'Content-Type': 'application/json'})
             except Exception as e:
                 logger.exception(e)
                 raise e
-        elif http_method is 'PUT':
+        elif http_method == 'PUT':
             try:
                 r = requests.put(url, params=params, headers={'Accept': 'application/json'})
             except Exception as e:
                 logger.error(u'Failed to PUT {} because {}'.format(url, e))
                 raise e
-        elif http_method is 'POST': # posts JSON data, needs key in url
+        elif http_method == 'POST':  # posts JSON data, needs key in url
             try:
                 url_with_key = url + "?key="+self._auth_token
-                r = requests.post(url_with_key, data=json.dumps(params), headers={'Accept': 'application/json', 'Content-Type': 'application/json'})
+                r = requests.post(url_with_key, data=json.dumps(params),
+                                  headers={'Accept': 'application/json', 'Content-Type': 'application/json'})
             except Exception as e:
                 logger.error(u'Failed to POST {} because {}'.format(url, e))
                 raise e
         else:
             raise ValueError('Error - unsupported HTTP method {}'.format(http_method))
         end_time = time.time()
-        logger.debug(u"Profiling: {}s for {} to {} (with {} / {})".format(end_time - start_time, http_method, url, params, json.dumps(json_data)))
+        logger.debug(u"Profiling: {}s for {} to {} (with {} / {})".format(end_time - start_time, http_method,
+                                                                          url, params, json.dumps(json_data)))
         if r.status_code is not requests.codes['ok']:
             logger.info(u'Bad HTTP response to {}: {} {}'.format(r.url, r.status_code, r.reason))
             # logger.info(u'\t{}'.format(r.content))
-            msg = u'Error - got a HTTP status code of {} with the message "{}", body: {}'.format(r.status_code, r.reason, r.text)
+            msg = u'Error - got a HTTP status code of {} with the message "{}", body: {}'.format(r.status_code,
+                                                                                                 r.reason, r.text)
             raise mediacloud.error.MCException(msg, r.status_code)
         return r
 
-    def publish_date_query(self, start_date, end_date, start_date_inclusive=True, end_date_inclusive=False,
+    @staticmethod
+    def publish_date_query(start_date, end_date, start_date_inclusive=True, end_date_inclusive=False,
                            field='publish_day'):
         valid_date_fields = ['publish_day', 'publish_week', 'publish_month', 'publish_year']
         if field not in valid_date_fields:
@@ -523,7 +476,7 @@ class MediaCloud(object):
     def topicMediaList(self, topics_id, **kwargs):
         params = {}
         valid_params = ['media_id', 'sort', 'name', 'limit',
-            'link_id', 'snapshots_id', 'foci_id', 'timespans_id', 'q']
+                        'link_id', 'snapshots_id', 'foci_id', 'timespans_id', 'q']
         _validate_params(params, valid_params, kwargs)
         if 'sort' in params:
             _validate_topic_sort_param(params['sort'])
@@ -543,8 +496,8 @@ class MediaCloud(object):
     def topicStoryList(self, topics_id, **kwargs):
         params = {}
         valid_params = ['q', 'fq', 'sort', 'stories_id', 'link_to_stories_id', 'link_from_stories_id',
-            'link_to_media_id', 'link_from_media_id', 'media_id', 'limit', 'link_id', 'snapshots_id',
-            'foci_id', 'timespans_id']
+                        'link_to_media_id', 'link_from_media_id', 'media_id', 'limit', 'link_id', 'snapshots_id',
+                        'foci_id', 'timespans_id']
         _validate_params(params, valid_params, kwargs)
         if 'sort' in params:
             _validate_topic_sort_param(params['sort'])
@@ -561,9 +514,7 @@ class MediaCloud(object):
         return links
 
     def topicStoryListFacebookData(self, topics_id, **kwargs):
-        '''
-        For technical reasons this data is too hard to include in the topicStoryList results :-(
-        '''
+        # For technical reasons this data is too hard to include in the topicStoryList results :-(
         params = {}
         valid_params = ['q', 'fq', 'limit', 'link_id', 'snapshots_id', 'foci_id', 'timespans_id']
         _validate_params(params, valid_params, kwargs)
@@ -581,21 +532,17 @@ class MediaCloud(object):
     def topicWordCount(self, topics_id, **kwargs):
         params = {}
         valid_params = ['q', 'fq', 'languages', 'num_words', 'sample_size', 'include_stopwords',
-            'include_stats', 'snapshots_id', 'foci_id', 'timespans_id', 'ngram_size']
+                        'include_stats', 'snapshots_id', 'foci_id', 'timespans_id', 'ngram_size']
         _validate_params(params, valid_params, kwargs)
         _validate_bool_params(params, 'include_stopwords', 'include_stats')
         return self._queryForJson(self.V2_API_URL+'topics/{}/wc/list'.format(topics_id), params)
 
     def topic(self, topics_id):
-        '''
-        Details about one controversy
-        '''
+        # Details about one controversy
         return self._queryForJson(self.V2_API_URL+'topics/single/{}'.format(topics_id))['topics'][0]
 
     def topicList(self, link_id=None, name=None, public=None, limit=20):
-        '''
-        List all the controversies
-        '''
+        # List all the controversies
         params = {}
         if link_id is not None:
             params['link_id'] = link_id
@@ -619,11 +566,15 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'topics/{}/snapshots/generate_status'.format(topics_id))
 
     def topicSnapshotWord2VecModel(self, topics_id, snapshots_id, model_id):
-        return self._queryForFile(self.V2_API_URL+'topics/{}/snapshots/{}/word2vec_model/{}'.format(topics_id, snapshots_id, model_id))
+        return self._queryForFile(self.V2_API_URL+'topics/{}/snapshots/{}/word2vec_model/{}'.format(topics_id,
+                                                                                                    snapshots_id,
+                                                                                                    model_id))
 
-    def topicCreate(self, name, solr_seed_query, description, start_date, end_date, media_ids=[], media_tags_ids=[], **kwargs):
-        valid_optional_params = [ 'max_iterations', 'is_public', 'ch_monitor_id', 'twitter_topics_id', 'is_logogram', 'max_stories']
-        params = {}
+    def topicCreate(self, name, solr_seed_query, description, start_date, end_date, media_ids=[], media_tags_ids=[],
+                    **kwargs):
+        valid_optional_params = ['max_iterations', 'is_public', 'ch_monitor_id', 'twitter_topics_id',
+                                 'is_logogram', 'max_stories']
+        params = dict()
         params['name'] = name
         params['solr_seed_query'] = solr_seed_query
         params['description'] = description
@@ -632,7 +583,7 @@ class MediaCloud(object):
         params['media_ids'] = media_ids
         params['media_tags_ids'] = media_tags_ids
         _validate_params(params, valid_optional_params, kwargs)
-        if (len(media_ids) == 0) and (len(media_tags_ids) == 0):
+        if (not media_ids) and (not media_tags_ids):
             raise ValueError('You have to specify media_ids or media_tags_ids')
         return self._queryForJson(self.V2_API_URL+'topics/create', params, 'POST')
 
@@ -665,7 +616,8 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'topics/{}/timespans/list'.format(topics_id), params)['timespans']
 
     def topicFocalSetDefinitionList(self, topics_id):
-        return self._queryForJson(self.V2_API_URL+'topics/{}/focal_set_definitions/list'.format(topics_id))['focal_set_definitions']
+        return self._queryForJson(self.V2_API_URL+'topics/{}/focal_set_definitions/list'.
+                                  format(topics_id))['focal_set_definitions']
 
     def topicFocalSetDefinitionCreate(self, topics_id, name, description, focal_technique):
         params = {
@@ -676,7 +628,7 @@ class MediaCloud(object):
         if params['focal_technique'] not in [self.FOCAL_TECHNIQUE_BOOLEAN_QUERY]:
             raise ValueError('%s is not a valid focal technique' % params['focal_technique'])
         return self._queryForJson(self.V2_API_URL+'topics/{}/focal_set_definitions/create'.format(topics_id),
-            params, http_method='POST')['focal_set_definitions'][0]
+                                  params, http_method='POST')['focal_set_definitions'][0]
 
     def topicFocalSetDefinitionDelete(self, topics_id, focal_set_definitions_id):
         return self._queryForJson(self.V2_API_URL+'topics/{}/focal_set_definitions/{}/delete'.format(
@@ -694,20 +646,20 @@ class MediaCloud(object):
         valid_params = ['snapshots_id', 'timespans_id', 'foci_id']
         _validate_params(params, valid_params, kwargs)
         return self._queryForJson(self.V2_API_URL+'topics/{}/focal_sets/list'.format(topics_id),
-            params)['focal_sets']
+                                  params)['focal_sets']
 
     def topicFocusDefinitionList(self, topics_id, focal_set_definitions_id):
-        params = {}
+        params = dict()
         params['focal_set_definitions_id'] = focal_set_definitions_id
         return self._queryForJson(self.V2_API_URL+'topics/{}/focus_definitions/list'.format(topics_id),
-            params)['focus_definitions']
+                                  params)['focus_definitions']
 
     def topicFocusDefinitionCreate(self, topics_id, **kwargs):
         params = {}
         valid_params = ['name', 'description', 'query', 'focal_set_definitions_id']
         _validate_params(params, valid_params, kwargs)
         return self._queryForJson(self.V2_API_URL+'topics/{}/focus_definitions/create'.format(topics_id),
-            params, http_method='POST')['focus_definitions']
+                                  params, http_method='POST')['focus_definitions']
 
     def topicFocusDefinitionUpdate(self, topics_id, focus_definitions_id, **kwargs):
         params = {}
@@ -726,7 +678,8 @@ class MediaCloud(object):
 
     def topicMediaMap(self, topics_id, **kwargs):
         params = {}
-        valid_params = ['color_field', 'num_media', 'include_weights', 'num_links_per_medium', 'snapshots_id', 'foci_id', 'timespans_id']
+        valid_params = ['color_field', 'num_media', 'include_weights', 'num_links_per_medium', 'snapshots_id',
+                        'foci_id', 'timespans_id']
         _validate_params(params, valid_params, kwargs)
         return self._query(self.V2_API_URL+'topics/{}/media/map'.format(topics_id), params).content
 
@@ -762,28 +715,21 @@ class MediaCloud(object):
 
 
 class AdminMediaCloud(MediaCloud):
-    '''
-    A MediaCloud API client that includes admin-only methods, including to writing back
-    data to MediaCloud.
-    '''
+    # A MediaCloud API client that includes admin-only methods, including to writing back data to MediaCloud.
 
     def story(self, stories_id, raw_1st_download=False, corenlp=False, sentences=False, text=False):
-        '''
-        Full details about one story.  Handy shortcut to storyList if you want sentences broken out
-        '''
+        # Full details about one story.  Handy shortcut to storyList if you want sentences broken out
         return self._queryForJson(self.V2_API_URL+'stories/single/{}'.format(stories_id),
-                {'raw_1st_download': 1 if raw_1st_download else 0,
-                 'corenlp': 1 if corenlp else 0,
-                 'sentences': 1 if sentences else 0,
-                 'text': 1 if text else 0
-                })[0]
+                                  {'raw_1st_download': 1 if raw_1st_download else 0,
+                                   'corenlp': 1 if corenlp else 0,
+                                   'sentences': 1 if sentences else 0,
+                                   'text': 1 if text else 0
+                                  })[0]
 
     def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
                   wc=False, feeds_id=None, sort=MediaCloud.SORT_PROCESSED_STORIES_ID, raw_1st_download=False,
                   corenlp=False, sentences=False, text=False, ap_stories_id=0, show_feeds=False):
-        '''
-        Search for stories and page through results
-        '''
+        # Search for stories and page through results
         stories = self._queryForJson(self.V2_API_URL+'stories/list',
                                      {'q': solr_query,
                                       'fq': solr_filter,
@@ -811,21 +757,17 @@ class AdminMediaCloud(MediaCloud):
         return self._queryForJson(self.V2_API_URL+'stories/update', {}, 'PUT_JSON', params)
 
     def sentenceList(self, solr_query, solr_filter='', start=0, rows=1000, sort=MediaCloud.SORT_PUBLISH_DATE_ASC):
-        '''
-        Search for sentences and page through results
-        '''
+        # Search for sentences and page through results
         return self._queryForJson(self.V2_API_URL+'sentences/list',
-                {'q': solr_query,
-                 'fq': solr_filter,
-                 'start': start,
-                 'rows': rows,
-                 'sort': sort
-                })
+                                  {'q': solr_query,
+                                   'fq': solr_filter,
+                                   'start': start,
+                                   'rows': rows,
+                                   'sort': sort
+                                  })
 
     def tagStories(self, tags=None, clear_others=False):
-        '''
-        Add some tags to stories. The tags parameter should be a list of StoryTag objects.
-        '''
+        # Add some tags to stories. The tags parameter should be a list of StoryTag objects.
         params = {}
         if clear_others is True:
             params['clear_tag_sets'] = 1
@@ -839,10 +781,8 @@ class AdminMediaCloud(MediaCloud):
         return self._queryForJson(self.V2_API_URL+'stories/put_tags', params, 'PUT_JSON', custom_tags)
 
     def tagMedia(self, tags=None, clear_others=False):
-        '''
-        Add some tags to media (ie. put them in a colleciton or add metadata to them).
-        The tags parameter should be a list of MediaTag objects.
-        '''
+        # Add some tags to media (ie. put them in a colleciton or add metadata to them).
+        # The tags parameter should be a list of MediaTag objects.
         params = {}
         if clear_others is True:
             params['clear_tag_sets'] = 1
@@ -855,7 +795,8 @@ class AdminMediaCloud(MediaCloud):
             custom_tags.append(tag.getParams())
         return self._queryForJson(self.V2_API_URL+'media/put_tags', params, 'PUT_JSON', custom_tags)
 
-    def createTag(self, tag_sets_id, name, label, description, is_static=False, show_on_media=False, show_on_stories=False):
+    def createTag(self, tag_sets_id, name, label, description, is_static=False, show_on_media=False,
+                  show_on_stories=False):
         params = {
             'tag_sets_id': tag_sets_id,
             'tag': name,
@@ -869,7 +810,7 @@ class AdminMediaCloud(MediaCloud):
 
     def updateTag(self, tags_id, name=None, label=None, description=None, is_static=None, show_on_media=None,
                   show_on_stories=None, tag_sets_id=None):
-        params = { 'tags_id': tags_id }
+        params = {'tags_id': tags_id}
         if name is not None:
             params['tag'] = name
         if label is not None:
@@ -895,7 +836,7 @@ class AdminMediaCloud(MediaCloud):
         return self._queryForJson(self.V2_API_URL+'tag_sets/create', params, 'POST')
 
     def updateTagSet(self, tag_sets_id, name=None, label=None, description=None):
-        params = { 'tag_sets_id': tag_sets_id }
+        params = {'tag_sets_id': tag_sets_id}
         if name is not None:
             params['name'] = name
         if label is not None:
@@ -918,7 +859,7 @@ class AdminMediaCloud(MediaCloud):
 
     def feedUpdate(self, feeds_id, name=None, url=None, feed_type='syndicated', active=True):
         _validate_feed_type(feed_type)
-        params = { 'feeds_id': feeds_id}
+        params = {'feeds_id': feeds_id}
         if name is not None:
             params['name'] = name
         if url is not None:
@@ -930,16 +871,17 @@ class AdminMediaCloud(MediaCloud):
         return self._queryForJson(self.V2_API_URL+'feeds/update', params, 'PUT_JSON')
 
     def feedsScrape(self, media_id):
-        params = { 'media_id': media_id }
+        params = {'media_id': media_id}
         return self._queryForJson(self.V2_API_URL+'feeds/scrape', params, 'POST')
 
     def feedsScrapeStatus(self, media_id=None):
-        params = { 'media_id': media_id }
+        params = {'media_id': media_id}
         return self._queryForJson(self.V2_API_URL+'feeds/scrape_status', params)
 
     def mediaCreate(self, media_items):
         # validate and clean input
-        valid_params = ['url', 'name', 'foreign_rss_links', 'content_delay', 'feeds', 'tags_ids', 'editor_notes', 'public_notes', 'is_monitored' ]
+        valid_params = ['url', 'name', 'foreign_rss_links', 'content_delay', 'feeds', 'tags_ids', 'editor_notes',
+                        'public_notes', 'is_monitored']
         boolean_params = ['foreign_rss_links', 'is_monitored']
         for media in media_items:
             for k in media:
@@ -947,20 +889,21 @@ class AdminMediaCloud(MediaCloud):
                     raise ValueError('Invalid param in attempt to create media: {}'.format(k))
                 if k in boolean_params:
                     media[k] = 1 if k else 0
-            if media['url'] is None or len(media['url']) == 0:
+            if (media['url'] is None) or (not media['url']):
                 raise ValueError('You must supply a media url')
         return self._queryForJson(self.V2_API_URL+'media/create', media_items, 'POST')
 
     def mediaUpdate(self, media_id, new_props):
         # validate and clean inputs
-        valid_params = ['url', 'name', 'foreign_rss_links', 'content_delay', 'editor_notes', 'public_notes', 'is_monitored']
+        valid_params = ['url', 'name', 'foreign_rss_links', 'content_delay', 'editor_notes', 'public_notes',
+                        'is_monitored']
         boolean_params = ['is_monitored']
         for k in new_props:
             if k not in valid_params:
                 raise ValueError('Invalid param in attempt to update media: {}'.format(k))
             if k in boolean_params:
                 new_props[k] = 1 if k else 0
-        if 'url' in new_props and (new_props['url'] is None or len(new_props['url']) == 0):
+        if 'url' in new_props and (new_props['url'] is None or not new_props['url']):
             raise ValueError('The media URL can\'t be empty')
         new_props['media_id'] = media_id
         return self._queryForJson(self.V2_API_URL+'media/update', new_props, 'PUT_JSON')
@@ -1037,9 +980,7 @@ def _zi_time(d):
 
 
 def _chunkify(data, chunk_size):
-    '''
-    Helper method to break an array into a set of smaller arrays
-    '''
+    # Helper method to break an array into a set of smaller arrays
     return [data[x:x+chunk_size] for x in xrange(0, len(data), chunk_size)]
 
 
@@ -1084,10 +1025,10 @@ def _validate_bool_params(params, *args):
 def _validate_date_params(params, *args):
     for arg in args:
         if arg in params:
-            datetime.datetime.strptime(params[arg], '%Y-%m-%d')    #will throw a ValueError if invalid
+            datetime.datetime.strptime(params[arg], '%Y-%m-%d')  # will throw a ValueError if invalid
     return params
 
 
 def _validate_feed_type(feed_type):
     if feed_type not in ['syndicated', 'web_page']:
-            raise ValueError('feed_type must be syndicated or web_page')
+        raise ValueError('feed_type must be syndicated or web_page')

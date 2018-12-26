@@ -32,4 +32,5 @@ class AdminApiBaseTest(ApiBaseTest):
     def setUp(self):
         self._config = ConfigParser.ConfigParser()
         self._config.read('mc-client.config')
-        self._mc = mediacloud.api.AdminMediaCloud(self._config.get('api', 'key'))
+        self._key = self._config.get('api', 'key')
+        self._mc = mediacloud.api.AdminMediaCloud(self._key)

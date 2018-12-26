@@ -82,15 +82,11 @@ If you are interested in adding code to this module, first clone [the GitHub rep
 ## Testing
 
 First run all the tests.  Copy `mc-client.config.template` to `mc-client.config` and edit it.
-Then run `python tests.py`.
+Then run `make test`.
 
 ## Distributing a New Version
 
-1. Run `python test.py` to make sure all the test pass
+1. Run `make test` to make sure all the test pass
 2. Update the version number in `mediacloud/__init__.py`
 3. Make a brief note in the version history section in the README file about the changes
-4. Run `python setup.py sdist` to test out a version locally
-5. Then run `python setup.py sdist upload -r pypitest` to release a test version to PyPI's test server
-6. Run `pip install -i https://testpypi.python.org/pypi mediacloud` somewhere and then use it with Python to make sure the test release works.
-7. When you're ready to push to pypi run `python setup.py sdist upload -r pypi`
-8. Run `pip install mediacloud` somewhere and then try it to make sure it worked.
+4. Run `make release` to release it to PYPI

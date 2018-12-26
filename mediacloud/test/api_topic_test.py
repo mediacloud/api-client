@@ -95,7 +95,7 @@ class AdminTopicStoryListTest(AdminApiBaseTest):
 
     def testTopicStoryListFacebookData(self):
         response = self._mc.topicStoryListFacebookData(self.TOPIC_ID)
-        self.assertEqual(len(response['counts']), 20)
+        self.assertEqual(len(response['counts']), 70)
         for story in response['counts']:
             self.assertIn('facebook_api_collect_date', story)
             self.assertIn('facebook_comment_count', story)
@@ -262,7 +262,7 @@ class AdminTopicWordCountTest(AdminApiBaseTest):
     def testResults(self):
         term_freq = self._mc.topicWordCount(self.TOPIC_ID)
         self.assertEqual(len(term_freq), 500)
-        self.assertEqual(term_freq[3]['term'], u'george')
+        self.assertEqual(term_freq[3]['term'], u'hoodie')
 
     def testSort(self):
         term_freq = self._mc.topicWordCount(self.TOPIC_ID)
@@ -278,7 +278,7 @@ class AdminTopicWordCountTest(AdminApiBaseTest):
         term_freq = self._mc.topicWordCount(self.TOPIC_ID, num_words=52)
         self.assertEqual(len(term_freq), 52)
         term_freq = self._mc.topicWordCount(self.TOPIC_ID, num_words=1000)
-        self.assertEqual(len(term_freq), 1000)
+        self.assertGreater(len(term_freq), 500)
 
 
 class AdminTopicMediaMapTest(AdminApiBaseTest):

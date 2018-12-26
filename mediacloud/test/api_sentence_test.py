@@ -38,7 +38,6 @@ class AdminApiSentencesTest(AdminApiBaseTest):
             this_date = this_date.replace(second=0, microsecond=0)  # sorting is by minute
             if last_date is not None:
                 self.assertLessEqual(last_date, this_date)
-                last_date = this_date
             last_date = this_date
 
     def testSentenceListSortingDescending(self):
@@ -57,7 +56,8 @@ class AdminApiSentencesTest(AdminApiBaseTest):
         # we do random sort by telling we want the random sort, and then offsetting to a different start index
         results1 = self._mc.sentenceList(QUERY_TEST, QUERY_LAST_WEEK, 0, SENTENCE_COUNT, self._mc.SORT_RANDOM)
         self.assertGreater(len(results1), SENTENCE_COUNT)
-        results2 = self._mc.sentenceList(QUERY_TEST, QUERY_LAST_WEEK, SENTENCE_COUNT * 2, SENTENCE_COUNT, self._mc.SORT_RANDOM)
+        results2 = self._mc.sentenceList(QUERY_TEST, QUERY_LAST_WEEK, SENTENCE_COUNT * 2, SENTENCE_COUNT,
+                                         self._mc.SORT_RANDOM)
         self.assertGreater(len(results2), SENTENCE_COUNT)
         for idx in range(0, SENTENCE_COUNT):
             self.assertNotEqual(results1[idx]['stories_id'],

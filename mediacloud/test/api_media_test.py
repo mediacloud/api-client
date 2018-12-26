@@ -6,6 +6,7 @@ TESTING_COLLECTION = 9353679
 TEST_MEDIA_SUGGEST_REASON = "!!!! TESTING SUGGESTION !!!!"
 TEST_TAG_ID_1 = 9172171  # mc-api-test@media.mit.edu:test_tag1
 
+
 class ApiMediaHealthTest(ApiBaseTest):
 
     def testMediaHealth(self):
@@ -101,16 +102,16 @@ class AdminApiMediaSuggestionsTest(AdminApiBaseTest):
 
     def testMediaSuggestionMark(self):
         suggest_result = self._mc.mediaSuggest("https://rahulbotics",
-                                        name="Rahulbotics",
-                                        reason=TEST_MEDIA_SUGGEST_REASON,
-                                        tags_ids=[TESTING_COLLECTION])
+                                               name="Rahulbotics",
+                                               reason=TEST_MEDIA_SUGGEST_REASON,
+                                               tags_ids=[TESTING_COLLECTION])
         self.assertIn('success', suggest_result)
         self.assertEqual(1, suggest_result['success'])
         list_result = self._mc.mediaSuggestionsList()
         for suggestion in list_result:
             if suggestion['reason'] == TEST_MEDIA_SUGGEST_REASON:
                 mark_result = self._mc.mediaSuggestionsMark(suggestion['media_suggestions_id'], "rejected",
-                                                       "This was a test suggestion, so we are deleting it.")
+                                                            "This was a test suggestion, so we are deleting it.")
                 self.assertIn('success', mark_result)
                 self.assertEqual(1, mark_result['success'])
 
@@ -138,11 +139,11 @@ class AdminApiMediaTest(AdminApiBaseTest):
         updated_prop_value = 'Rahul\'s test domain!'
         original = self._mc.media(test_media_id)
         # update something
-        results = self._mc.mediaUpdate(test_media_id, { prop_to_change: updated_prop_value })
+        self._mc.mediaUpdate(test_media_id, {prop_to_change: updated_prop_value})
         updated = self._mc.media(test_media_id)
         self.assertEqual(updated[prop_to_change], updated_prop_value)
         # set it back and verify
-        results = self._mc.mediaUpdate(test_media_id, { prop_to_change: original[prop_to_change] })
+        self._mc.mediaUpdate(test_media_id, {prop_to_change: original[prop_to_change]})
         reverted = self._mc.media(test_media_id)
         self.assertEqual(reverted[prop_to_change], original[prop_to_change])
 

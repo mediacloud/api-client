@@ -16,7 +16,8 @@ class ApiFeedTest(AdminApiBaseTest):
         # queue scrape job
         results = self._mc.feedsScrape(TEST_MEDIA_ID)
         self.assertEqual(TEST_MEDIA_ID, int(results['job_state']['media_id']))
-        self.assertTrue(results['job_state']['state'] in ['queued', 'completed'])
+        self.assertTrue(results['job_state']['state'] in ['queued', 'running', 'completed'],
+                        "Job state was {}, instead of queued or completed".format(results['job_state']['state']))
 
     def testFeedScrapeStatus(self):
         media = self.randomMedia()
@@ -40,30 +41,21 @@ class ApiFeedsTest(ApiBaseTest):
         longer_list = self._mc.feedList(TEST_FEED_ID, 0, 200)
         self.assertEqual(len(longer_list), 200)
 
-'''
-TOO SLOW!
     def testStoryListInFeed(self):
-        TEST_FEEDS_ID_1 = 61  # NYT US news feeds (http://www.nytimes.com/services/xml/rss/nyt/US.xml)
-        TEST_FEEDS_ID_2 = 313908  # WashPo Business feed (https://core.mediacloud.org/admin/downloads/list?f=313908)
-        results1 = set([s['stories_id'] for s in self._mc.storyList(feeds_id=TEST_FEEDS_ID_1)])
-        results2 = set([s['stories_id'] for s in self._mc.storyList(feeds_id=TEST_FEEDS_ID_2)])
+        test_feeds_id_1 = 61  # NYT US news feeds (http://www.nytimes.com/services/xml/rss/nyt/US.xml)
+        test_feeds_id_2 = 313908  # WashPo Business feed (https://core.mediacloud.org/admin/downloads/list?f=313908)
+        results1 = set([s['stories_id'] for s in self._mc.storyList(feeds_id=test_feeds_id_1)])
+        results2 = set([s['stories_id'] for s in self._mc.storyList(feeds_id=test_feeds_id_2)])
         intersection = list(results1 & results2)
         self.assertTrue(len(intersection) == 0)
         # now test lower level (only do 3 cause it takes a long time)
-        results1 = self._mc.storyList(feeds_id=TEST_FEEDS_ID_1, show_feeds=True, rows=3)
+        results1 = self._mc.storyList(feeds_id=test_feeds_id_1, show_feeds=True, rows=3)
         for s in results1:
             feed_ids = [f['feeds_id'] for f in s['feeds']]
-            self.assertTrue(TEST_FEEDS_ID_1 in feed_ids)
-'''
+            self.assertTrue(test_feeds_id_1 in feed_ids)
 
-
-
-
-'''
-TOO SLOW TO RUN!
     def testStoryPublicListByFeed(self):
-        FEED_ID = 65    # NYT World feed
-        results = self._mc.storyList(feeds_id=FEED_ID)
+        feeds_id = 65    # NYT World feed
+        results = self._mc.storyList(feeds_id=feeds_id)
         self.assertNotEqual(len(results), 0)
         # anyway to check the feed id on a story returned?
-'''

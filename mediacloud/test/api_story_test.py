@@ -19,7 +19,8 @@ class ApiStoriesWordMatrixTest(ApiBaseTest):
 class ApiStoryTagCountTest(ApiBaseTest):
 
     def testStoryTagCount(self):
-        counts = self._mc.storyTagCount('*', [QUERY_LAST_WEEK, QUERY_ENGLISH_LANGUAGE], tag_sets_id=tags.TAG_SET_CLIFF_PLACES)
+        counts = self._mc.storyTagCount('*', [QUERY_LAST_WEEK, QUERY_ENGLISH_LANGUAGE],
+                                        tag_sets_id=tags.TAG_SET_CLIFF_PLACES)
         self.assertTrue(len(counts) > 0)
         for tag_count in counts:
             self.assertEqual(tag_count['tag_sets_id'], tags.TAG_SET_CLIFF_PLACES)
@@ -44,7 +45,7 @@ class ApiStoryCountTest(ApiBaseTest):
         results = self._mc.storyCount('*', QUERY_LAST_WEEK, split=True)
         self.assertEqual(len(results['counts']), 8)
         results = self._mc.storyCount('*', QUERY_LAST_MONTH, split=True, split_period='week')
-        self.assertEqual(len(results['counts']), 5)
+        self.assertEqual(len(results['counts']), 6)
         results = self._mc.storyCount('*', QUERY_LAST_YEAR, split=True, split_period='month')
         self.assertEqual(len(results['counts']), 13)
         results = self._mc.storyCount('*', QUERY_LAST_DECADE, split=True, split_period='year')
@@ -190,7 +191,7 @@ class AdminApiTaggingContentTest(AdminApiBaseTest):
         desired_tags = [StoryTag(TEST_STORY_ID, tag_set_name, 'test_tag1'),
                         StoryTag(TEST_STORY_ID, tag_set_name, 'test_tag2')]
         response = self._mc.tagStories(desired_tags)
-        self.assertIn('success' , response)
+        self.assertIn('success', response)
         self.assertEqual(response['success'], 1)
         story = self._mc.story(TEST_STORY_ID, sentences=True)   # make sure it worked
         tags_on_story = [t for t in story['story_tags'] if t['tag_set'] == tag_set_name]
@@ -198,13 +199,13 @@ class AdminApiTaggingContentTest(AdminApiBaseTest):
         # test removal by action
         desired_tags = [StoryTag(TEST_STORY_ID, tag_set_name, 'test_tag1', TAG_ACTION_REMOVE)]
         response = self._mc.tagStories(desired_tags)
-        self.assertIn('success' , response)
+        self.assertIn('success', response)
         story = self._mc.story(TEST_STORY_ID, sentences=True)   # make sure it worked
         tags_on_story = [t for t in story['story_tags'] if t['tag_set'] == tag_set_name]
         self.assertEqual(1, len(tags_on_story))
         # test removal by clear others
         response = self._mc.tagStories([], clear_others=True)
-        self.assertIn('success' , response)
+        self.assertIn('success', response)
         story = self._mc.story(TEST_STORY_ID, sentences=True)   # make sure it worked
         tags_on_story = [t for t in story['story_tags'] if t['tag_set'] == tag_set_name]
         self.assertEqual(1, len(tags_on_story))
@@ -213,9 +214,9 @@ class AdminApiTaggingContentTest(AdminApiBaseTest):
 class ApiBigQueryTest(ApiBaseTest):
 
     def testBigQuery(self):
-        query_to_repeat = "(publish_date:[2016-05-16T00:00:00Z TO 2016-05-17T00:00:00Z]) AND (tags_id_media:(8875027))"
-        query_pieces = [query_to_repeat for x in range(0, 110)]    # "110" was determined experimentally
-        big_query = " AND ".join(query_pieces)
-        results = self._mc.storyCount(big_query)
+        q = "tags_id_media:8875027"
+        fq = "publish_date:[2016-05-16T00:00:00Z TO 2016-05-17T00:00:00Z]"
+        big_q = " AND ".join([q for x in range(0, 110)]) # "110" was determined experimentally
+        big_fq = " AND ".join([fq for x in range(0, 110)])  # "110" was determined experimentally
+        results = self._mc.storyCount(big_q, big_fq)
         self.assertTrue(results['count'] > 0)
-
