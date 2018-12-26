@@ -25,22 +25,22 @@ class StatsTest(ApiBaseTest):
 class PublishDateQueryTest(ApiBaseTest):
 
     def testPublishDateDefaults(self):
-        start_date = datetime.date(2014, 6, 02)
-        end_date = datetime.date(2014, 6, 03)
+        start_date = datetime.date(2014, 6, 2)
+        end_date = datetime.date(2014, 6, 3)
         date_query_default = self._mc.publish_date_query(start_date, end_date)
         self.assertEqual(date_query_default, "publish_day:[2014-06-02T00:00:00Z TO 2014-06-03T00:00:00Z}")
 
     def testPublishDateField(self):
-        start_date = datetime.date(2014, 6, 02)
-        end_date = datetime.date(2014, 6, 03)
+        start_date = datetime.date(2014, 6, 2)
+        end_date = datetime.date(2014, 6, 3)
         date_query_default = self._mc.publish_date_query(start_date, end_date)
         self.assertEqual(date_query_default, "publish_day:[2014-06-02T00:00:00Z TO 2014-06-03T00:00:00Z}")
         date_query_default = self._mc.publish_date_query(start_date, end_date, field='publish_week')
         self.assertEqual(date_query_default, "publish_week:[2014-06-02T00:00:00Z TO 2014-06-03T00:00:00Z}")
 
     def testPublishDateInslusivity(self):
-        start_date = datetime.date(2014, 6, 02)
-        end_date = datetime.date(2014, 6, 03)
+        start_date = datetime.date(2014, 6, 2)
+        end_date = datetime.date(2014, 6, 3)
 
         date_query_inclusive_exclusive = self._mc.publish_date_query(start_date, end_date, start_date_inclusive=True,
                                                                      end_date_inclusive=False)
