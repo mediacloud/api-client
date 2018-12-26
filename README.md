@@ -4,6 +4,8 @@ MediaCloud Python API Client
 This is a python client for accessing the [MediaCloud API v2](https://github.com/berkmancenter/mediacloud/blob/master/doc/api_2_0_spec/api_2_0_spec.md). 
 We support Python versions 2.7 and 3.6.
 
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/mitmedialab/MediaCloud-API-Client/blob/master/LICENSE) [![Build Status](https://travis-ci.org/mitmedialab/MediaCloud-API-Client.svg?branch=master)](https://travis-ci.org/mitmedialab/MediaCloud-API-Client)
+
 Usage
 -----
 
