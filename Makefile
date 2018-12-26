@@ -9,6 +9,9 @@ lint:
 test:
 	python test.py
 
+build:
+	python setup.py sdist
+
 release:
 	python setup.py sdist
 	python setup.py sdist upload -r pypitest

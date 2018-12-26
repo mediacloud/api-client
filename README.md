@@ -1,7 +1,8 @@
 MediaCloud Python API Client
 ============================
 
-This is a python client for accessing the [MediaCloud API v2](https://github.com/berkmancenter/mediacloud/blob/master/doc/api_2_0_spec/api_2_0_spec.md).
+This is a python client for accessing the [MediaCloud API v2](https://github.com/berkmancenter/mediacloud/blob/master/doc/api_2_0_spec/api_2_0_spec.md). 
+We support Python versions 2.7 and 3.6.
 
 Usage
 -----
@@ -81,7 +82,7 @@ If you are interested in adding code to this module, first clone [the GitHub rep
 
 ## Testing
 
-First run all the tests.  Copy `mc-client.config.template` to `mc-client.config` and edit it.
+You need to create an `MC_API_KEY` envvar and set it to your API key (we use [`python-dotenv`](https://pypi.org/project/python-dotenv/)).
 Then run `make test`.
 
 ## Distributing a New Version

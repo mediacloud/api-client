@@ -262,7 +262,7 @@ class AdminTopicWordCountTest(AdminApiBaseTest):
     def testResults(self):
         term_freq = self._mc.topicWordCount(self.TOPIC_ID)
         self.assertEqual(len(term_freq), 500)
-        self.assertEqual(term_freq[3]['term'], u'hoodie')
+        self.assertIn(term_freq[1]['term'], [u'trayvon', u'martin']) # based on the random sample it can change
 
     def testSort(self):
         term_freq = self._mc.topicWordCount(self.TOPIC_ID)
