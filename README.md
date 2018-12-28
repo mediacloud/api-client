@@ -92,4 +92,6 @@ Then run `make test`.
 1. Run `make test` to make sure all the test pass
 2. Update the version number in `mediacloud/__init__.py`
 3. Make a brief note in the version history section in the README file about the changes
-4. Run `make release` to release it to PYPI
+4. Run `make build-release` to test out a an install package
+5. Run `make release` to push it to pypi
+

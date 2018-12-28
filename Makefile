@@ -9,7 +9,7 @@ lint:
 test:
 	python test.py
 
-build:
+build-release:
 	python setup.py sdist
 
 release:
