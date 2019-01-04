@@ -1,4 +1,5 @@
 import random
+import os
 
 from mediacloud.test.basetest import ApiBaseTest, AdminApiBaseTest
 
@@ -18,7 +19,7 @@ class UserProfileTest(ApiBaseTest):
 class AuthTokenTest(ApiBaseTest):
 
     def testAuthToken(self):
-        valid_auth_token = self._config.get('api', 'key')
+        valid_auth_token = os.getenv("MC_API_KEY")
         fake_auth_token = 'these are not the keys you are looking for'
         # make sure setAuthToken workds
         self._mc.setAuthToken(fake_auth_token)

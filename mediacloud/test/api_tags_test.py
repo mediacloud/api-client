@@ -1,4 +1,6 @@
 import time
+import random
+
 from mediacloud.test.basetest import ApiBaseTest, AdminApiBaseTest
 
 TEST_USER_EMAIL = "mc-api-test@media.mit.edu"
@@ -81,7 +83,7 @@ class ApiTagSetsTest(ApiBaseTest):
 class AdminApiTaggingTest(AdminApiBaseTest):
 
     def testTagCreate(self):
-        new_tag_name = 'test-create-tag-'+str(int(time.time()))
+        new_tag_name = 'test-create-tag-{}-{}'.format(int(time.time()), random.randint(1,101))
         self._mc.createTag(TEST_TAG_SET_ID, new_tag_name, 'Test Create Tag', 'this is just a test tag')
         # now search for it by name
         results = self._mc.tagList(name_like=new_tag_name)

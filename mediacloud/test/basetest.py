@@ -1,12 +1,9 @@
 import unittest
 import random
 import os
-from dotenv import load_dotenv
 
 import mediacloud.api
-from mediacloud.test import QUERY_LAST_WEEK, QUERY_ENGLISH_LANGUAGE, basedir
-
-load_dotenv(dotenv_path=os.path.join(basedir, '.env'), verbose=True)
+from mediacloud.test import QUERY_LAST_MONTH, QUERY_ENGLISH_LANGUAGE
 
 
 class ApiBaseTest(unittest.TestCase):
@@ -19,7 +16,7 @@ class ApiBaseTest(unittest.TestCase):
         self._mc = mediacloud.api.MediaCloud(self._mc_api_key)
 
     def recentStory(self):
-        recent_stories = self._mc.storyList(QUERY_ENGLISH_LANGUAGE, QUERY_LAST_WEEK)
+        recent_stories = self._mc.storyList(QUERY_ENGLISH_LANGUAGE, QUERY_LAST_MONTH)
         story = random.choice(recent_stories)
         return story
 

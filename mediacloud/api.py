@@ -981,7 +981,7 @@ def _zi_time(d):
 
 def _chunkify(data, chunk_size):
     # Helper method to break an array into a set of smaller arrays
-    return [data[x:x+chunk_size] for x in xrange(0, len(data), chunk_size)]
+    return [data[x:x+chunk_size] for x in range(0, len(data), chunk_size)]
 
 
 def _validate_params(params, valid_params, args):

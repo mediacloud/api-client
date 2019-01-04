@@ -145,8 +145,9 @@ class AdminTopicStoryListTest(AdminApiBaseTest):
         response = self._mc.topicStoryList(self.TOPIC_ID, limit=500, sort='twitter')
         last_inlink_count = 1000000000000
         for story in response['stories']:
-            self.assertLessEqual(story['normalized_tweet_count'], last_inlink_count)
-            last_inlink_count = story['normalized_tweet_count']
+            if (last_inlink_count is not None) and (story['normalized_tweet_count'] is not None):
+                self.assertLessEqual(story['normalized_tweet_count'], last_inlink_count)
+                last_inlink_count = story['normalized_tweet_count']
 
 
 class TopicStoryLinksTest(AdminApiBaseTest):
@@ -172,11 +173,11 @@ class AdminTopicStoryCountTest(AdminApiBaseTest):
     def testTopicStoryCount(self):
         response = self._mc.topicStoryCount(self.TOPIC_ID)
         self.assertIn('count', response)
-        self.assertGreater(response, 0)
+        self.assertGreater(response['count'], 0)
         response2 = self._mc.topicStoryCount(self.TOPIC_ID, q='Obama')
         self.assertIn('count', response2)
-        self.assertGreater(response2, 0)
-        self.assertGreater(response, response2)
+        self.assertGreater(response2['count'], 0)
+        self.assertGreater(response['count'], response2['count'])
 
 
 class AdminTopicMediaListTest(AdminApiBaseTest):
@@ -228,15 +229,17 @@ class AdminTopicMediaListTest(AdminApiBaseTest):
         response = self._mc.topicMediaList(self.TOPIC_ID, sort='facebook')
         last_count = 1000000000000
         for media in response['media']:
-            self.assertLessEqual(media['facebook_share_count'], last_count)
-            last_count = media['facebook_share_count']
+            if (last_count is not None) and (media['facebook_share_count'] is not None):
+                self.assertLessEqual(media['facebook_share_count'], last_count)
+                last_count = media['facebook_share_count']
 
     def testTopicMediaListSortTwitter(self):
         response = self._mc.topicMediaList(self.TOPIC_ID, sort='twitter')
         last_count = 1000000000000
         for media in response['media']:
-            self.assertLessEqual(media['simple_tweet_count'], last_count)
-            last_count = media['simple_tweet_count']
+            if (last_count is not None) and (media['simple_tweet_count'] is not None):
+                self.assertLessEqual(media['simple_tweet_count'], last_count)
+                last_count = media['simple_tweet_count']
 
 
 class TopicMediaLinksText(AdminApiBaseTest):
@@ -262,7 +265,7 @@ class AdminTopicWordCountTest(AdminApiBaseTest):
     def testResults(self):
         term_freq = self._mc.topicWordCount(self.TOPIC_ID)
         self.assertEqual(len(term_freq), 500)
-        self.assertIn(term_freq[1]['term'], [u'trayvon', u'martin']) # based on the random sample it can change
+        self.assertIn(term_freq[1]['term'], [u'trayvon', u'martin'])  # based on the random sample it can change
 
     def testSort(self):
         term_freq = self._mc.topicWordCount(self.TOPIC_ID)
@@ -285,4 +288,4 @@ class AdminTopicMediaMapTest(AdminApiBaseTest):
 
     def testMediaMap(self):
         results = self._mc.topicMediaMap(TEST_TOPIC2_ID)
-        self.assertIn('gexf', results)
+        self.assertIn('gexf', str(results))

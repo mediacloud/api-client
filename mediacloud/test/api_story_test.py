@@ -45,7 +45,7 @@ class ApiStoryCountTest(ApiBaseTest):
         results = self._mc.storyCount('*', QUERY_LAST_WEEK, split=True)
         self.assertEqual(len(results['counts']), 8)
         results = self._mc.storyCount('*', QUERY_LAST_MONTH, split=True, split_period='week')
-        self.assertEqual(len(results['counts']), 6)
+        self.assertIn(len(results['counts']), [5, 6])
         results = self._mc.storyCount('*', QUERY_LAST_YEAR, split=True, split_period='month')
         self.assertEqual(len(results['counts']), 13)
         results = self._mc.storyCount('*', QUERY_LAST_DECADE, split=True, split_period='year')
@@ -74,15 +74,17 @@ class ApiStoryTest(ApiBaseTest):
         cliff_results = self._mc.storyRawCliffResults([story['stories_id']])
         self.assertEqual(len(cliff_results), 1)
         self.assertEqual(cliff_results[0]['stories_id'], story['stories_id'])
-        self.assertIn('results', cliff_results[0]['cliff'])
-        self.assertIn('organizations', cliff_results[0]['cliff']['results'])
+        if cliff_results[0]['cliff'] != 'story is not annotated':
+            self.assertIn('results', cliff_results[0]['cliff'])
+            self.assertIn('organizations', cliff_results[0]['cliff']['results'])
 
     def testStoryRawNytThemeResults(self):
         story = self.recentStory()
         nyt_theme_results = self._mc.storyRawNytThemeResults([story['stories_id']])
         self.assertEqual(len(nyt_theme_results), 1)
         self.assertEqual(nyt_theme_results[0]['stories_id'], story['stories_id'])
-        self.assertIn('descriptors600', nyt_theme_results[0]['nytlabels'])
+        if nyt_theme_results[0]['nytlabels'] != 'story is not annotated':
+            self.assertIn('descriptors600', nyt_theme_results[0]['nytlabels'])
 
 
 class AdminApiStoryTest(AdminApiBaseTest):
@@ -147,7 +149,7 @@ class ApiStoryListTest(ApiBaseTest):
         results = self._mc.storyList('*', QUERY_LAST_WEEK, wc=True)
         for story in results:
             self.assertIn('word_count', story)
-            self.assertGreater(story['word_count'], 0)
+            self.assertGreater(len(story['word_count']), 0)
 
     def testStoryListMetadata(self):
         results = self._mc.storyList('*', QUERY_LAST_WEEK)

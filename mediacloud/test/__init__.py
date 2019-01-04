@@ -1,5 +1,7 @@
 import os.path
 import codecs
+from dotenv import load_dotenv
+
 
 TEST_USER_EMAIL = "mc-api-test@media.mit.edu"
 
@@ -11,6 +13,8 @@ QUERY_LAST_DECADE = "publish_date:[NOW-10YEAR TO NOW]"
 QUERY_ENGLISH_LANGUAGE = "language:en"
 
 basedir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
+load_dotenv(dotenv_path=os.path.join(basedir, '.env'), verbose=True)
 
 
 def load_text_from_fixture(filename):

@@ -15,51 +15,13 @@ class StoryDatabase(object):
     def storyExists(self, story_id):
         raise NotImplementedError("Subclasses should implement this!")
 
-    def addStoryFromSentences(self, story_sentences, extra_attributes={}):
-        # Save a story based on it's sentences to the database.  Return success or failure boolean.
-        # This is pairs well with mediacloud.sentencesMatchingByStory(...).  This saves or updates.
-        # if nothing to save, bail
-        if not story_sentences:
-            return False
-        # verify all the sentences are part of the same story
-        stories_id_list = set([s['stories_id'] for s in story_sentences])
-        if len(stories_id_list) > 1:
-            raise Exception('Expecting all the sentences to be part of the same story (ie. one entry from'
-                            'mediacloud.sentencesMatchingByStory)')
-        stories_id = list(stories_id_list)[0]
-        # save or update the story
-        sentences_by_number = {str(s['sentence_number']): s['sentence'] for s in
-                               sorted(story_sentences, key=lambda x: x['sentence_number'], reverse=True)}
-        if not self.storyExists(stories_id):
-            # if the story is new, save it all
-            story_attributes = {
-                'stories_id': stories_id,
-                'media_id': story_sentences[0]['media_id'],
-                'publish_date': story_sentences[0]['publish_date'],
-                'language': story_sentences[0]['language'],
-                'story_sentences': sentences_by_number,
-                'story_sentences_count': len(sentences_by_number)
-            }
-            self._saveStory(dict(story_attributes.items() + extra_attributes.items()))
-        else:
-            # if the story exists already, add any new sentences
-            story = self.getStory(stories_id)
-            all_sentences = dict(story['story_sentences'].items() + sentences_by_number.items())
-            story_attributes = {
-                'stories_id': stories_id,
-                'story_sentences': all_sentences,
-                'story_sentences_count': len(all_sentences)
-            }
-            self._updateStory(dict(story_attributes.items() + extra_attributes.items()))
-        return True
-
     def updateStory(self, story, extra_attributes={}):
         # if it is a new story, just add it normally
         if not self.storyExists(story['stories_id']):
             return self.addStory(story, extra_attributes)
         else:
             story_to_save = copy.deepcopy(story)
-            story_to_save = dict(story_to_save.items() + extra_attributes.items())
+            story_to_save.update(extra_attributes)
             story_to_save['stories_id'] = story['stories_id']
             if 'story_sentences' in story:
                 story_to_save['story_sentences_count'] = len(story['story_sentences'])
@@ -74,7 +36,7 @@ class StoryDatabase(object):
             self._logger.warn('Not saving {} - already exists'.format(story['stories_id']))
             return False
         story_to_save = copy.deepcopy(story)
-        story_to_save = dict(story_to_save.items() + extra_attributes.items())
+        story_to_save.update(extra_attributes)
         story_to_save['_stories_id'] = story['stories_id']
         if 'story_sentences' in story:
             story_to_save['story_sentences_count'] = len(story['story_sentences'])
