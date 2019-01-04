@@ -1,5 +1,6 @@
 import os.path
 import codecs
+import logging
 from dotenv import load_dotenv
 
 
@@ -14,8 +15,12 @@ QUERY_ENGLISH_LANGUAGE = "language:en"
 
 basedir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-load_dotenv(dotenv_path=os.path.join(basedir, '.env'), verbose=True)
+logger = logging.getLogger(__name__)
 
+# load env-vars from .env file if there is one
+test_env = os.path.join(basedir, '.env')
+if os.path.isfile(test_env):
+    load_dotenv(dotenv_path=os.path.join(basedir, '.env'), verbose=True)
 
 def load_text_from_fixture(filename):
     f = codecs.open(os.path.join(basedir, "mediacloud", "test", "fixtures", filename), 'r',
