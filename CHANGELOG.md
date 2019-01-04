@@ -1,6 +1,11 @@
 Version History
 ===============
 
+### v3.4.2
+
+* default development to python3 (we still test on both 3.6 and 2.7 on CI)
+* upgrade release strategy to use twine
+
 ### v3.4.1
 
 * setup for CI - added linting and automated release tasks via makefile  

@@ -14,7 +14,8 @@ class ApiMediaHealthTest(ApiBaseTest):
         media_health = self._mc.mediaHealth(media['media_id'])
         self.assertEqual(media_health['media_id'], media['media_id'])
         self.assertIn(media_health['is_healthy'], [True, False])
-        self.assertEqual(media_health['coverage_gaps'], len(media_health['coverage_gaps_list']))
+        if media_health['coverage_gaps_list'] is not None:
+            self.assertEqual(media_health['coverage_gaps'], len(media_health['coverage_gaps_list']))
         self.assertIn('start_date', media_health)
         self.assertIn('end_date', media_health)
 

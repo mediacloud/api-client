@@ -7,7 +7,7 @@ lint:
 	$(PYLINT) mediacloud
 
 test:
-	python test.py
+	python setup.py test
 
 build-release:
 	find . -name '.DS_Store' -type f -delete

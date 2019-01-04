@@ -1,5 +1,5 @@
 from mediacloud.test.basetest import ApiBaseTest
-from mediacloud.test import QUERY_LAST_WEEK
+from mediacloud.test import QUERY_LAST_WEEK, QUERY_ENGLISH_LANGUAGE
 
 
 class ApiWordCountTest(ApiBaseTest):
@@ -31,10 +31,10 @@ class ApiWordCountTest(ApiBaseTest):
         self.assertTrue('words' in term_freq.keys())
 
     def testBigram(self):
-        term_freq = self._mc.wordCount('*', QUERY_LAST_WEEK, ngram_size=2)
+        term_freq = self._mc.wordCount(QUERY_ENGLISH_LANGUAGE, QUERY_LAST_WEEK, ngram_size=2)
         for term in term_freq:
             self.assertEqual(len(term['term'].split(' ')), 2,
-                             "Uh oh - '{}' doesn't seem like a bigram! ({})".format(term['term'], term['stem']))
+                             u"Uh oh - '{}' doesn't seem like a bigram! ({})".format(term['term'], term['stem']))
 
     def testRandomSeed(self):
         term_freq = self._mc.wordCount('*', QUERY_LAST_WEEK)
