@@ -34,7 +34,7 @@ class AdminApiSentencesTest(AdminApiBaseTest):
         self.assertGreater(len(results), SENTENCE_COUNT)
         last_date = None
         for sentence in results:
-            this_date = datetime.datetime.strptime(sentence['publish_date'], self._mc.SENTENCE_PUBLISH_DATE_FORMAT)
+            this_date = datetime.datetime.strptime(sentence['publish_date'][0:19], self._mc.SENTENCE_PUBLISH_DATE_FORMAT)
             this_date = this_date.replace(second=0, microsecond=0)  # sorting is by minute
             if last_date is not None:
                 self.assertLessEqual(last_date, this_date)

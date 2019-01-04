@@ -33,7 +33,8 @@ class ApiWordCountTest(ApiBaseTest):
     def testBigram(self):
         term_freq = self._mc.wordCount('*', QUERY_LAST_WEEK, ngram_size=2)
         for term in term_freq:
-            self.assertEqual(len(term['term'].split(' ')), 2)
+            self.assertEqual(len(term['term'].split(' ')), 2,
+                             "Uh oh - '{}' doesn't seem like a bigram! ({})".format(term['term'], term['stem']))
 
     def testRandomSeed(self):
         term_freq = self._mc.wordCount('*', QUERY_LAST_WEEK)

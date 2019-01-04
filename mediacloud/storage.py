@@ -33,7 +33,7 @@ class StoryDatabase(object):
         # Save a story (python object) to the database. This does NOT update stories.
         # Return success or failure boolean.
         if self.storyExists(story['stories_id']):
-            self._logger.warn('Not saving {} - already exists'.format(story['stories_id']))
+            self._logger.info('Not saving {} - already exists'.format(story['stories_id']))
             return False
         story_to_save = copy.deepcopy(story)
         story_to_save.update(extra_attributes)
