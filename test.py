@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 import unittest
 import logging
+import sys
 
 import mediacloud.test.api_story_test
 import mediacloud.test.api_sentence_test
@@ -42,7 +43,7 @@ requests_logger.addHandler(log_handler)
 requests_logger.level = logging.WARN
 
 # now run all the tests
-suites = [unittest.TestLoader().loadTestsFromModule(module) for module in modules]
+suites = [unittest.TestLoader().loadTestsFromModule(m) for m in modules]
 
 failed_suites_count = 0
 
@@ -53,3 +54,9 @@ if __name__ == "__main__":
             failed_suites_count = failed_suites_count + 1
 
 logger.info("Ran {} suites. {} failed.".format(len(suites), failed_suites_count))
+
+# Let CI tools know if there was an error
+if failed_suites_count:
+    sys.exit(1)
+
+sys.exit(0)

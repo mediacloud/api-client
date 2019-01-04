@@ -10,9 +10,11 @@ test:
 	python test.py
 
 build-release:
-	python setup.py sdist
+	find . -name '.DS_Store' -type f -delete
+	python setup.py sdist bdist_wheel
+
+release-test:
+	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
 release:
-	python setup.py sdist
-	python setup.py sdist upload -r pypitest
-	python setup.py sdist upload -r pypi
+	twine upload dist/*

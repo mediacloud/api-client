@@ -13,7 +13,7 @@ with open(path.join(this_directory, 'README.md')) as f:
 
 setup(name='mediacloud',
       version=version,
-      description='MediaCloud API Client Library',
+      description='Media Cloud API Client Library',
       long_description=long_description,
       long_description_content_type='text/markdown',
       author='Rahul Bhargava',

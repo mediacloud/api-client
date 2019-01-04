@@ -2,3 +2,6 @@ requests==2.20.0
 pymongo
 pylint
 python-dotenv
+twine
+wheel
+keyring
