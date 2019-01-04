@@ -32,6 +32,8 @@ class MediaCloud(object):
     FOCAL_TECHNIQUE_BOOLEAN_QUERY = "Boolean Query"
 
     def __init__(self, auth_token=None, all_fields=False):
+        if not auth_token:
+            raise mediacloud.error.MCException(u"No api key set - nothing will work without this")
         self._all_fields = None
         self._auth_token = None
         self.setAuthToken(auth_token)
@@ -52,7 +54,7 @@ class MediaCloud(object):
         except mediacloud.error.MCException:
             return False
         except Exception as exception:
-            logger.warn(u"AuthToken verify failed: %s", exception)
+            logger.warning(u"AuthToken verify failed: %s", exception)
         return False
 
     def userProfile(self):
