@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.4.3
+
+* including all python packages by name
+
 ### v3.4.2
 
 * default development to python3 (we still test on both 3.6 and 2.7 on CI)
