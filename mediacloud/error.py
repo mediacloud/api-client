@@ -1,15 +1,15 @@
 import warnings
 
+
 class MCException(Exception):
     def __init__(self, message, status_code=0):
-        Exception.__init__(self, message)
+        self.message = message
         self.status_code = status_code
 
+
 def deprecated(func):
-    '''
-    This is a decorator which can be used to mark functions as deprecated. It will result in a
-    warning being emitted when the function is used.
-    '''
+    # This is a decorator which can be used to mark functions as deprecated. It will result in a
+    # warning being emitted when the function is used.
     def new_func(*args, **kwargs):
         warnings.warn("Call to deprecated function {}.".format(func.__name__), category=DeprecationWarning)
         return func(*args, **kwargs)
