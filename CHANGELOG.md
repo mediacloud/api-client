@@ -1,6 +1,14 @@
 Version History
 ===============
 
+### v3.4.4
+
+* more work on exceptions and documentation for importing
+
+### v3.4.3
+
+* fix problem with `MCException`s not saving the details that caused them
+
 ### v3.4.2
 
 * default development to python3 (we still test on both 3.6 and 2.7 on CI)
