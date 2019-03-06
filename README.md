@@ -95,7 +95,7 @@ password over and over.
 
 1. Run `make test` to make sure all the test pass
 2. Update the version number in `mediacloud/__init__.py`
-3. Make a brief note in the version history section in the README file about the changes
+3. Make a brief note in the CHANGELOG.md about what changes
 4. Run `make build-release` to create an install package
 5. Run `make release-test` to upload it to PyPI's test platform
 5. Run `make release` to upload it to PyPI

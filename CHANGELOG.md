@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.5.4
+
+* add new snapshots/create endpoint, and support passing in a snapshots_id to the topicSpider call 
+
 ### v3.4.4
 
 * more work on exceptions and documentation for importing

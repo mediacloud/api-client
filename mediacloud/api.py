@@ -558,6 +558,12 @@ class MediaCloud(object):
     def topicSnapshotList(self, topics_id):
         return self._queryForJson(self.V2_API_URL+'topics/{}/snapshots/list'.format(topics_id))['snapshots']
 
+    def topicCreateSnapshot(self, topics_id, **kwargs):
+        params = {}
+        valid_params = ['note']
+        _validate_params(params, valid_params, kwargs)
+        return self._queryForJson(self.V2_API_URL + 'topics/{}/snapshots/create'.format(topics_id), params, 'POST')
+
     def topicGenerateSnapshot(self, topics_id, **kwargs):
         params = {}
         valid_params = ['note']
@@ -601,9 +607,12 @@ class MediaCloud(object):
         _validate_params(params, valid_params, kwargs)
         return self._queryForJson(self.V2_API_URL+'topics/{}/update'.format(topics_id), params, 'PUT_JSON')
 
-    def topicSpider(self, topics_id):
+    def topicSpider(self, topics_id, snapshots_id=None):
         # this will generate a new snapshot for you
-        return self._queryForJson(self.V2_API_URL + 'topics/{}/spider'.format(topics_id), {}, 'POST')
+        params = {}
+        if snapshots_id:
+            params['snapshots_id'] = snapshots_id
+        return self._queryForJson(self.V2_API_URL + 'topics/{}/spider'.format(topics_id), params, 'POST')
 
     def topicSpiderStatus(self, topics_id):
         return self._queryForJson(self.V2_API_URL + 'topics/{}/spider_status'.format(topics_id))
