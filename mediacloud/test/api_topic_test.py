@@ -95,7 +95,7 @@ class AdminTopicStoryListTest(AdminApiBaseTest):
 
     def testTopicStoryListFacebookData(self):
         response = self._mc.topicStoryListFacebookData(self.TOPIC_ID)
-        self.assertEqual(len(response['counts']), 70)
+        self.assertEqual(len(response['counts']), 1000)
         for story in response['counts']:
             self.assertIn('facebook_api_collect_date', story)
             self.assertIn('facebook_comment_count', story)
