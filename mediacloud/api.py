@@ -555,6 +555,10 @@ class MediaCloud(object):
         params['limit'] = limit
         return self._queryForJson(self.V2_API_URL+'topics/list', params)
 
+    def topicSnapshotCancel(self, topics_id, snapshots_id):
+        params = {'snapshots_id': snapshots_id}
+        return self._queryForJson(self.V2_API_URL + 'topics/{}/snapshots/cancel'.format(topics_id), params, 'POST')
+
     def topicSnapshotList(self, topics_id):
         return self._queryForJson(self.V2_API_URL+'topics/{}/snapshots/list'.format(topics_id))['snapshots']
 
@@ -566,7 +570,7 @@ class MediaCloud(object):
 
     def topicGenerateSnapshot(self, topics_id, **kwargs):
         params = {}
-        valid_params = ['note']
+        valid_params = ['note', 'snapshots_id']
         _validate_params(params, valid_params, kwargs)
         return self._queryForJson(self.V2_API_URL+'topics/{}/snapshots/generate'.format(topics_id), params, 'POST')
 
@@ -608,7 +612,7 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'topics/{}/update'.format(topics_id), params, 'PUT_JSON')
 
     def topicSpider(self, topics_id, snapshots_id=None):
-        # this will generate a new snapshot for you
+        # this will generate a new snapshot for you (ie. run a spider job and then a snapshot job)
         params = {}
         if snapshots_id:
             params['snapshots_id'] = snapshots_id
@@ -617,8 +621,9 @@ class MediaCloud(object):
     def topicSpiderStatus(self, topics_id):
         return self._queryForJson(self.V2_API_URL + 'topics/{}/spider_status'.format(topics_id))
 
-    def topicSpiderIterationsList(self, topics_id):
-        return self._queryForJson(self.V2_API_URL + 'topics/{}/iterations/list'.format(topics_id))
+# Not implemented yet
+#    def topicSpiderIterationsList(self, topics_id):
+#        return self._queryForJson(self.V2_API_URL + 'topics/{}/iterations/list'.format(topics_id))
 
     def topicTimespanList(self, topics_id, **kwargs):
         params = {}
