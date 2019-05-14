@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.6.0
+
+* add `has_consented` to user update
+
 ### v3.5.1
 
 * fix for spidering into an existing snapshot
