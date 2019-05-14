@@ -961,7 +961,8 @@ class AdminMediaCloud(MediaCloud):
 
     def userUpdate(self, auth_users_id, **kwargs):
         params = {'auth_users_id': auth_users_id}
-        valid_params = ['full_name', 'email', 'notes', 'roles', 'max_topic_stories', 'weekly_requests_limit', 'active']
+        valid_params = ['full_name', 'email', 'notes', 'roles', 'max_topic_stories', 'weekly_requests_limit',
+                        'active', 'has_consented']
         _validate_params(params, valid_params, kwargs)
         _validate_bool_params(params, 'active')
         return self._queryForJson(self.V2_API_URL + 'users/update', params, 'PUT_JSON')
