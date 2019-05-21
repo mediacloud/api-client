@@ -69,7 +69,7 @@ class MediaCloud(object):
         }
         return self._queryForJson(self.V2_API_URL+'auth/login', params, 'POST')
 
-    def authRegister(self, email, password, full_name, notes, subscribe_to_newsletter, activation_url):
+    def authRegister(self, email, password, full_name, notes, subscribe_to_newsletter, activation_url, has_consented):
         # :return: {success: 1}, or {error: "msg"}
         params = {
             'email': email,
@@ -77,10 +77,16 @@ class MediaCloud(object):
             'full_name': full_name,
             'notes': notes,
             'subscribe_to_newsletter': subscribe_to_newsletter,
-            'activation_url': activation_url
+            'activation_url': activation_url,
         }
         _validate_bool_params(params, 'subscribe_to_newsletter')
-        return self._queryForJson(self.V2_API_URL+'auth/register', params, 'POST')
+        results = self._queryForJson(self.V2_API_URL+'auth/register', params, 'POST')
+        # hack to add `has_consented` because auth/register endpoint doesn't support it (for now)
+        if ('success' in results) and (results['success'] == 1):
+            if 'has_consented':
+                user = self.userList(search=email)['users'][0]
+                self.userUpdate(auth_users_id=user['auth_users_id'], has_consented=has_consented)
+        return results
 
     def authActivate(self, email, activation_token):
         # :return: { success: 1, profile: {...}} or {error: msg}
@@ -682,7 +688,7 @@ class MediaCloud(object):
         valid_params = ['name', 'description', 'query']
         _validate_params(params, valid_params, kwargs)
         return self._queryForJson(self.V2_API_URL+'topics/{}/focus_definitions/{}/update'.format(
-            topics_id, focus_definitions_id), params, http_method='PUT')['focus_definitions']
+            topics_id, focus_definitions_id), params, http_method='PUT_JSON')['focus_definitions']
 
     def topicFocusDefinitionDelete(self, topics_id, focus_definitions_id):
         return self._queryForJson(self.V2_API_URL+'topics/{}/focus_definitions/{}/delete'.format(

@@ -1,6 +1,18 @@
 Version History
 ===============
 
+### v3.6.3
+
+* fix bug with `has_consented` on auth/reg call
+
+### v3.6.2
+
+* add `has_consented` to auth/reg call
+
+### v3.6.1
+
+* fix update focus call to use JSON format
+
 ### v3.6.0
 
 * add `has_consented` to user update
