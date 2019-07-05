@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.6.4
+
+* allow downloading randomly sorted lists of topic stories
+
 ### v3.6.3
 
 * fix bug with `has_consented` on auth/reg call
