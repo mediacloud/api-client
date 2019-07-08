@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.6.5
+
+* support searching for media by boolean combinations of tags
+
 ### v3.6.4
 
 * allow downloading randomly sorted lists of topic stories
