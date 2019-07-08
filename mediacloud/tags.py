@@ -6,6 +6,8 @@ TAG_SET_PUBLICATION_STATE = 1962  # holds the state of publication of a source (
 TAG_SET_PRIMARY_LANGUAGE = 1969  # holds the primary language of a source
 TAG_SET_COUNTRY_OF_FOCUS = 1970  # holds the primary focus on what country for a source
 TAG_SET_MEDIA_TYPE = 1972  # holds what type of media source this is (broadcast, online, etc)
+METADATA_TAG_SETS = [TAG_SET_PUBLICATION_COUNTRY, TAG_SET_PUBLICATION_STATE, TAG_SET_PRIMARY_LANGUAGE,
+                     TAG_SET_COUNTRY_OF_FOCUS, TAG_SET_MEDIA_TYPE]
 
 # Tag set ids for information about a story
 TAG_SET_NYT_THEMES = 1963  # the tag set the top 600 labels from our NYT-corpus-trained model
@@ -25,11 +27,10 @@ TAG_NYT_LABELER_1_0_0 = 9360669  # the tag that indicates a story was tagged by 
 # Tag ids for information about a story
 TAG_STORY_UNDATEABLE = 8877812  # if a story has this tag, that means it was undateable
 
-
 '''
 These are helpers for calling media/story tag update methods.  These wrappers exist
 because you can specify this by tag/tag-set name, or by tag-id.  Because you don't want to mess
-these calls up, I found it helpful to fomarlize this, instead of just accepting a dict from the
+these calls up, I found it helpful to formalize this, instead of just accepting a dict from the
 caller (which might be missing params).
 '''
 
@@ -64,6 +65,9 @@ class TagSpec(object):
 
 
 class StoryTag(TagSpec):
+    """
+    Use this to tag stories with metadata, like the language they are in.
+    """
 
     def __init__(self, stories_id, tag_set_name=None, tag_name=None, action=TAG_ACTION_ADD, tags_id=None):
         self.stories_id = stories_id
@@ -76,6 +80,9 @@ class StoryTag(TagSpec):
 
 
 class MediaTag(TagSpec):
+    """
+    Use this to tag media with metadata, like the country they are publised in.
+    """
 
     def __init__(self, media_id, tag_set_name=None, tag_name=None, action=TAG_ACTION_ADD, tags_id=None):
         self.media_id = media_id
