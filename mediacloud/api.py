@@ -152,7 +152,7 @@ class MediaCloud(object):
 
     def mediaList(self, last_media_id=0, rows=20, name_like=None,
                   timespans_id=None, topic_mode=None, tags_id=None, q=None, include_dups=False,
-                  unhealthy=None, similar_media_id=None, sort=None):
+                  unhealthy=None, similar_media_id=None, sort=None, search_criteria=None, **kwargs):
         # Page through all media sources.
         valid_sort_options = ['id', 'num_stories']
         params = {'last_media_id': last_media_id, 'rows': rows}
@@ -176,7 +176,9 @@ class MediaCloud(object):
             raise ValueError('Sort must be either id num_stories')
         else:
             params['sort'] = sort
-
+        # And verify that the kwargs are tags_ids
+        params.update(kwargs)
+        # now make the call with all the params
         results = self._queryForJson(self.V2_API_URL+'media/list', params)
         for m in results:  # cleanup from string to float
             m['num_sentences_90'] = float(m['num_sentences_90'])

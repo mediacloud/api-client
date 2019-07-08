@@ -1,7 +1,9 @@
+#import logging
+#logging.basicConfig(level=logging.DEBUG)
+
 from mediacloud.test.basetest import ApiBaseTest, AdminApiBaseTest
 from mediacloud.test import TEST_USER_EMAIL
 from mediacloud.tags import MediaTag, TAG_ACTION_ADD, TAG_ACTION_REMOVE
-
 TESTING_COLLECTION = 9353679
 TEST_MEDIA_SUGGEST_REASON = "!!!! TESTING SUGGESTION !!!!"
 TEST_TAG_ID_1 = 9172171  # mc-api-test@media.mit.edu:test_tag1
@@ -89,6 +91,23 @@ class ApiMediaTest(ApiBaseTest):
     def testMediaListWithTagId(self):
         matching_list = self._mc.mediaList(tags_id=8875027)  # US MSM
         self.assertTrue(len(matching_list) > 0)
+
+    def testMediaListWithMultipleTagIds(self):
+        TAG_PUBLISHED_IN_INDIA = 9353533
+        TAG_PUBLISHED_IN_NEPAL = 9353597
+        TAG_PRIMARY_LANGUAGE_ENGLISH = 9361422
+        # (published in India) AND (written in English)
+        matching_list = self._mc.mediaList(tags_id_1=[TAG_PUBLISHED_IN_INDIA], tags_id_2=[TAG_PRIMARY_LANGUAGE_ENGLISH])
+        self.assertTrue(len(matching_list) > 0)
+        for m in matching_list:
+            self.assertEqual(m['metadata']['pub_country']['tags_id'], TAG_PUBLISHED_IN_INDIA)
+            self.assertEqual(m['metadata']['language']['tags_id'], TAG_PRIMARY_LANGUAGE_ENGLISH)
+        # (published in Nepal or India) AND (written in English or Hindi)
+        matching_list = self._mc.mediaList(tags_id_1=[TAG_PUBLISHED_IN_INDIA], tags_id_2=[TAG_PRIMARY_LANGUAGE_ENGLISH])
+        self.assertTrue(len(matching_list) > 0)
+        for m in matching_list:
+            self.assertIn(m['metadata']['pub_country']['tags_id'], [TAG_PUBLISHED_IN_INDIA, TAG_PUBLISHED_IN_NEPAL])
+            self.assertEqual(m['metadata']['language']['tags_id'], TAG_PRIMARY_LANGUAGE_ENGLISH)
 
     def testMediaListUnhealthy(self):
         # make sure no overlap in healthy and unhealthy first page of results
