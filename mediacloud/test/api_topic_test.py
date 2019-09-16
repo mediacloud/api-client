@@ -1,7 +1,9 @@
+import mediacloud.api
 from mediacloud.test.basetest import AdminApiBaseTest
 
 TEST_TOPIC_ID = 1537    # climate change topic
 TEST_TOPIC2_ID = 1019   # common core
+TEST_TOPIC3_ID = 3180   # rahul test
 
 
 class ApiTopicTest(AdminApiBaseTest):
@@ -289,3 +291,14 @@ class AdminTopicMediaMapTest(AdminApiBaseTest):
     def testMediaMap(self):
         results = self._mc.topicMediaMap(TEST_TOPIC2_ID)
         self.assertIn('gexf', str(results))
+
+
+class TopicSeedQueryTest(AdminApiBaseTest):
+
+    def testSeedQuery(self):
+        results = self._mc.topicAddSeedQuery(TEST_TOPIC3_ID, mediacloud.api.TOPIC_PLATFORM_TWITTER,
+                                             mediacloud.api.TOPIC_SOURCE_ARCHIVE, 'rahul')
+        self.assertIn('topic_seed_query', results)
+        self.assertIn('topic_seed_queries_id', results['topic_seed_query'])
+        results = self._mc.topicRemoveSeedQuery(TEST_TOPIC3_ID, results['topic_seed_query']['topic_seed_queries_id'])
+        self.assertEqual(results['success'], 1)

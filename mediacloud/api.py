@@ -14,6 +14,15 @@ MAX_HTTP_GET_CHARS = 4000   # experimentally determined for our main servers (co
 
 logger = logging.getLogger(__name__)
 
+# platforms to use with topicSeedQuery
+TOPIC_PLATFORM_TWITTER = 'twitter'
+TOPIC_PLATFORM_WEB = 'web'
+TOPIC_PLATFORMS = [TOPIC_PLATFORM_WEB, TOPIC_PLATFORM_TWITTER]
+# twitter platform sources for topicSeedQuery calls
+TOPIC_SOURCE_CRIMSON = 'crimson_hexagon'
+TOPIC_SOURCE_ARCHIVE = 'archive_org'
+TOPIC_TWITTER_SOURCES = [TOPIC_SOURCE_ARCHIVE, TOPIC_SOURCE_CRIMSON]
+
 
 # Simple client library for the MediaCloud API v2
 class MediaCloud(object):
@@ -720,6 +729,21 @@ class MediaCloud(object):
             'permission': permission
         }
         return self._queryForJson(self.V2_API_URL+'topics/{}/permissions/update'.format(topics_id), params, 'PUT_JSON')
+
+    def topicAddSeedQuery(self, topics_id, platform, source, query):
+        params = {
+            'topics_id': topics_id,
+            'platform': platform,  # twitter or web
+            'source': source,  # 'crimson_hexagon' or 'archive_org'
+            'query': query,  # boolean query terms in correct format, or ID, or something
+        }
+        return self._queryForJson(self.V2_API_URL + 'topics/{}/add_seed_query'.format(topics_id), params, 'PUT_JSON')
+
+    def topicRemoveSeedQuery(self, topics_id, topic_seed_queries_id):
+        params = {
+            'topic_seed_queries_id': topic_seed_queries_id,
+        }
+        return self._queryForJson(self.V2_API_URL + 'topics/{}/remove_seed_query'.format(topics_id), params, 'PUT_JSON')
 
     '''
     # not implemented yet
