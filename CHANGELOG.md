@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.7.0
+
+* add support for mutiple topic seed queries via `topic_queries` endpoints
+
 ### v3.6.5
 
 * support searching for media by boolean combinations of tags
