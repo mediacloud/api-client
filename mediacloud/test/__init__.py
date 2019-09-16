@@ -22,6 +22,7 @@ test_env = os.path.join(basedir, '.env')
 if os.path.isfile(test_env):
     load_dotenv(dotenv_path=os.path.join(basedir, '.env'), verbose=True)
 
+
 def load_text_from_fixture(filename):
     f = codecs.open(os.path.join(basedir, "mediacloud", "test", "fixtures", filename), 'r',
                     encoding='utf8')
