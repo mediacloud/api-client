@@ -85,16 +85,13 @@ class MediaCloud(object):
             'password': password,
             'full_name': full_name,
             'notes': notes,
+            'has_consented': has_consented,
             'subscribe_to_newsletter': subscribe_to_newsletter,
             'activation_url': activation_url,
         }
         _validate_bool_params(params, 'subscribe_to_newsletter')
+        _validate_bool_params(params, 'has_consented')
         results = self._queryForJson(self.V2_API_URL+'auth/register', params, 'POST')
-        # hack to add `has_consented` because auth/register endpoint doesn't support it (for now)
-        if ('success' in results) and (results['success'] == 1):
-            if 'has_consented':
-                user = self.userList(search=email)['users'][0]
-                self.userUpdate(auth_users_id=user['auth_users_id'], has_consented=has_consented)
         return results
 
     def authActivate(self, email, activation_token):
