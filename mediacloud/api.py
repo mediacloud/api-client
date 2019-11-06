@@ -78,7 +78,7 @@ class MediaCloud(object):
         }
         return self._queryForJson(self.V2_API_URL+'auth/login', params, 'POST')
 
-    def authRegister(self, email, password, full_name, notes, subscribe_to_newsletter, activation_url, has_consented):
+    def authRegister(self, email, password, full_name, notes, activation_url, has_consented):
         # :return: {success: 1}, or {error: "msg"}
         params = {
             'email': email,
@@ -86,10 +86,8 @@ class MediaCloud(object):
             'full_name': full_name,
             'notes': notes,
             'has_consented': has_consented,
-            'subscribe_to_newsletter': subscribe_to_newsletter,
             'activation_url': activation_url,
         }
-        _validate_bool_params(params, 'subscribe_to_newsletter')
         _validate_bool_params(params, 'has_consented')
         results = self._queryForJson(self.V2_API_URL+'auth/register', params, 'POST')
         return results
