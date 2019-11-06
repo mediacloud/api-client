@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.7.2
+
+* remove registration `subscribe_to_newsletter`
+
 ### v3.7.1
 
 * remove registration-related `has_consented` hack
