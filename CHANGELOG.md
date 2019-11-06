@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.7.1
+
+* remove registration-related `has_consented` hack
+
 ### v3.7.0
 
 * add support for mutiple topic seed queries via `topic_queries` endpoints
