@@ -156,7 +156,7 @@ class MediaCloud(object):
 
     def mediaList(self, last_media_id=0, rows=20, name_like=None,
                   timespans_id=None, topic_mode=None, tags_id=None, q=None, include_dups=False,
-                  unhealthy=None, similar_media_id=None, sort=None, search_criteria=None, **kwargs):
+                  unhealthy=None, similar_media_id=None, sort=None, **kwargs):
         # Page through all media sources.
         valid_sort_options = ['id', 'num_stories']
         params = {'last_media_id': last_media_id, 'rows': rows}
@@ -212,8 +212,11 @@ class MediaCloud(object):
         # Find all the tags from a set on a media source
         return [t for t in media_source['media_source_tags'] if t['tag_sets_id'] == tag_sets_id]
 
-    def mediaSuggest(self, url, name=None, feed_url=None, reason=None, tags_ids=[]):
-        for tags_id in tags_ids:
+    def mediaSuggest(self, url, name=None, feed_url=None, reason=None, tags_ids=None):
+        tags_to_apply = tags_ids if tags_ids is not None else []
+        if tags_to_apply is None:
+            tags_to_apply = []
+        for tags_id in tags_to_apply:
             if not isinstance(tags_id, int):
                 raise ValueError('The tags_ids must be a list of ids')
         params = {
@@ -221,7 +224,7 @@ class MediaCloud(object):
             'name': name,
             'feed_url': feed_url,
             'reason': reason,
-            'tags_ids': tags_ids
+            'tags_ids': tags_to_apply
         }
         return self._queryForJson(self.V2_API_URL+'media/submit_suggestion', params, 'POST')
 
@@ -258,7 +261,7 @@ class MediaCloud(object):
                                    'fq': solr_filter,
                                    'split': 1 if split is True else 0,
                                    'split_period': _validate_split_period_param(split_period)
-                                  })
+                                   })
 
     def storyPublicList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
                         wc=False, feeds_id=None, sort=SORT_PROCESSED_STORIES_ID):
@@ -277,7 +280,7 @@ class MediaCloud(object):
                                       'wc': 1 if wc is True else 0,
                                       'feeds_id': feeds_id,
                                       'show_feeds': 1 if show_feeds is True else 0,
-                                     })
+                                      })
         stories_with_metadata = self._addMetadataTagsToStoryList(stories)
         return stories_with_metadata
 
@@ -418,7 +421,7 @@ class MediaCloud(object):
 
     def _query(self, url, params=None, http_method='GET', json_data=None):
         start_time = time.time()
-        logger.debug(u"query {} to {} with {} and {}".format(http_method, url, params, json_data))
+        logger.debug(u"query {} to {} with {} and {}".format(http_method, url, params, _remove_private_info(json_data)))
         if params is None:
             params = {}
 #        if (http_method is not 'PUT_JSON') and (not isinstance(params, dict)):
@@ -470,7 +473,8 @@ class MediaCloud(object):
             raise ValueError('Error - unsupported HTTP method {}'.format(http_method))
         end_time = time.time()
         logger.debug(u"Profiling: {}s for {} to {} (with {} / {})".format(end_time - start_time, http_method,
-                                                                          url, params, json.dumps(json_data)))
+                                                                          url, params,
+                                                                          json.dumps(_remove_private_info(json_data))))
         if r.status_code is not requests.codes['ok']:
             logger.info(u'Bad HTTP response to {}: {} {}'.format(r.url, r.status_code, r.reason))
             # logger.info(u'\t{}'.format(r.content))
@@ -767,7 +771,7 @@ class AdminMediaCloud(MediaCloud):
                                    'corenlp': 1 if corenlp else 0,
                                    'sentences': 1 if sentences else 0,
                                    'text': 1 if text else 0
-                                  })[0]
+                                   })[0]
 
     def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
                   wc=False, feeds_id=None, sort=MediaCloud.SORT_PROCESSED_STORIES_ID, raw_1st_download=False,
@@ -807,7 +811,7 @@ class AdminMediaCloud(MediaCloud):
                                    'start': start,
                                    'rows': rows,
                                    'sort': sort
-                                  })
+                                   })
 
     def tagStories(self, tags=None, clear_others=False):
         # Add some tags to stories. The tags parameter should be a list of StoryTag objects.
@@ -1076,3 +1080,9 @@ def _validate_date_params(params, *args):
 def _validate_feed_type(feed_type):
     if feed_type not in ['syndicated', 'web_page']:
         raise ValueError('feed_type must be syndicated or web_page')
+
+
+def _remove_private_info(json_data):
+    if json_data is None:
+        return None
+    return {k: v for (k, v) in json_data if k not in ['password', 'key']}
