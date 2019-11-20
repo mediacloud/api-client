@@ -97,14 +97,14 @@ class UserAuthTest(AdminApiBaseTest):
         # update to false
         response = self._mc.userUpdate(TEST_USER_ID, has_consented=False)
         self.assertIn('success', response)
-        self.assertEquals(response['success'], 1)
+        self.assertEqual(response['success'], 1)
         # verify it is false
         u2 = self._mc.user(TEST_USER_ID)
         self.assertFalse(u2['users'][0]['has_consented'])
         # update back to true
         results2 = self._mc.userUpdate(TEST_USER_ID, has_consented=True)
         self.assertIn('success', results2)
-        self.assertEquals(results2['success'], 1)
+        self.assertEqual(results2['success'], 1)
         # verify it is true
         u3 = self._mc.user(TEST_USER_ID)
         self.assertTrue(u3['users'][0]['has_consented'])
