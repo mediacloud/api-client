@@ -1,6 +1,14 @@
 Version History
 ===============
 
+### v3.7.4
+
+* more privacy-related logging improvements (and tests for them)
+
+### v3.7.3
+
+* improve logging to not log key user data
+
 ### v3.7.2
 
 * remove registration `subscribe_to_newsletter`
