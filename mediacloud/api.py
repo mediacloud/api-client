@@ -1082,7 +1082,7 @@ def _validate_feed_type(feed_type):
         raise ValueError('feed_type must be syndicated or web_page')
 
 
-def _remove_private_info(json_data):
-    if json_data is None:
+def _remove_private_info(orignal_data):
+    if orignal_data is None:
         return None
-    return {k: v for (k, v) in json_data if k not in ['password', 'key']}
+    return {k: v for k, v in orignal_data.items() if k not in ['password', 'key']}

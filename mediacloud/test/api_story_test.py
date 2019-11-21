@@ -171,14 +171,14 @@ class ApiStoryListTest(ApiBaseTest):
 class AdminApiStoryListTest(AdminApiBaseTest):
 
     def testStoryListWithSentences(self):
-        results = self._mc.storyList('*', QUERY_LAST_WEEK, sentences=True)
+        results = self._mc.storyList('*', QUERY_LAST_WEEK, sentences=True, rows=5)
         for story in results:
             self.assertIn('story_sentences', story)
             self.assertNotIn('story_text', story)
             self.assertNotIn('is_fully_extracted', story)
 
     def testStoryListWithText(self):
-        results = self._mc.storyList('*', QUERY_LAST_WEEK, text=True)
+        results = self._mc.storyList('*', QUERY_LAST_WEEK, text=True, rows=5)
         for story in results:
             self.assertNotIn('story_sentences', story)
             self.assertIn('story_text', story)

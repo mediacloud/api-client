@@ -77,7 +77,7 @@ class ApiAllFieldsOptionTest(ApiBaseTest):
         self.assertIn('url', media)
 
 
-class AdminApiChunkifyTest(ApiBaseTest):
+class ApiChunkifyTest(ApiBaseTest):
 
     def testChunkify(self):
         chunk_size = 50
@@ -87,3 +87,22 @@ class AdminApiChunkifyTest(ApiBaseTest):
         for x in range(0, 10):
             self.assertEqual(chunk_size, len(chunked[x]))
         self.assertEqual(7, len(chunked[10]))
+
+
+class RemovePrivateInfoTest(ApiBaseTest):
+
+    def testKeyRemoval(self):
+        data = {'key': 'SOME_RANDOM_KEY'}
+        clean_data = mediacloud.api._remove_private_info(data)
+        self.assertEqual(0, len(clean_data.keys()))
+
+    def testPasswordRemoval(self):
+        data = {'password': 'MY_AWESOME_PSWD'}
+        clean_data = mediacloud.api._remove_private_info(data)
+        self.assertEqual(0, len(clean_data.keys()))
+
+    def testRetention(self):
+        data = {'password': 'MY_AWESOME_PSWD', 'key': 'SOME_RANDOM_KEY', 'other_stuff': 'THAT_SHOULD_REMAIN'}
+        clean_data = mediacloud.api._remove_private_info(data)
+        self.assertEqual(1, len(clean_data.keys()))
+        self.assertEqual('other_stuff', list(clean_data.keys())[0])
