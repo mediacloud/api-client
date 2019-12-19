@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.7.5
+
+* remove silly logging error
+
 ### v3.7.4
 
 * more privacy-related logging improvements (and tests for them)

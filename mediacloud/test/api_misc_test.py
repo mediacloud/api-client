@@ -101,6 +101,11 @@ class RemovePrivateInfoTest(ApiBaseTest):
         clean_data = mediacloud.api._remove_private_info(data)
         self.assertEqual(0, len(clean_data.keys()))
 
+    def testListInput(self):
+        data = ['sdfd', 'sdfdf', 'sfdf']
+        clean_data = mediacloud.api._remove_private_info(data)
+        self.assertEqual(len(data), len(clean_data))
+
     def testRetention(self):
         data = {'password': 'MY_AWESOME_PSWD', 'key': 'SOME_RANDOM_KEY', 'other_stuff': 'THAT_SHOULD_REMAIN'}
         clean_data = mediacloud.api._remove_private_info(data)

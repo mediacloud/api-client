@@ -1082,7 +1082,11 @@ def _validate_feed_type(feed_type):
         raise ValueError('feed_type must be syndicated or web_page')
 
 
-def _remove_private_info(orignal_data):
-    if orignal_data is None:
+def _remove_private_info(original_data):
+    if original_data is None:
         return None
-    return {k: v for k, v in orignal_data.items() if k not in ['password', 'key']}
+    try:
+        return {k: v for k, v in original_data.items() if k not in ['password', 'key']}
+    except AttributeError:
+        logger.warning("Can't remove private info from something that isn't a dict")
+        return original_data
