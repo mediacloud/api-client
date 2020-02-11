@@ -93,27 +93,24 @@ class MongoStoryDatabase(StoryDatabase):
         return story is not None
 
     def _updateStory(self, story_attributes):
-        story = self.getStory(story_attributes['stories_id'])
-        story_attributes['_id'] = story['_id']
-        self._db.stories.save(story_attributes)
+        self._db.stories.update_one({'stories_id': story_attributes['stories_id']}, {'$set': story_attributes})
         story = self.getStory(story_attributes['stories_id'])
         return story
 
     def _saveStory(self, story_attributes):
-        self._db.stories.insert(story_attributes)
+        self._db.stories.insert_one(story_attributes)
         story = self.getStory(story_attributes['stories_id'])
         return story
 
     def getStory(self, story_id):
         stories = self._db.stories.find({"stories_id": story_id}).limit(1)
-        if stories.count() == 0:
+        try:
+            return stories.next()
+        except:
             return None
-        return stories.next()
 
     def getMaxStoryId(self):
-        max_story_id = 0
-        if self._db.stories.count() > 0:
-            max_story_id = self._db.stories.find().sort("stories_id", -1)[0]['stories_id']
+        max_story_id = self._db.stories.find().sort("stories_id", -1)[0]['stories_id']
         return int(max_story_id)
 
     def initialize(self):
@@ -121,4 +118,4 @@ class MongoStoryDatabase(StoryDatabase):
         return
 
     def storyCount(self):
-        return self._db['stories'].count()
+        return self._db['stories'].count_documents({})

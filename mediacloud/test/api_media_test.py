@@ -61,7 +61,7 @@ class ApiMediaTest(ApiBaseTest):
 
     def testMediaListWithName(self):
         matching_list = self._mc.mediaList(name_like='new york times')
-        self.assertEqual(len(matching_list), 2)
+        self.assertEqual(len(matching_list), 1)
 
     def testMediaList(self):
         first_list = self._mc.mediaList()

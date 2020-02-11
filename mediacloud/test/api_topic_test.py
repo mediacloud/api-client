@@ -147,7 +147,7 @@ class AdminTopicStoryListTest(AdminApiBaseTest):
         response = self._mc.topicStoryList(self.TOPIC_ID, limit=500, sort='twitter')
         last_inlink_count = 1000000000000
         for story in response['stories']:
-            if (last_inlink_count is not None) and (story['normalized_tweet_count'] is not None):
+            if (last_inlink_count is not None) and ('normalized_tweet_count' in story) and (story['normalized_tweet_count'] is not None):
                 self.assertLessEqual(story['normalized_tweet_count'], last_inlink_count)
                 last_inlink_count = story['normalized_tweet_count']
 
@@ -239,7 +239,7 @@ class AdminTopicMediaListTest(AdminApiBaseTest):
         response = self._mc.topicMediaList(self.TOPIC_ID, sort='twitter')
         last_count = 1000000000000
         for media in response['media']:
-            if (last_count is not None) and (media['simple_tweet_count'] is not None):
+            if (last_count is not None) and ('simple_tweet_count' in media) and (media['simple_tweet_count'] is not None):
                 self.assertLessEqual(media['simple_tweet_count'], last_count)
                 last_count = media['simple_tweet_count']
 

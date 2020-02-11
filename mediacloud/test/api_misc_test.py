@@ -2,6 +2,7 @@ import datetime
 
 from mediacloud.test.basetest import ApiBaseTest
 import mediacloud
+import mediacloud.api
 
 
 class StatsTest(ApiBaseTest):

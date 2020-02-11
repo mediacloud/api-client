@@ -53,8 +53,8 @@ class StorageTest(unittest.TestCase):
         self.assertFalse(worked)
         saved_story = db.getStory(story['stories_id'])
         self.assertNotEqual(saved_story, None)
-        self.assertEquals(saved_story['stories_id'], story['stories_id'])
-        self.assertEquals(saved_story['story_sentences_count'], 4)
+        self.assertEqual(saved_story['stories_id'], story['stories_id'])
+        self.assertEqual(saved_story['story_sentences_count'], 4)
         db.deleteDatabase(self.TEST_DB_NAME)
 
     def _checkStoryExistsInDb(self, db):
@@ -75,19 +75,18 @@ class StorageTest(unittest.TestCase):
         db.initialize()
         db.addStory(story1)
         db.addStory(story2)
-        self.assertEquals(db.getMaxStoryId(), 20000000000)
+        self.assertEqual(db.getMaxStoryId(), 20000000000)
         db.deleteDatabase(self.TEST_DB_NAME)
 
     @staticmethod
     def _getFakeStory():
-        my_file = open(os.path.dirname(os.path.realpath(__file__))+'/fixtures/story_27456565.json', 'r')
-        return json.loads(my_file.read())
+        with open(os.path.dirname(os.path.realpath(__file__))+'/fixtures/story_27456565.json', 'r') as my_file:
+            return json.loads(my_file.read())
 
     @staticmethod
     def _getFakeStorySentences(page=1):
-        my_file = open(os.path.dirname(os.path.realpath(__file__))+'/fixtures/sentences_by_story_'+str(page)+'.json',
-                       'r')
-        return json.loads(my_file.read())
+        with open(os.path.dirname(os.path.realpath(__file__))+'/fixtures/sentences_by_story_'+str(page)+'.json', 'r') as my_file:
+            return json.loads(my_file.read())
 
 
 class MongoStorageTest(StorageTest):
