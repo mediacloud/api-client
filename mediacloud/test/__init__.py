@@ -1,5 +1,4 @@
 import os.path
-import codecs
 import logging
 from dotenv import load_dotenv
 
@@ -24,7 +23,6 @@ if os.path.isfile(test_env):
 
 
 def load_text_from_fixture(filename):
-    f = codecs.open(os.path.join(basedir, "mediacloud", "test", "fixtures", filename), 'r',
-                    encoding='utf8')
-    text = f.read()
+    with open(os.path.join(basedir, "mediacloud", "test", "fixtures", filename), 'r') as f:
+        text = f.read()
     return text

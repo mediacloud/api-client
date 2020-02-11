@@ -777,7 +777,7 @@ class AdminMediaCloud(MediaCloud):
 
     def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
                   wc=False, feeds_id=None, sort=MediaCloud.SORT_PROCESSED_STORIES_ID, raw_1st_download=False,
-                  corenlp=False, sentences=False, auth=False, ap_stories_id=0, show_feeds=False):
+                  corenlp=False, sentences=False, auth=False, ap_stories_id=0, show_feeds=False, text=False):
         # Search for stories and page through results
         stories = self._queryForJson(self.V2_API_URL+'stories/list',
                                      {'q': solr_query,
