@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.7.6
+
+* add support for podcast feed type
+
 ### v3.7.5
 
 * remove silly logging error
