@@ -1,3 +1,4 @@
+import mediacloud.api
 from mediacloud.test.basetest import ApiBaseTest, AdminApiBaseTest
 
 TEST_MEDIA_ID = 362086  # rahulbotics.com - a source that is ok to mess up
@@ -23,6 +24,16 @@ class ApiFeedTest(AdminApiBaseTest):
         media = self.randomMedia()
         scrape_status = self._mc.feedsScrapeStatus(media['media_id'])
         self.assertGreater(len(scrape_status['job_states']), 0)
+
+
+class ApiFeedTypeTest(ApiBaseTest):
+
+    def validFeedType(self):
+        for t in mediacloud.api.VALID_FEED_TYPES:
+            self.assetTrue(mediacloud.api._validate_feed_type(t))
+
+    def invalidFeedType(self):
+        self.assetTrue(mediacloud.api._validate_feed_type('atom'))
 
 
 class ApiFeedsTest(ApiBaseTest):

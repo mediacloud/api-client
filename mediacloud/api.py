@@ -14,6 +14,8 @@ MAX_HTTP_GET_CHARS = 4000   # experimentally determined for our main servers (co
 
 logger = logging.getLogger(__name__)
 
+VALID_FEED_TYPES = ['syndicated', 'web_page', 'podcast']
+
 # platforms to use with topicSeedQuery
 TOPIC_PLATFORM_TWITTER = 'twitter'
 TOPIC_PLATFORM_WEB = 'web'
@@ -775,7 +777,7 @@ class AdminMediaCloud(MediaCloud):
 
     def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
                   wc=False, feeds_id=None, sort=MediaCloud.SORT_PROCESSED_STORIES_ID, raw_1st_download=False,
-                  corenlp=False, sentences=False, text=False, ap_stories_id=0, show_feeds=False):
+                  corenlp=False, sentences=False, auth=False, ap_stories_id=0, show_feeds=False):
         # Search for stories and page through results
         stories = self._queryForJson(self.V2_API_URL+'stories/list',
                                      {'q': solr_query,
@@ -1078,8 +1080,8 @@ def _validate_date_params(params, *args):
 
 
 def _validate_feed_type(feed_type):
-    if feed_type not in ['syndicated', 'web_page']:
-        raise ValueError('feed_type must be syndicated or web_page')
+    if feed_type not in VALID_FEED_TYPES:
+        raise ValueError('feed_type must be on of []'.format(', '.join(VALID_FEED_TYPES)))
 
 
 def _remove_private_info(original_data):
