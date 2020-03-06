@@ -302,3 +302,13 @@ class TopicSeedQueryTest(AdminApiBaseTest):
         self.assertIn('topic_seed_queries_id', results['topic_seed_query'])
         results = self._mc.topicRemoveSeedQuery(TEST_TOPIC3_ID, results['topic_seed_query']['topic_seed_queries_id'])
         self.assertEqual(results['success'], 1)
+
+
+class TopicInfoTest(AdminApiBaseTest):
+
+    def testTopicInfo(self):
+        results = self._mc.topicInfo()
+        self.assertIn('info', results)
+        self.assertIn('topic_platforms', results['info'])
+        self.assertIn('topic_platforms_sources_map', results['info'])
+        self.assertIn('topic_sources', results['info'])

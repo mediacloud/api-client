@@ -762,6 +762,9 @@ class MediaCloud(object):
         }
         return self._queryForJson(self.V2_API_URL+'util/is_syndicated_ap', params, 'PUT_JSON')
 
+    def topicInfo(self):
+        return self._queryForJson(self.V2_API_URL + 'topics/info')
+
 
 class AdminMediaCloud(MediaCloud):
     # A MediaCloud API client that includes admin-only methods, including to writing back data to MediaCloud.
