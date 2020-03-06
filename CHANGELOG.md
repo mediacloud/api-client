@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.8.0
+
+* add support for topicInfo call
+
 ### v3.7.6
 
 * add support for podcast feed type
