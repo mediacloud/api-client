@@ -1,6 +1,11 @@
 Version History
 ===============
 
+### v3.9.0
+
+* fix topic mode support
+* add new topic media map list call, and update media map call
+
 ### v3.8.0
 
 * add support for topicInfo call
