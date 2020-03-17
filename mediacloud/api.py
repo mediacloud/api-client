@@ -16,15 +16,6 @@ logger = logging.getLogger(__name__)
 
 VALID_FEED_TYPES = ['syndicated', 'web_page', 'podcast']
 
-# platforms to use with topicSeedQuery
-TOPIC_PLATFORM_TWITTER = 'twitter'
-TOPIC_PLATFORM_WEB = 'web'
-TOPIC_PLATFORMS = [TOPIC_PLATFORM_WEB, TOPIC_PLATFORM_TWITTER]
-# twitter platform sources for topicSeedQuery calls
-TOPIC_SOURCE_CRIMSON = 'crimson_hexagon'
-TOPIC_SOURCE_ARCHIVE = 'archive_org'
-TOPIC_TWITTER_SOURCES = [TOPIC_SOURCE_ARCHIVE, TOPIC_SOURCE_CRIMSON]
-
 
 # Simple client library for the MediaCloud API v2
 class MediaCloud(object):
@@ -157,7 +148,7 @@ class MediaCloud(object):
         return results
 
     def mediaList(self, last_media_id=0, rows=20, name_like=None,
-                  timespans_id=None, topic_mode=None, tags_id=None, q=None, include_dups=False,
+                  timespans_id=None, tags_id=None, q=None, include_dups=False,
                   unhealthy=None, similar_media_id=None, sort=None, **kwargs):
         # Page through all media sources.
         valid_sort_options = ['id', 'num_stories']
@@ -166,8 +157,6 @@ class MediaCloud(object):
             params['name'] = name_like
         if timespans_id is not None:
             params['timespans_id'] = timespans_id
-        if topic_mode is not None:
-            params['topic_mode'] = topic_mode
         if include_dups is not None:
             params['include_dups'] = 1 if include_dups is True else 0
         if unhealthy is not None:
@@ -623,7 +612,8 @@ class MediaCloud(object):
     def topicUpdate(self, topics_id, **kwargs):
         valid_params = [
             'name', 'solr_seed_query', 'description', 'start_date', 'end_date', 'media_ids', 'media_tags_ids',
-            'max_iterations', 'is_public', 'ch_monitor_id', 'twitter_topics_id', 'is_logogram', 'max_stories'
+            'max_iterations', 'is_public', 'ch_monitor_id', 'twitter_topics_id', 'is_logogram', 'max_stories',
+            'mode'
         ]
         params = {}
         _validate_params(params, valid_params, kwargs)
@@ -713,9 +703,15 @@ class MediaCloud(object):
     def topicMediaMap(self, topics_id, **kwargs):
         params = {}
         valid_params = ['color_field', 'num_media', 'include_weights', 'num_links_per_medium', 'snapshots_id',
-                        'foci_id', 'timespans_id']
+                        'foci_id', 'timespans_id', 'timespan_maps_id']
         _validate_params(params, valid_params, kwargs)
         return self._query(self.V2_API_URL+'topics/{}/media/map'.format(topics_id), params).content
+
+    def topicMediaMapList(self, topics_id, **kwargs):
+        params = {}
+        valid_params = ['timespans_id']
+        _validate_params(params, valid_params, kwargs)
+        return self._queryForJson(self.V2_API_URL+'topics/{}/media/list_maps'.format(topics_id), params)
 
     def userPermissionsList(self):
         return self._queryForJson(self.V2_API_URL+'topics/permissions/user/list')

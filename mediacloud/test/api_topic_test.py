@@ -292,12 +292,16 @@ class AdminTopicMediaMapTest(AdminApiBaseTest):
         results = self._mc.topicMediaMap(TEST_TOPIC2_ID)
         self.assertIn('gexf', str(results))
 
+    def testMediaMapList(self):
+        results = self._mc.topicMediaMapList(TEST_TOPIC2_ID)
+        self.assertIn('timespan_maps', results)
+        self.assertEqual(len(results['timespan_maps']), 0)
+
 
 class TopicSeedQueryTest(AdminApiBaseTest):
 
     def testSeedQuery(self):
-        results = self._mc.topicAddSeedQuery(TEST_TOPIC3_ID, mediacloud.api.TOPIC_PLATFORM_TWITTER,
-                                             mediacloud.api.TOPIC_SOURCE_ARCHIVE, 'rahul')
+        results = self._mc.topicAddSeedQuery(TEST_TOPIC3_ID, 'reddit', 'pushshift', 'rahul')
         self.assertIn('topic_seed_query', results)
         self.assertIn('topic_seed_queries_id', results['topic_seed_query'])
         results = self._mc.topicRemoveSeedQuery(TEST_TOPIC3_ID, results['topic_seed_query']['topic_seed_queries_id'])
