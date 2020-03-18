@@ -1,6 +1,14 @@
 Version History
 ===============
 
+### v3.9.2
+
+* more work fixing topic media map download endpoint
+
+### v3.9.1
+
+* fix media map param typo
+
 ### v3.9.0
 
 * fix topic mode support
