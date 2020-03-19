@@ -708,16 +708,16 @@ class MediaCloud(object):
         _validate_params(params, valid_params, kwargs)
         return self._query(self.V2_API_URL+'topics/{}/media/map'.format(topics_id), params).content
 
-    def topicMediaMapDownload(self, topics_id, timespans_maps_id, format):
+    def topicMediaMapDownload(self, topics_id, timespan_maps_id, format):
         """
         New endpoint format for downloading auto-generated maps for each timespan in a topic.
         :param topics_id:
-        :param timespans_maps_id: as reported by topicMediaMapList
-        :param format: 'svg' or 'gexf' (should match what topicMediaMapList reports for timespans_maps_id)
+        :param timespan_maps_id: as reported by topicMediaMapList
+        :param format: 'svg' or 'gexf' (should match what topicMediaMapList reports for timespan_maps_id)
         :return:
         """
         return self._query(self.V2_API_URL+'topics/{}/media/map'.format(topics_id),
-                           {'timespans_maps_id': timespans_maps_id, 'format': format}).content
+                           {'timespan_maps_id': timespan_maps_id, 'format': format}).content
 
     def topicMediaMapList(self, topics_id, **kwargs):
         params = {}
