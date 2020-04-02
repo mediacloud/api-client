@@ -708,6 +708,7 @@ class MediaCloud(object):
         _validate_params(params, valid_params, kwargs)
         return self._query(self.V2_API_URL+'topics/{}/media/map'.format(topics_id), params).content
 
+    @mediacloud.error.deprecated
     def topicMediaMapDownload(self, topics_id, timespan_maps_id, format):
         """
         New endpoint format for downloading auto-generated maps for each timespan in a topic.
