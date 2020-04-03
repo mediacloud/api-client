@@ -1,6 +1,11 @@
 Version History
 ===============
 
+### v3.10.0
+
+* remove deprecated topic "mode" parameter
+* add topic snapshots (admin-only) and timespans list endpoints
+
 ### v3.9.3
 
 * even more work on topic media map download endpoint
