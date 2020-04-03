@@ -1,5 +1,4 @@
-import mediacloud.api
-from mediacloud.test.basetest import AdminApiBaseTest
+from mediacloud.test.basetest import AdminApiBaseTest, ApiBaseTest
 
 TEST_TOPIC_ID = 1537    # climate change topic
 TEST_TOPIC2_ID = 1019   # common core
@@ -316,3 +315,33 @@ class TopicInfoTest(AdminApiBaseTest):
         self.assertIn('topic_platforms', results['info'])
         self.assertIn('topic_platforms_sources_map', results['info'])
         self.assertIn('topic_sources', results['info'])
+
+
+class TopicTimespansListTest(ApiBaseTest):
+
+    def testTimespansList(self):
+        snapshots = self._mc.topicSnapshotList(TEST_TOPIC3_ID)
+        timespans = self._mc.topicTimespanList(TEST_TOPIC3_ID, snapshots_id=snapshots[0]['snapshots_id'])
+        assert len(timespans) > 0
+        results = self._mc.topicTimespanFiles(TEST_TOPIC3_ID, timespans_id=timespans[0]['timespans_id'])
+        assert 'timespan_files' in results
+        assert len(results['timespan_files']) > 0
+        assert 'timespans_id' in results['timespan_files'][0]
+        assert results['timespan_files'][0]['timespans_id'] == timespans[0]['timespans_id']
+        assert 'url' in results['timespan_files'][0]
+        assert results['timespan_files'][0]['url'].startswith('http')
+        assert 'name' in results['timespan_files'][0]
+
+
+class TopicSnapshotsListTest(AdminApiBaseTest):
+
+    def testSnapshotsList(self):
+        snapshots = self._mc.topicSnapshotList(TEST_TOPIC3_ID)
+        results = self._mc.topicSnapshotFiles(TEST_TOPIC3_ID, snapshots_id=snapshots[0]['snapshots_id'])
+        assert 'snapshot_files' in results
+        assert len(results['snapshot_files']) > 0
+        assert 'snapshots_id' in results['snapshot_files'][0]
+        assert results['snapshot_files'][0]['snapshots_id'] == snapshots[0]['snapshots_id']
+        assert 'url' in results['snapshot_files'][0]
+        assert results['snapshot_files'][0]['url'].startswith('http')
+        assert 'name' in results['snapshot_files'][0]

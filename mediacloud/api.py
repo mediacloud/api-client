@@ -612,8 +612,7 @@ class MediaCloud(object):
     def topicUpdate(self, topics_id, **kwargs):
         valid_params = [
             'name', 'solr_seed_query', 'description', 'start_date', 'end_date', 'media_ids', 'media_tags_ids',
-            'max_iterations', 'is_public', 'ch_monitor_id', 'twitter_topics_id', 'is_logogram', 'max_stories',
-            'mode'
+            'max_iterations', 'is_public', 'ch_monitor_id', 'twitter_topics_id', 'is_logogram', 'max_stories'
         ]
         params = {}
         _validate_params(params, valid_params, kwargs)
@@ -773,6 +772,12 @@ class MediaCloud(object):
 
     def topicInfo(self):
         return self._queryForJson(self.V2_API_URL + 'topics/info')
+
+    def topicTimespanFiles(self, topics_id, **kwargs):
+        params = {}
+        valid_params = ['timespans_id']
+        _validate_params(params, valid_params, kwargs)
+        return self._queryForJson(self.V2_API_URL+'topics/{}/list_timespan_files'.format(topics_id), params)
 
 
 class AdminMediaCloud(MediaCloud):
@@ -1019,6 +1024,12 @@ class AdminMediaCloud(MediaCloud):
     def validUserRoles(self):
         # list all the possible roles that exist for users
         return self._queryForJson(self.V2_API_URL + 'users/list_roles')
+
+    def topicSnapshotFiles(self, topics_id, **kwargs):
+        params = {}
+        valid_params = ['snapshots_id']
+        _validate_params(params, valid_params, kwargs)
+        return self._queryForJson(self.V2_API_URL+'topics/{}/list_snapshot_files'.format(topics_id), params)
 
 
 def _solr_date_range(start_date, end_date, start_date_inclusive=True, end_date_inclusive=False):
