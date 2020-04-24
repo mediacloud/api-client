@@ -1,7 +1,7 @@
 from mediacloud.test.basetest import ApiBaseTest, AdminApiBaseTest
 import mediacloud.tags as tags
 from mediacloud.test import QUERY_LAST_WEEK, QUERY_LAST_YEAR, QUERY_LAST_MONTH, QUERY_LAST_DECADE, \
-    QUERY_ENGLISH_LANGUAGE, load_text_from_fixture
+    QUERY_ENGLISH_LANGUAGE, LONG_ENGLISH_QUERY, load_text_from_fixture
 from mediacloud.test import TEST_USER_EMAIL
 from mediacloud.tags import StoryTag, TAG_ACTION_REMOVE
 
@@ -24,6 +24,12 @@ class ApiStoryTagCountTest(ApiBaseTest):
         self.assertTrue(len(counts) > 0)
         for tag_count in counts:
             self.assertEqual(tag_count['tag_sets_id'], tags.TAG_SET_CLIFF_PLACES)
+
+    def testStoryTagCountPost(self):
+        counts = self._mc.storyTagCount("robot", QUERY_LAST_WEEK,
+                                        tag_sets_id=tags.TAG_SET_CLIFF_PLACES,
+                                        http_method='POST')
+        self.assertTrue(len(counts) > 0)
 
 
 class ApiStoryCountTest(ApiBaseTest):
@@ -50,6 +56,14 @@ class ApiStoryCountTest(ApiBaseTest):
         self.assertEqual(len(results['counts']), 13)
         results = self._mc.storyCount('*', QUERY_LAST_DECADE, split=True, split_period='year')
         self.assertEqual(len(results['counts']), 11)
+
+    def testStoryCountPost(self):
+        results = self._mc.storyCount("robot", QUERY_LAST_WEEK, http_method='POST')
+        self.assertGreater(results['count'], 0)
+
+    def testStoryCountLongQueryPost(self):
+        results = self._mc.storyCount(LONG_ENGLISH_QUERY, QUERY_LAST_WEEK, http_method='POST_JSON')
+        self.assertIn('count', results)
 
 
 class ApiStoryTest(ApiBaseTest):
@@ -166,6 +180,10 @@ class ApiStoryListTest(ApiBaseTest):
             self.assertNotIn('story_sentences', story)
             self.assertNotIn('story_text', story)
             self.assertNotIn('is_fully_extracted', story)
+
+    def testStoryListLongQueryPost(self):
+        results = self._mc.storyList("robot", QUERY_LAST_WEEK, http_method='POST')
+        self.assertGreater(len(results), 0)
 
 
 class AdminApiStoryListTest(AdminApiBaseTest):

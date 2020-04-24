@@ -40,3 +40,7 @@ class ApiWordCountTest(ApiBaseTest):
         term_freq = self._mc.wordCount('*', QUERY_LAST_WEEK)
         random_term_freq = self._mc.wordCount('*', QUERY_LAST_WEEK, random_seed=20)
         self.assertEqual(len(term_freq), len(random_term_freq))
+
+    def testWordCountPost(self):
+        results = self._mc.wordCount("robot", QUERY_LAST_WEEK, http_method='POST')
+        self.assertGreater(len(results), 0)
