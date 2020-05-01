@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.11.1
+
+* more work on POSTing long queries
+
 ### v3.11.0
 
 * add support for making some common requests via POST, so they can support really long queries
