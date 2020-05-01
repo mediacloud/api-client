@@ -831,14 +831,9 @@ class AdminMediaCloud(MediaCloud):
         return self._queryForJson(self.V2_API_URL+'stories/update', {}, 'PUT_JSON', params)
 
     def sentenceList(self, solr_query, solr_filter='', start=0, rows=1000, sort=MediaCloud.SORT_PUBLISH_DATE_ASC):
+        params = {'q': solr_query, 'fq': solr_filter, 'start': start, 'rows': rows, 'sort': sort}
         # Search for sentences and page through results
-        return self._queryForJson(self.V2_API_URL+'sentences/list',
-                                  {'q': solr_query,
-                                   'fq': solr_filter,
-                                   'start': start,
-                                   'rows': rows,
-                                   'sort': sort
-                                   })
+        return self._queryForJson(self.V2_API_URL+'sentences/list', params, 'POST')
 
     def tagStories(self, tags=None, clear_others=False):
         # Add some tags to stories. The tags parameter should be a list of StoryTag objects.
