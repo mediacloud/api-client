@@ -245,7 +245,7 @@ class MediaCloud(object):
     def storyRawNytThemeResults(self, story_id_list):
         return self._queryForJson(self.V2_API_URL+'stories/nytlabels', {'stories_id': story_id_list})
 
-    def storyCount(self, solr_query='', solr_filter='', split=None, split_period=None, http_method='GET'):
+    def storyCount(self, solr_query='', solr_filter='', split=None, split_period=None, http_method='POST'):
         # The call returns the number of stories returned by Solr for the specified query
         return self._queryForJson(self.V2_API_URL+'stories_public/count',
                                   {'q': solr_query,
@@ -260,7 +260,7 @@ class MediaCloud(object):
         return self.storyList(solr_query, solr_filter, last_processed_stories_id, rows, wc, feeds_id, sort)
 
     def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
-                  wc=False, feeds_id=None, sort=SORT_PROCESSED_STORIES_ID, show_feeds=False, http_method='GET'):
+                  wc=False, feeds_id=None, sort=SORT_PROCESSED_STORIES_ID, show_feeds=False, http_method='POST'):
         # Authenticated Public Users: Search for stories and page through results
         stories = self._queryForJson(self.V2_API_URL+'stories_public/list',
                                      {'q': solr_query,
@@ -330,7 +330,7 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'stories/tag_count', params, http_method)
 
     def wordCount(self, solr_query, solr_filter='', languages=None, num_words=500, sample_size=1000,
-                  include_stopwords=False, include_stats=False, ngram_size=1, random_seed=None, http_method='GET'):
+                  include_stopwords=False, include_stats=False, ngram_size=1, random_seed=None, http_method='POST'):
         params = {
             'q': solr_query,
             'l': languages,
@@ -818,7 +818,7 @@ class AdminMediaCloud(MediaCloud):
                                       'wc': 1 if wc is True else 0,
                                       'feeds_id': feeds_id,
                                       'show_feeds': 1 if show_feeds is True else 0,
-                                      })
+                                      }, http_method='POST')
         stories_with_metadata = self._addMetadataTagsToStoryList(stories)
         return stories_with_metadata
 
