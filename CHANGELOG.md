@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.11.3
+
+* support new topic story list sorting options 
+
 ### v3.11.2
 
 * even more work on POSTing long queries
