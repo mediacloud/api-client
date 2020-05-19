@@ -1080,7 +1080,8 @@ def _validate_sort_param(order):
 
 
 def _validate_topic_sort_param(order):
-    if order not in [None, 'inlink', 'facebook', 'twitter', 'random', '']:
+    if order not in [None, 'inlink', 'facebook', 'twitter', 'random', '',
+                     'post_count', 'author_count', 'channel_count']:
         raise ValueError('Invalid sort specified: {}'.format(order))
 
 
