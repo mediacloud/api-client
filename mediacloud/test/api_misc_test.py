@@ -23,40 +23,40 @@ class StatsTest(ApiBaseTest):
             self.assertIn(key, stats)
 
 
-class PublishDateQueryTest(ApiBaseTest):
+class DatesAsQueryClauseTest(ApiBaseTest):
 
-    def testPublishDateDefaults(self):
+    def testDateDefaults(self):
         start_date = datetime.date(2014, 6, 2)
         end_date = datetime.date(2014, 6, 3)
-        date_query_default = self._mc.publish_date_query(start_date, end_date)
-        self.assertEqual(date_query_default, "publish_day:[2014-06-02T00:00:00Z TO 2014-06-03T00:00:00Z}")
+        date_query_default = self._mc.dates_as_query_clause(start_date, end_date)
+        self.assertEqual(date_query_default, "publish_day:[2014-06-02T00:00:00Z TO 2014-06-03T00:00:00Z]")
 
-    def testPublishDateField(self):
+    def testDateField(self):
         start_date = datetime.date(2014, 6, 2)
         end_date = datetime.date(2014, 6, 3)
-        date_query_default = self._mc.publish_date_query(start_date, end_date)
-        self.assertEqual(date_query_default, "publish_day:[2014-06-02T00:00:00Z TO 2014-06-03T00:00:00Z}")
-        date_query_default = self._mc.publish_date_query(start_date, end_date, field='publish_week')
-        self.assertEqual(date_query_default, "publish_week:[2014-06-02T00:00:00Z TO 2014-06-03T00:00:00Z}")
+        date_query_default = self._mc.dates_as_query_clause(start_date, end_date)
+        self.assertEqual(date_query_default, "publish_day:[2014-06-02T00:00:00Z TO 2014-06-03T00:00:00Z]")
+        date_query_default = self._mc.dates_as_query_clause(start_date, end_date, field='publish_week')
+        self.assertEqual(date_query_default, "publish_week:[2014-06-02T00:00:00Z TO 2014-06-03T00:00:00Z]")
 
-    def testPublishDateInslusivity(self):
+    def testDateInslusivity(self):
         start_date = datetime.date(2014, 6, 2)
         end_date = datetime.date(2014, 6, 3)
 
-        date_query_inclusive_exclusive = self._mc.publish_date_query(start_date, end_date, start_date_inclusive=True,
-                                                                     end_date_inclusive=False)
+        date_query_inclusive_exclusive = self._mc.dates_as_query_clause(start_date, end_date, start_date_inclusive=True,
+                                                                        end_date_inclusive=False)
         self.assertEqual(date_query_inclusive_exclusive, "publish_day:[2014-06-02T00:00:00Z TO 2014-06-03T00:00:00Z}")
 
-        date_query_inclusive_inclusive = self._mc.publish_date_query(start_date, end_date, start_date_inclusive=True,
-                                                                     end_date_inclusive=True)
+        date_query_inclusive_inclusive = self._mc.dates_as_query_clause(start_date, end_date, start_date_inclusive=True,
+                                                                        end_date_inclusive=True)
         self.assertEqual(date_query_inclusive_inclusive, "publish_day:[2014-06-02T00:00:00Z TO 2014-06-03T00:00:00Z]")
 
-        date_query_exclusive_inclusive = self._mc.publish_date_query(start_date, end_date, start_date_inclusive=False,
-                                                                     end_date_inclusive=True)
+        date_query_exclusive_inclusive = self._mc.dates_as_query_clause(start_date, end_date, start_date_inclusive=False,
+                                                                        end_date_inclusive=True)
         self.assertEqual(date_query_exclusive_inclusive, "publish_day:{2014-06-02T00:00:00Z TO 2014-06-03T00:00:00Z]")
 
-        date_query_exclusive_exclusive = self._mc.publish_date_query(start_date, end_date, start_date_inclusive=False,
-                                                                     end_date_inclusive=False)
+        date_query_exclusive_exclusive = self._mc.dates_as_query_clause(start_date, end_date, start_date_inclusive=False,
+                                                                        end_date_inclusive=False)
         self.assertEqual(date_query_exclusive_exclusive, "publish_day:{2014-06-02T00:00:00Z TO 2014-06-03T00:00:00Z}")
 
 

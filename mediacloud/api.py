@@ -483,12 +483,27 @@ class MediaCloud(object):
         return r
 
     @staticmethod
+    @mediacloud.error.deprecated
     def publish_date_query(start_date, end_date, start_date_inclusive=True, end_date_inclusive=False,
+                           field='publish_day'):
+        """
+        This is deprecated because the defaults didn't match what we use on the online tools, so it was causing
+        confusion. Use the `dates_as_query_clause` helper instead.
+        """
+        valid_date_fields = ['publish_day', 'publish_week', 'publish_month', 'publish_year']
+        if field not in valid_date_fields:
+            raise mediacloud.error.MCException("Not a valid date field {}".format(field))
+        return field+':' + _solr_date_range(start_date, end_date, start_date_inclusive, end_date_inclusive)
+
+    @staticmethod
+    def dates_as_query_clause(start_date, end_date, start_date_inclusive=True, end_date_inclusive=True,
                            field='publish_day'):
         valid_date_fields = ['publish_day', 'publish_week', 'publish_month', 'publish_year']
         if field not in valid_date_fields:
             raise mediacloud.error.MCException("Not a valid date field {}".format(field))
         return field+':' + _solr_date_range(start_date, end_date, start_date_inclusive, end_date_inclusive)
+
+
 
     def topicMediaList(self, topics_id, **kwargs):
         params = {}
@@ -1035,7 +1050,7 @@ class AdminMediaCloud(MediaCloud):
         return self._queryForJson(self.V2_API_URL+'topics/{}/list_snapshot_files'.format(topics_id), params)
 
 
-def _solr_date_range(start_date, end_date, start_date_inclusive=True, end_date_inclusive=False):
+def _solr_date_range(start_date, end_date, start_date_inclusive=True, end_date_inclusive=True):
     ret = ''
     if start_date_inclusive:
         ret += '['
