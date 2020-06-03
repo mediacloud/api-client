@@ -6,6 +6,11 @@ We support Python versions 2.7 and 3.6.
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/mitmedialab/MediaCloud-API-Client/blob/master/LICENSE) [![Build Status](https://travis-ci.org/mitmedialab/MediaCloud-API-Client.svg?branch=master)](https://travis-ci.org/mitmedialab/MediaCloud-API-Client)
 
+Related work:
+* See our [MediaCloud-API-Tutorial_Notebooks](https://github.com/rahulbot/MediaCloud-API-Tutorial-Notebooks) repo for *many* more examples of use   
+* If you happen to work in R, check out the [`mediacloudr` library for R](https://github.com/jandix/mediacloudr) 
+(from Dix Jan).
+
 Usage
 -----
 
@@ -38,7 +43,7 @@ stories = []
 last_processed_stories_id = 0
 while len(stories) < 2000:
     fetched_stories = mc.storyList('trump AND "north korea" AND media_id:1', 
-                                   solr_filter=mc.publish_date_query(datetime.date(2018,1,1), datetime.date(2019,1,1)),
+                                   solr_filter=mc.dates_as_query_clause(datetime.date(2018,1,1), datetime.date(2019,1,1)),
                                    last_processed_stories_id=last_processed_stories_id, rows= fetch_size)
     stories.extend(fetched_stories)
     if len( fetched_stories) < fetch_size:
@@ -52,7 +57,7 @@ Find the most commonly used words in stories from the US top online news sites t
 import mediacloud.api, datetime
 mc = mediacloud.api.MediaCloud('MY_API_KEY')
 words = mc.wordCount('zimbabwe AND president AND tags_id_media:58722749',
-                     mc.publish_date_query( datetime.date( 2013, 1, 1), datetime.date( 2014, 1, 1)))
+                     mc.dates_as_query_clause( datetime.date( 2013, 1, 1), datetime.date( 2014, 1, 1)))
 print(words[0])  # prints the most common word
 ```
 
@@ -69,7 +74,7 @@ To save the first 100 stories from one day to a database:
 import mediacloud.api, datetime
 mc = mediacloud.api.MediaCloud('MY_API_KEY')
 db = mediacloud.storage.MongoStoryDatabase('one_day')
-stories = mc.storyList('*', mc.publish_date_query( datetime.date (2014, 01, 01), datetime.date(2014,01,02) ),
+stories = mc.storyList('*', mc.dates_as_query_clause( datetime.date (2014, 1, 1), datetime.date(2014,1,2) ),
                        last_processed_stories_id=0,rows=100)
 [db.addStory(s) for s in stories]
 print(db.storyCount())

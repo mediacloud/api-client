@@ -1,6 +1,11 @@
 Version History
 ===============
 
+### v3.12.0
+
+* deprecate `publish_date_query` - switch to `dates_as_query_clause` instead (defaults to inclusive, matching our web 
+tools and typical usage patterns)
+
 ### v3.11.3
 
 * support new topic story list sorting options 
