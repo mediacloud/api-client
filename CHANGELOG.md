@@ -1,6 +1,11 @@
 Version History
 ===============
 
+### v3.12.1
+
+* switch two more methods to use POST to send data over so they can request larger batches of results by sending in a
+big array of story ids (`storyRawCliffResults` and `storyRawNytThemeResults`)
+
 ### v3.12.0
 
 * deprecate `publish_date_query` - switch to `dates_as_query_clause` instead (defaults to inclusive, matching our web 
