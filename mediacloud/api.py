@@ -239,11 +239,11 @@ class MediaCloud(object):
         stories_with_metadata = self._addMetadataTagsToStoryList(stories)
         return stories_with_metadata[0]
 
-    def storyRawCliffResults(self, story_id_list):
-        return self._queryForJson(self.V2_API_URL+'stories/cliff', {'stories_id': story_id_list})
+    def storyRawCliffResults(self, story_id_list, http_method='POST'):
+        return self._queryForJson(self.V2_API_URL+'stories/cliff', {'stories_id': story_id_list}, http_method)
 
-    def storyRawNytThemeResults(self, story_id_list):
-        return self._queryForJson(self.V2_API_URL+'stories/nytlabels', {'stories_id': story_id_list})
+    def storyRawNytThemeResults(self, story_id_list, http_method='POST'):
+        return self._queryForJson(self.V2_API_URL+'stories/nytlabels', {'stories_id': story_id_list}, http_method)
 
     def storyCount(self, solr_query='', solr_filter='', split=None, split_period=None, http_method='POST'):
         # The call returns the number of stories returned by Solr for the specified query
