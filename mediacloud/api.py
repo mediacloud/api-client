@@ -306,12 +306,14 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'stories/corenlp',
                                   {'stories_id': story_id_list})
 
-    def storyWordMatrix(self, solr_query='', solr_filter='', rows=1000, max_words=None, stopword_length=None):
+    def storyWordMatrix(self, solr_query='', solr_filter='', rows=1000, max_words=None, stopword_length=None,
+                        old_stopwords=False):
         # Helpful to feed term-document-matrix driven analyses, like TF-IDF.
         params = dict()
         params['q'] = solr_query
         params['fq'] = solr_filter
         params['rows'] = rows
+        params['old_stopwords'] = old_stopwords
         if max_words is not None:
             params['max_words'] = max_words
         if stopword_length is not None:
@@ -330,7 +332,8 @@ class MediaCloud(object):
         return self._queryForJson(self.V2_API_URL+'stories/tag_count', params, http_method)
 
     def wordCount(self, solr_query, solr_filter='', languages=None, num_words=500, sample_size=1000,
-                  include_stopwords=False, include_stats=False, ngram_size=1, random_seed=None, http_method='POST'):
+                  include_stopwords=False, include_stats=False, ngram_size=1, random_seed=None,
+                  old_stopwords=False, http_method='POST'):
         params = {
             'q': solr_query,
             'l': languages,
@@ -339,7 +342,8 @@ class MediaCloud(object):
             'include_stopwords': 1 if include_stopwords is True else 0,
             'include_stats': 1 if include_stats is True else 0,
             'ngram_size': ngram_size,
-            'random_seed': int(random_seed) if random_seed is not None else None
+            'random_seed': int(random_seed) if random_seed is not None else None,
+            'old_stopwords': old_stopwords,
         }
         if solr_filter:
             params['fq'] = solr_filter
