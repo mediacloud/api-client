@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.12.2
+
+* added `old_stopwords` param to `storyWordMatrix` and `wordCount`
+
 ### v3.12.1
 
 * switch two more methods to use POST to send data over so they can request larger batches of results by sending in a
