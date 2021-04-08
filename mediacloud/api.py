@@ -313,7 +313,7 @@ class MediaCloud(object):
         params['q'] = solr_query
         params['fq'] = solr_filter
         params['rows'] = rows
-        params['old_stopwords'] = old_stopwords
+        params['old_stopwords'] = 1 if old_stopwords else 0
         if max_words is not None:
             params['max_words'] = max_words
         if stopword_length is not None:
@@ -343,7 +343,7 @@ class MediaCloud(object):
             'include_stats': 1 if include_stats is True else 0,
             'ngram_size': ngram_size,
             'random_seed': int(random_seed) if random_seed is not None else None,
-            'old_stopwords': old_stopwords,
+            'old_stopwords':  1 if old_stopwords else 0,
         }
         if solr_filter:
             params['fq'] = solr_filter
