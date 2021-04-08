@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.12.3
+
+* pass `old_stopwords` param as int to `storyWordMatrix` and `wordCount`
+
 ### v3.12.2
 
 * added `old_stopwords` param to `storyWordMatrix` and `wordCount`
