@@ -1,6 +1,11 @@
 Version History
 ===============
 
+### v3.12.4
+
+* prevent people from trying to page through randomly sorted `storyList` results - it doesn't work so we shouldn't 
+let them try 
+
 ### v3.12.3
 
 * pass `old_stopwords` param as int to `storyWordMatrix` and `wordCount`
