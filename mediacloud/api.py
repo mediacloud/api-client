@@ -261,6 +261,9 @@ class MediaCloud(object):
 
     def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
                   wc=False, feeds_id=None, sort=SORT_PROCESSED_STORIES_ID, show_feeds=False, http_method='POST'):
+        # This combination doesn't produce expected behaviour
+        if (sort == MediaCloud.SORT_RANDOM) and (last_processed_stories_id not in [0, None]):
+            raise ValueError("You can't page through randomly sorted story lists")
         # Authenticated Public Users: Search for stories and page through results
         stories = self._queryForJson(self.V2_API_URL+'stories_public/list',
                                      {'q': solr_query,
@@ -822,6 +825,9 @@ class AdminMediaCloud(MediaCloud):
     def storyList(self, solr_query='', solr_filter='', last_processed_stories_id=0, rows=20,
                   wc=False, feeds_id=None, sort=MediaCloud.SORT_PROCESSED_STORIES_ID, raw_1st_download=False,
                   corenlp=False, sentences=False, auth=False, ap_stories_id=0, show_feeds=False, text=False):
+        # This combination doesn't produce expected behaviour
+        if (sort == MediaCloud.SORT_RANDOM) and (last_processed_stories_id not in [0, None]):
+            raise ValueError("You can't page through randomly sorted story lists")
         # Search for stories and page through results
         stories = self._queryForJson(self.V2_API_URL+'stories/list',
                                      {'q': solr_query,

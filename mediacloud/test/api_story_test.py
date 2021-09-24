@@ -149,6 +149,13 @@ class AdminApiStoryTest(AdminApiBaseTest):
 
 class ApiStoryListTest(ApiBaseTest):
 
+    def testInvalidSortPaging(self):
+        try:
+            _ = self._mc.storyList('*', QUERY_LAST_WEEK, sort=self._mc.SORT_RANDOM, last_processed_stories_id=100)
+            assert False
+        except ValueError:
+            assert True
+
     def testStoryListRows(self):
         results = self._mc.storyList('*', QUERY_LAST_WEEK, rows=10)
         self.assertEqual(len(results), 10)
