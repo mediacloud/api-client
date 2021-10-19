@@ -54,7 +54,7 @@ class StoryDatabase(object):
     def getStory(self, story_id):
         raise NotImplementedError("Subclasses should implement this!")
 
-    def storyCount(self):
+    def storyCount(self, search_criteria=None):
         raise NotImplementedError("Subclasses should implement this!")
 
     def createDatabase(self, db_name):
@@ -72,10 +72,10 @@ class StoryDatabase(object):
 
 class MongoStoryDatabase(StoryDatabase):
 
-    def __init__(self, db_name=None, host='127.0.0.1', port=27017):
+    def __init__(self, db_name=None, uri="mongodb://localhost:27017"):
         super(MongoStoryDatabase, self).__init__()
         import pymongo
-        self._server = pymongo.MongoClient(host, port)
+        self._server = pymongo.MongoClient(uri)
         if db_name is not None:
             self.selectDatabase(db_name)
 
@@ -89,8 +89,8 @@ class MongoStoryDatabase(StoryDatabase):
         self._db.drop_collection('stories')
 
     def storyExists(self, story_id):
-        story = self.getStory(story_id)
-        return story is not None
+        matching_count = self.storyCount({"stories_id": story_id})
+        return matching_count != 0
 
     def _updateStory(self, story_attributes):
         self._db.stories.update_one({'stories_id': story_attributes['stories_id']}, {'$set': story_attributes})
@@ -106,7 +106,7 @@ class MongoStoryDatabase(StoryDatabase):
         stories = self._db.stories.find({"stories_id": story_id}).limit(1)
         try:
             return stories.next()
-        except:
+        except StopIteration:
             return None
 
     def getMaxStoryId(self):
@@ -117,5 +117,8 @@ class MongoStoryDatabase(StoryDatabase):
         # nothing to init for mongo
         return
 
-    def storyCount(self):
-        return self._db['stories'].count_documents({})
+    def storyCount(self, search_criteria=None):
+        criteria = {}
+        if search_criteria is not None:
+            criteria = search_criteria
+        return self._db['stories'].count_documents(criteria)
