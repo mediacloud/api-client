@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.12.5
+
+* update MongoDB storage helper to use URI for connection (so it support user/pass authentication) 
+
 ### v3.12.4
 
 * prevent people from trying to page through randomly sorted `storyList` results - it doesn't work so we shouldn't 
