@@ -20,6 +20,11 @@ VALID_FEED_TYPES = ['syndicated', 'web_page', 'podcast']
 # Simple client library for the MediaCloud API v2
 class MediaCloud(object):
 
+    # Default applied to all queries made to main server. You can alter this on
+    # your instance if you want to bail out more quickly, or know you have longer
+    # running queries
+    TIMEOUT_SECS = 30
+
     V2_API_URL = "https://api.mediacloud.org/api/v2/"
 
     SORT_PUBLISH_DATE_ASC = "publish_date_asc"
@@ -433,9 +438,9 @@ class MediaCloud(object):
             # automatically switch to POST if request too long
             try:
                 if self._url_length(url, params) > MAX_HTTP_GET_CHARS:
-                    r = requests.post(url, data=params, headers={'Accept': 'application/json'})
+                    r = requests.post(url, data=params, headers={'Accept': 'application/json'}, timeout=self.TIMEOUT_SECS)
                 else:
-                    r = requests.get(url, params=params, headers={'Accept': 'application/json'})
+                    r = requests.get(url, params=params, headers={'Accept': 'application/json'}, timeout=self.TIMEOUT_SECS)
             except Exception as e:
                 logger.error(u'Failed to GET or POST to {} because {}'.format(url, e))
                 raise e
@@ -450,13 +455,14 @@ class MediaCloud(object):
                     params_to_send = params
                     data_to_send = json_data
                 r = requests.put(url, params=params_to_send, data=json.dumps(data_to_send),
-                                 headers={'Accept': 'application/json', 'Content-Type': 'application/json'})
+                                 headers={'Accept': 'application/json', 'Content-Type': 'application/json'},
+                                 timeout=self.TIMEOUT_SECS)
             except Exception as e:
                 logger.exception(e)
                 raise e
         elif http_method == 'PUT':
             try:
-                r = requests.put(url, params=params, headers={'Accept': 'application/json'})
+                r = requests.put(url, params=params, headers={'Accept': 'application/json'}, timeout=self.TIMEOUT_SECS)
             except Exception as e:
                 logger.error(u'Failed to PUT {} because {}'.format(url, e))
                 raise e
@@ -464,14 +470,15 @@ class MediaCloud(object):
             try:
                 url_with_key = url + "?key="+self._auth_token
                 r = requests.post(url_with_key, data=json.dumps(params),
-                                  headers={'Accept': 'application/json', 'Content-Type': 'application/json'})
+                                  headers={'Accept': 'application/json', 'Content-Type': 'application/json'},
+                                  timeout=self.TIMEOUT_SECS)
             except Exception as e:
                 logger.error(u'Failed to POST JSON {} because {}'.format(url, e))
                 raise e
         elif http_method == 'POST':  # post Form data
             try:
                 url_with_key = url + "?key=" + self._auth_token
-                r = requests.post(url_with_key, params, headers={'Accept': 'application/json'})
+                r = requests.post(url_with_key, params, headers={'Accept': 'application/json'}, timeout=self.TIMEOUT_SECS)
             except Exception as e:
                 logger.error(u'Failed to POST {} because {}'.format(url, e))
                 raise e
