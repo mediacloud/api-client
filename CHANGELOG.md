@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v3.13.0
+
+* add TIMEOUT_SECS property, defaulting to 30 seconds (configurable by user on `MediaCloud` object) 
+
 ### v3.12.5
 
 * update MongoDB storage helper to use URI for connection (so it support user/pass authentication) 
