@@ -14,7 +14,7 @@ Related work:
 Usage
 -----
 
-First [sign up for an API key](https://core.mediacloud.org/login/register).  Then
+First [sign up for an API key](https://tools.mediacloud.org/#/user/signup).  Then
 ```
 pip install mediacloud
 ```
