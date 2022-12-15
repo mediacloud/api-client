@@ -1,13 +1,13 @@
 PYLINT := env PYTHONPATH=$(PYTHONPATH) pylint
 
 install:
-	pip install -r requirements.txt
+	pip install -e .[dev]
 
 lint:
 	$(PYLINT) mediacloud
 
 test:
-	python setup.py test
+	pytest
 
 build-release:
 	find . -name '.DS_Store' -type f -delete
