@@ -1,7 +1,7 @@
-import mediacloud.api
 from unittest import TestCase
 import datetime as dt
 import os
+import mediacloud.api
 
 TEST_COLLECTION_ID = 34412234  # US -National sources
 TEST_SOURCE_ID = 1095  # cnn.com

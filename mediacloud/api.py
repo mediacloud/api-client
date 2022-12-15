@@ -1,8 +1,7 @@
 import logging
-import requests
 import datetime as dt
 from typing import Dict, Optional, Union
-
+import requests
 import mediacloud
 import mediacloud.error
 
@@ -26,7 +25,7 @@ class BaseApi:
         self._auth_token = auth_token
         # better performance to put all HTTP through this one object
         self._session = requests.Session()
-        self._session.headers.update({'Authorization': 'Token {}'.format(self._auth_token)})
+        self._session.headers.update({'Authorization': f'Token {self._auth_token}'})
 
     def user_profile(self) -> Dict:
         # :return: basic info about the current user, including their roles
@@ -42,9 +41,9 @@ class BaseApi:
         elif method == 'POST':
             r = self._session.post(endpoint_url, json=params, timeout=self.TIMEOUT_SECS)
         else:
-            raise RuntimeError("Unsupported method of '{}'".format(method))
+            raise RuntimeError(f"Unsupported method of '{method}'")
         if r.status_code != 200:
-            raise RuntimeError("API Server Error {}. Params: {}".format(r.status_code, params))
+            raise RuntimeError(f"API Server Error {r.status_code}. Params: {params}")
         return r.json()
 
 
@@ -64,7 +63,8 @@ class DirectoryApi(BaseApi):
             params['platform'] = platform
         return self._query('sources/collections/', params)
 
-    def source_list(self, platform: Optional[str] = None, name: Optional[str] = None, collection_id: Optional[int] = None,
+    def source_list(self, platform: Optional[str] = None, name: Optional[str] = None,
+                    collection_id: Optional[int] = None,
                     limit: Optional[int] = 0, offset: Optional[int] = 0):
         params = dict(limit=limit, offset=offset)
         if collection_id:
@@ -81,5 +81,6 @@ class DirectoryApi(BaseApi):
         if source_id:
             params['source_id'] = source_id
         if modified_since:  # need to send server an epoch timestamp
-            params['modified_since'] = int(modified_since.timestamp()) if isinstance(modified_since, dt.datetime) else modified_since
+            params['modified_since'] = int(modified_since.timestamp()) if isinstance(modified_since, dt.datetime)\
+                else modified_since
         return self._query('sources/feeds/', params)
