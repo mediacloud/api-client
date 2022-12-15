@@ -1,9 +1,20 @@
 Version History
 ===============
 
+
+
+Version 4
+---------
+
 ### v4.0.0
 
-* ⚠️ 🚧 complete rewrite: first work on supporting new API for cross-platform search and directory of collections/sources/feeds
+* ⚠️ 🚧 Complete rewrite. This is first work on supporting new API for cross-platform search and directory of 
+collections/sources/feeds. This is an entirely new system we are building out. 
+
+
+
+Version 3
+---------
 
 ### v3.13.0
 
@@ -219,8 +230,10 @@ This release is not backwards-compatible.  You will likely need to update your c
 * begins refactoring tests into individual modules by content type (story, sentence, tag, etc.)
 * begins removing references to specific content (by id) so we can test on non-production databases
 
-Previous Versions
------------------
+
+
+Version 2
+---------
 
 * __v2.53.0__: add random_seed option to wordCount call
 * __v2.52.0__: added new topicSnapshotWord2VecModel endpoint
