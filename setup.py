@@ -3,27 +3,34 @@ from setuptools import setup
 import re
 from os import path
 
-version = ''
+REQUIRED_PACKAGES = [
+    # utilities
+    "requests==2.*",  # widely used HTTP library
+]
+
 with open('mediacloud/__init__.py', 'r') as fd:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(), re.MULTILINE).group(1)
 
+# add README.md to distribution
 this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md')) as f:
     long_description = f.read()
 
 setup(name='mediacloud',
+      maintainer='Rahul Bhargava',
+      maintainer_email='r.bhargava@northeastern.edu',
       version=version,
       description='Media Cloud API Client Library',
       long_description=long_description,
       long_description_content_type='text/markdown',
-      author='Rahul Bhargava',
-      author_email='rahulb@mit.edu',
       url='http://mediacloud.org',
       test_suite="mediacloud.test",
-      packages={'mediacloud'},
+      packages=['mediacloud'],
       package_data={'': ['LICENSE']},
-      install_requires=['requests'],
+      python_requires='>3.7',
+      install_requires=REQUIRED_PACKAGES,
+      extras_require={'dev': ['pytest', 'pylint', 'twine', 'wheel', 'keyring', 'python-dotenv']},
       license='MIT',
-      zip_safe=False,
-      extras_require={'db': ['pymongo']}
       )
+
+

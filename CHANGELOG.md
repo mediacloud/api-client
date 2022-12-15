@@ -1,6 +1,10 @@
 Version History
 ===============
 
+### v4.0.0
+
+* ⚠️ 🚧 complete rewrite: first work on supporting new API for cross-platform search and directory of collections/sources/feeds
+
 ### v3.13.0
 
 * add TIMEOUT_SECS property, defaulting to 30 seconds (configurable by user on `MediaCloud` object) 

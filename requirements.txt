@@ -1,7 +1,0 @@
-requests==2.27.1
-pymongo
-pylint
-python-dotenv
-twine
-wheel
-keyring
