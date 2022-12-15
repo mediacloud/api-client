@@ -6,7 +6,7 @@ MediaCloud Python API Client
 This is a python client for accessing the MediaCloud API v4. This allows you to perform cross-platform searches and 
 also browse our collection/source/feed directory.
 
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/mitmedialab/MediaCloud-API-Client/blob/master/LICENSE) [![Build Status](https://travis-ci.org/mitmedialab/MediaCloud-API-Client.svg?branch=master)](https://travis-ci.org/mitmedialab/MediaCloud-API-Client)
+![pylint](https://github.com/mediacloud/api-client/actions/workflows/pylint.yml/badge.svg) ![pytest](https://github.com/mediacloud/api-client/actions/workflows/pytest.yml/badge.svg) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/mitmedialab/MediaCloud-API-Client/blob/master/LICENSE)
 
 Usage
 -----
