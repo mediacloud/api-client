@@ -1,19 +1,19 @@
 #! /usr/bin/env python
-from setuptools import setup
 import re
 from os import path
+from setuptools import setup
 
 REQUIRED_PACKAGES = [
     # utilities
     "requests==2.*",  # widely used HTTP library
 ]
 
-with open('mediacloud/__init__.py', 'r') as fd:
+with open('mediacloud/__init__.py', 'r', encoding="utf-8") as fd:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(), re.MULTILINE).group(1)
 
 # add README.md to distribution
 this_directory = path.abspath(path.dirname(__file__))
-with open(path.join(this_directory, 'README.md')) as f:
+with open(path.join(this_directory, 'README.md'), encoding="utf-8") as f:
     long_description = f.read()
 
 setup(name='mediacloud',
@@ -32,5 +32,3 @@ setup(name='mediacloud',
       extras_require={'dev': ['pytest', 'pylint', 'twine', 'wheel', 'keyring', 'python-dotenv']},
       license='MIT',
       )
-
-
