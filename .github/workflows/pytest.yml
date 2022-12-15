@@ -27,5 +27,7 @@ jobs:
       run: |
         make install
     - name: Test with pytest
+      env:
+        MC_API_TOKEN: ${{ secrets.MC_API_TOKEN }}
       run: |
         make test
