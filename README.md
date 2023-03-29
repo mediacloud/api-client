@@ -1,5 +1,5 @@
-MediaCloud Python API Client
-============================
+Legacy MediaCloud Python API Client
+===================================
 
 This is a python client for accessing the [MediaCloud API v2](https://github.com/berkmancenter/mediacloud/blob/master/doc/api_2_0_spec/api_2_0_spec.md). 
 We support Python versions 2.7 and 3.6.
@@ -11,12 +11,15 @@ Related work:
 * If you happen to work in R, check out the [`mediacloudr` library for R](https://github.com/jandix/mediacloudr) 
 (from Dix Jan).
 
+This package exists to mantain access to our legacy search interface while we build out tooling and reliability for our new system. API keys for the new search tools will not work for this API. 
+
+
 Usage
 -----
 
 First [sign up for an API key](https://core.mediacloud.org/login/register).  Then
 ```
-pip install mediacloud
+pip install mediacloud-api-legacy
 ```
 
 Check `CHANGELOG.md` for a detailed history of changes.
