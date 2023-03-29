@@ -4,7 +4,7 @@ import re
 from os import path
 
 version = ''
-with open('mediacloud/__init__.py', 'r') as fd:
+with open('mediacloud_legacy/__init__.py', 'r') as fd:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(), re.MULTILINE).group(1)
 
 this_directory = path.abspath(path.dirname(__file__))

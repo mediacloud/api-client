@@ -4,7 +4,7 @@ install:
 	pip install -r requirements.txt
 
 lint:
-	$(PYLINT) mediacloud
+	$(PYLINT) mediacloud_legacy
 
 test:
 	python setup.py test
