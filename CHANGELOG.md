@@ -6,6 +6,9 @@ Version History
 Version 4
 ---------
 
+### v4.0.1
+* added a "modified_before" parameter to DirectoryApi.feed_list for use by rss_fetcher
+
 ### v4.0.0
 
 * ⚠️ 🚧 Complete rewrite. This is first work on supporting new API for cross-platform search and directory of 
