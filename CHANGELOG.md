@@ -1,5 +1,8 @@
 Version History
 ===============
+### v3.12.6
+
+* Frozen state for legacy package 
 
 ### v3.12.5
 
