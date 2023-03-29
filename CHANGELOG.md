@@ -1,5 +1,8 @@
 Version History
 ===============
+### v3.13.0
+* renamed package to "mediacloud_legacy", stored on pypi at "mediacloud-api-legacy"
+
 ### v3.12.6
 
 * Frozen state for legacy package 
