@@ -1,9 +1,9 @@
 #import logging
 #logging.basicConfig(level=logging.DEBUG)
 
-from mediacloud.test.basetest import ApiBaseTest, AdminApiBaseTest
-from mediacloud.test import TEST_USER_EMAIL
-from mediacloud.tags import MediaTag, TAG_ACTION_ADD, TAG_ACTION_REMOVE
+from mediacloud_legacy.test.basetest import ApiBaseTest, AdminApiBaseTest
+from mediacloud_legacy.test import TEST_USER_EMAIL
+from mediacloud_legacy.tags import MediaTag, TAG_ACTION_ADD, TAG_ACTION_REMOVE
 TESTING_COLLECTION = 9353679
 TEST_MEDIA_SUGGEST_REASON = "!!!! TESTING SUGGESTION !!!!"
 TEST_TAG_ID_1 = 9172171  # mc-api-test@media.mit.edu:test_tag1

@@ -1,7 +1,7 @@
 import random
 import os
 
-from mediacloud.test.basetest import ApiBaseTest, AdminApiBaseTest
+from mediacloud_legacy.test.basetest import ApiBaseTest, AdminApiBaseTest
 
 TEST_USER_EMAIL = "mediacloud-testing@media.mit.edu"
 TEST_USER_ID = 435

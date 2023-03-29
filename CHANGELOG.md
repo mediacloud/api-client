@@ -1,5 +1,9 @@
 Version History
 ===============
+### v3.13.1
+
+* corrected mediacloud_legacy namespace within package and tests
+
 ### v3.13.0
 * renamed package to "mediacloud_legacy", stored on pypi at "mediacloud-api-legacy"
 

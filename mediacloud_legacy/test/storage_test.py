@@ -1,7 +1,7 @@
 import unittest
 import os
 import json
-from mediacloud.storage import MongoStoryDatabase
+from mediacloud_legacy.storage import MongoStoryDatabase
 
 
 class StorageTest(unittest.TestCase):

@@ -2,8 +2,8 @@ import unittest
 import random
 import os
 
-import mediacloud.api
-from mediacloud.test import QUERY_LAST_MONTH, QUERY_ENGLISH_LANGUAGE
+import mediacloud_legacy as mediacloud
+from mediacloud_legacy.test import QUERY_LAST_MONTH, QUERY_ENGLISH_LANGUAGE
 
 
 class ApiBaseTest(unittest.TestCase):

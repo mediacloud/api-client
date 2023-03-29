@@ -1,9 +1,9 @@
-from mediacloud.test.basetest import ApiBaseTest, AdminApiBaseTest
-import mediacloud.tags as tags
-from mediacloud.test import QUERY_LAST_WEEK, QUERY_LAST_YEAR, QUERY_LAST_MONTH, QUERY_LAST_DECADE, \
+from mediacloud_legacy.test.basetest import ApiBaseTest, AdminApiBaseTest
+import mediacloud_legacy.tags as tags
+from mediacloud_legacy.test import QUERY_LAST_WEEK, QUERY_LAST_YEAR, QUERY_LAST_MONTH, QUERY_LAST_DECADE, \
     QUERY_ENGLISH_LANGUAGE, LONG_ENGLISH_QUERY, load_text_from_fixture
-from mediacloud.test import TEST_USER_EMAIL
-from mediacloud.tags import StoryTag, TAG_ACTION_REMOVE
+from mediacloud_legacy.test import TEST_USER_EMAIL
+from mediacloud_legacy.tags import StoryTag, TAG_ACTION_REMOVE
 
 TEST_STORY_ID = 2  # a super old, unused story that we can add and remove tags from without causing problems
 

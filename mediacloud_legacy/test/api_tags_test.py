@@ -1,7 +1,7 @@
 import time
 import random
 
-from mediacloud.test.basetest import ApiBaseTest, AdminApiBaseTest
+from mediacloud_legacy.test.basetest import ApiBaseTest, AdminApiBaseTest
 
 TEST_USER_EMAIL = "mc-api-test@media.mit.edu"
 TEST_TAG_SET_ID = 1727

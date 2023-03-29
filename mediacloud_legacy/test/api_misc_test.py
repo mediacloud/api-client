@@ -1,8 +1,8 @@
 import datetime
 
-from mediacloud.test.basetest import ApiBaseTest
-import mediacloud
-import mediacloud.api
+from mediacloud_legacy.test.basetest import ApiBaseTest
+import mediacloud_legacy as mediacloud
+import mediacloud_legacy.api
 
 
 class StatsTest(ApiBaseTest):

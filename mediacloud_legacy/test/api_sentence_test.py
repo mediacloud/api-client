@@ -1,7 +1,7 @@
 import datetime
 
-from mediacloud.test.basetest import AdminApiBaseTest
-from mediacloud.test import QUERY_LAST_WEEK
+from mediacloud_legacy.test.basetest import AdminApiBaseTest
+from mediacloud_legacy.test import QUERY_LAST_WEEK
 
 SENTENCE_COUNT = 100
 QUERY_TEST = "*"

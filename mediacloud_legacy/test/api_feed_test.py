@@ -1,5 +1,5 @@
-import mediacloud.api
-from mediacloud.test.basetest import ApiBaseTest, AdminApiBaseTest
+import mediacloud_legacy as mediacloud
+from mediacloud_legacy.test.basetest import ApiBaseTest, AdminApiBaseTest
 
 TEST_MEDIA_ID = 362086  # rahulbotics.com - a source that is ok to mess up
 TEST_FEED_ID = 1

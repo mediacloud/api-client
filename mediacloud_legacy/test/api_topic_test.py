@@ -1,4 +1,4 @@
-from mediacloud.test.basetest import AdminApiBaseTest, ApiBaseTest
+from mediacloud_legacy.test.basetest import AdminApiBaseTest, ApiBaseTest
 
 TEST_TOPIC_ID = 1537    # climate change topic
 TEST_TOPIC2_ID = 1019   # common core

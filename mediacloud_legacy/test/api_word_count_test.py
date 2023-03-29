@@ -1,5 +1,5 @@
-from mediacloud.test.basetest import ApiBaseTest
-from mediacloud.test import QUERY_LAST_WEEK, QUERY_ENGLISH_LANGUAGE
+from mediacloud_legacy.test.basetest import ApiBaseTest
+from mediacloud_legacy.test import QUERY_LAST_WEEK, QUERY_ENGLISH_LANGUAGE
 
 
 class ApiWordCountTest(ApiBaseTest):

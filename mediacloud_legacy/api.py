@@ -4,9 +4,9 @@ import logging
 import time
 import requests
 
-import mediacloud
-import mediacloud.error
-from mediacloud.tags import StoryTag, MediaTag, TAG_SET_PUBLICATION_COUNTRY, TAG_SET_PUBLICATION_STATE, \
+import mediacloud_legacy as mediacloud
+import mediacloud_legacy.error 
+from mediacloud_legacy.tags import StoryTag, MediaTag, TAG_SET_PUBLICATION_COUNTRY, TAG_SET_PUBLICATION_STATE, \
     TAG_SET_PRIMARY_LANGUAGE, TAG_SET_COUNTRY_OF_FOCUS, TAG_SET_MEDIA_TYPE, TAG_SET_DATE_GUESS_METHOD, \
     TAG_SET_EXTRACTOR_VERSION, TAG_SET_GEOCODER_VERSION, TAG_SET_NYT_THEMES_VERSION
 
@@ -490,7 +490,7 @@ class MediaCloud(object):
         return r
 
     @staticmethod
-    @mediacloud.error.deprecated
+    @mediacloud_legacy.error.deprecated
     def publish_date_query(start_date, end_date, start_date_inclusive=True, end_date_inclusive=False,
                            field='publish_day'):
         """
@@ -729,7 +729,7 @@ class MediaCloud(object):
         params = {'focal_sets_id': focal_sets_id}
         return self._queryForJson(self.V2_API_URL+'topics/{}/foci/list'.format(topics_id), params)['foci']
 
-    @mediacloud.error.deprecated
+    @mediacloud_legacy.error.deprecated
     def topicMediaMap(self, topics_id, **kwargs):
         params = {}
         valid_params = ['color_field', 'num_media', 'include_weights', 'num_links_per_medium',
@@ -737,7 +737,7 @@ class MediaCloud(object):
         _validate_params(params, valid_params, kwargs)
         return self._query(self.V2_API_URL+'topics/{}/media/map'.format(topics_id), params).content
 
-    @mediacloud.error.deprecated
+    @mediacloud_legacy.error.deprecated
     def topicMediaMapDownload(self, topics_id, timespan_maps_id, format):
         """
         New endpoint format for downloading auto-generated maps for each timespan in a topic.
