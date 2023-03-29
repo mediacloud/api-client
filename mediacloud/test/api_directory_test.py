@@ -76,3 +76,24 @@ class ApiDirectoryTest(TestCase):
                 break
             offset += limit
         assert len(feeds) > 0
+
+    def test_feed_list_modified_before(self):
+        feeds = []
+        limit = 100
+        offset = 0
+        server_version = self._directory.version()
+        server_now = server_version['now']
+
+        modified_since = dt.datetime(2022, 8, 1)
+        while True:
+            response = self._directory.feed_list(source_id=TEST_SOURCE_ID,
+                                                 modified_since=modified_since,
+                                                 modified_before=server_now,
+                                                 limit=limit, offset=offset)
+            assert response['count'] != 0
+            assert len(response['results']) > 0
+            feeds += response['results']
+            if response['next'] is None:
+                break
+            offset += limit
+        assert len(feeds) > 0

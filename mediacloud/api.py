@@ -31,6 +31,13 @@ class BaseApi:
         # :return: basic info about the current user, including their roles
         return self._query('auth/profile')
 
+    def version(self) -> Dict:
+        """
+        returns dict with (at least):
+        GIT_REV, now (float epoch time), version
+        """
+        return self._query('version')
+
     def _query(self, endpoint: str, params: Dict = None, method: str = 'GET'):
         """
         Centralize making the actual queries here for easy maintenance and testing of HTTP comms
@@ -75,12 +82,24 @@ class DirectoryApi(BaseApi):
             params['platform'] = platform
         return self._query('sources/sources/', params)
 
-    def feed_list(self, source_id: Optional[int] = None, modified_since: Optional[Union[dt.datetime, int]] = None,
+    def feed_list(self, source_id: Optional[int] = None, modified_since: Optional[Union[dt.datetime, int, float]] = None,
+                  modified_before: Optional[Union[dt.datetime, int, float]] = None,
                   limit: Optional[int] = 0, offset: Optional[int] = 0):
         params = dict(limit=limit, offset=offset)
         if source_id:
             params['source_id'] = source_id
-        if modified_since:  # need to send server an epoch timestamp
-            params['modified_since'] = int(modified_since.timestamp()) if isinstance(modified_since, dt.datetime)\
-                else modified_since
+
+        def epoch_param(t, param):
+            if t is None:
+                return        # parameter not set
+            if isinstance(t, dt.datetime):
+                params[param] = t.timestamp() # get epoch time
+            elif isinstance(t, (int, float)):
+                params[param] = t
+            else:
+                raise ValueError(param)
+
+        epoch_param(modified_since, 'modified_since')
+        epoch_param(modified_before, 'modified_before')
+
         return self._query('sources/feeds/', params)
