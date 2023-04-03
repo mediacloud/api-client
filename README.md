@@ -22,6 +22,28 @@ Check `CHANGELOG.md` for a detailed history of changes.
 
 Take a look at the test in the `mediacloud/test/` module for more detailed examples.
 
+#### Fetch all Sources in a Collection
+
+```python
+import mediacloud.api
+INDIA_NATIONAL_COLLECTION = 34412118
+SOURCES_PER_PAGE = 100  # the number of sources retrieved per page
+mc_directory = mediacloud.api.DirectoryApi(MC_API_KEY)
+sources = []
+offset = 0   # offset for paging through
+while True:
+    # grab a page of sources in the collection
+    response = mc_directory.source_list(collection_id=INDIA_NATIONAL_COLLECTION, limit=SOURCES_PER_PAGE, offset=offset)
+    # add it to our running list of all the sources in the collection
+    sources += response['results']
+    # if there is no next page then we're done so bail out
+    if response['next'] is None:
+        break
+    # otherwise setup to fetch the next page of sources
+    offset += len(response['results'])
+print("India National Collection has {} sources".format(len(sources)))
+```
+
 Development
 -----------
 
