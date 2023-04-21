@@ -1,6 +1,6 @@
 import logging
 import datetime as dt
-from typing import Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 import requests
 import mediacloud
 import mediacloud.error
@@ -18,7 +18,7 @@ class BaseApi:
 
     BASE_API_URL = "https://search.mediacloud.org/api/"
 
-    def __init__(self, auth_token=str):
+    def __init__(self, auth_token: str):
         if not auth_token:
             raise mediacloud.error.MCException("No api key set - nothing will work without this")
         # Specify the auth_token to use for all future requests
@@ -29,16 +29,16 @@ class BaseApi:
 
     def user_profile(self) -> Dict:
         # :return: basic info about the current user, including their roles
-        return self._query('auth/profile')
+        return self._query('auth/profile')  # type: ignore[no-any-return]
 
     def version(self) -> Dict:
         """
         returns dict with (at least):
         GIT_REV, now (float epoch time), version
         """
-        return self._query('version')
+        return self._query('version')  # type: ignore[no-any-return]
 
-    def _query(self, endpoint: str, params: Dict = None, method: str = 'GET'):
+    def _query(self, endpoint: str, params: Optional[Dict[str, Any]] = None, method: str = 'GET') -> Any:
         """
         Centralize making the actual queries here for easy maintenance and testing of HTTP comms
         """
@@ -62,34 +62,34 @@ class DirectoryApi(BaseApi):
     PLATFORM_REDDIT = "reddit"
 
     def collection_list(self, platform: Optional[str] = None, name: Optional[str] = None,
-                        limit: Optional[int] = 0, offset: Optional[int] = 0):
-        params = dict(limit=limit, offset=offset)
+                        limit: Optional[int] = 0, offset: Optional[int] = 0) -> Dict[str, Any]:
+        params: Dict[str, Any] = dict(limit=limit, offset=offset)
         if name:
             params['name'] = name
         if platform:
             params['platform'] = platform
-        return self._query('sources/collections/', params)
+        return self._query('sources/collections/', params)  # type: ignore[no-any-return]
 
     def source_list(self, platform: Optional[str] = None, name: Optional[str] = None,
                     collection_id: Optional[int] = None,
-                    limit: Optional[int] = 0, offset: Optional[int] = 0):
-        params = dict(limit=limit, offset=offset)
+                    limit: Optional[int] = 0, offset: Optional[int] = 0) -> Dict[str, Any]:
+        params: Dict[str, Any] = dict(limit=limit, offset=offset)
         if collection_id:
             params['collection_id'] = collection_id
         if name:
             params['name'] = name
         if platform:
             params['platform'] = platform
-        return self._query('sources/sources/', params)
+        return self._query('sources/sources/', params)  # type: ignore[no-any-return]
 
     def feed_list(self, source_id: Optional[int] = None, modified_since: Optional[Union[dt.datetime, int, float]] = None,
                   modified_before: Optional[Union[dt.datetime, int, float]] = None,
-                  limit: Optional[int] = 0, offset: Optional[int] = 0):
-        params = dict(limit=limit, offset=offset)
+                  limit: Optional[int] = 0, offset: Optional[int] = 0) -> Dict[str, Any]:
+        params: Dict[str, Any] = dict(limit=limit, offset=offset)
         if source_id:
             params['source_id'] = source_id
 
-        def epoch_param(t, param):
+        def epoch_param(t: Optional[Union[dt.datetime, int, float]], param: str) -> None:
             if t is None:
                 return        # parameter not set
             if isinstance(t, dt.datetime):
@@ -102,4 +102,4 @@ class DirectoryApi(BaseApi):
         epoch_param(modified_since, 'modified_since')
         epoch_param(modified_before, 'modified_before')
 
-        return self._query('sources/feeds/', params)
+        return self._query('sources/feeds/', params)  # type: ignore[no-any-return]
