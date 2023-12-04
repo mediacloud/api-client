@@ -1,6 +1,6 @@
 import logging
 import datetime as dt
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, List
 import requests
 import mediacloud
 import mediacloud.error
@@ -14,11 +14,11 @@ class BaseApi:
     # Default applied to all queries made to main server. You can alter this on
     # your instance if you want to bail out more quickly, or know you have longer
     # running queries
-    TIMEOUT_SECS = 30
+    TIMEOUT_SECS = 60
 
     BASE_API_URL = "https://search.mediacloud.org/api/"
 
-    def __init__(self, auth_token=str):
+    def __init__(self, auth_token: Optional[str] = None):
         if not auth_token:
             raise mediacloud.error.MCException("No api key set - nothing will work without this")
         # Specify the auth_token to use for all future requests

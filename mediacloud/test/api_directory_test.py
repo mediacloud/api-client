@@ -2,13 +2,34 @@ from unittest import TestCase
 import datetime as dt
 import os
 import mediacloud.api
+from mediacloud.error import MCException
 
 TEST_COLLECTION_ID = 34412234  # US -National sources
 TEST_SOURCE_ID = 1095  # cnn.com
 TEST_FEED_ID = 1
 
 
-class ApiDirectoryTest(TestCase):
+class BaseApiTest(TestCase):
+
+    def test_no_token(self):
+        try:
+            _ = mediacloud.api.DirectoryApi()
+            assert False
+        except MCException:
+            assert True
+        try:
+            _ = mediacloud.api.DirectoryApi("")
+            assert False
+        except MCException:
+            assert True
+
+    def test_token(self):
+        mc_api_key = os.getenv("MC_API_TOKEN")
+        _ = mediacloud.api.DirectoryApi(mc_api_key)
+        assert True
+
+
+class DirectoryTest(TestCase):
 
     def setUp(self):
         self._mc_api_key = os.getenv("MC_API_TOKEN")
