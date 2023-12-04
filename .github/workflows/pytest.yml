@@ -25,9 +25,9 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        make install
+        flit install
     - name: Test with pytest
       env:
         MC_API_TOKEN: ${{ secrets.MC_API_TOKEN }}
       run: |
-        make test
+        pytest
