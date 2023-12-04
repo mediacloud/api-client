@@ -1,10 +1,11 @@
-import logging
 import datetime as dt
-from typing import Dict, Optional, Union
+import logging
+from typing import Any, Dict, Optional, Union
+
 import requests
+
 import mediacloud
 import mediacloud.error
-
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ class BaseApi:
 
     BASE_API_URL = "https://search.mediacloud.org/api/"
 
-    def __init__(self, auth_token=str):
+    def __init__(self, auth_token: Optional[str] = None):
         if not auth_token:
             raise mediacloud.error.MCException("No api key set - nothing will work without this")
         # Specify the auth_token to use for all future requests
@@ -38,7 +39,7 @@ class BaseApi:
         """
         return self._query('version')
 
-    def _query(self, endpoint: str, params: Dict = None, method: str = 'GET'):
+    def _query(self, endpoint: str, params: Optional[Dict] = None, method: str = 'GET'):
         """
         Centralize making the actual queries here for easy maintenance and testing of HTTP comms
         """
@@ -63,7 +64,7 @@ class DirectoryApi(BaseApi):
 
     def collection_list(self, platform: Optional[str] = None, name: Optional[str] = None,
                         limit: Optional[int] = 0, offset: Optional[int] = 0):
-        params = dict(limit=limit, offset=offset)
+        params: Dict[Any, Any] = dict(limit=limit, offset=offset)
         if name:
             params['name'] = name
         if platform:
@@ -73,7 +74,7 @@ class DirectoryApi(BaseApi):
     def source_list(self, platform: Optional[str] = None, name: Optional[str] = None,
                     collection_id: Optional[int] = None,
                     limit: Optional[int] = 0, offset: Optional[int] = 0):
-        params = dict(limit=limit, offset=offset)
+        params: Dict[Any, Any] = dict(limit=limit, offset=offset)
         if collection_id:
             params['collection_id'] = collection_id
         if name:
@@ -82,10 +83,11 @@ class DirectoryApi(BaseApi):
             params['platform'] = platform
         return self._query('sources/sources/', params)
 
-    def feed_list(self, source_id: Optional[int] = None, modified_since: Optional[Union[dt.datetime, int, float]] = None,
+    def feed_list(self, source_id: Optional[int] = None,
+                  modified_since: Optional[Union[dt.datetime, int, float]] = None,
                   modified_before: Optional[Union[dt.datetime, int, float]] = None,
                   limit: Optional[int] = 0, offset: Optional[int] = 0):
-        params = dict(limit=limit, offset=offset)
+        params: Dict[Any, Any] = dict(limit=limit, offset=offset)
         if source_id:
             params['source_id'] = source_id
 
@@ -93,7 +95,7 @@ class DirectoryApi(BaseApi):
             if t is None:
                 return        # parameter not set
             if isinstance(t, dt.datetime):
-                params[param] = t.timestamp() # get epoch time
+                params[param] = t.timestamp()  # get epoch time
             elif isinstance(t, (int, float)):
                 params[param] = t
             else:
