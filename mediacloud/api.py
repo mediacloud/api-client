@@ -27,6 +27,7 @@ class BaseApi:
         # better performance to put all HTTP through this one object
         self._session = requests.Session()
         self._session.headers.update({'Authorization': f'Token {self._auth_token}'})
+        self._session.headers.update({'Accept': 'application/json'})
 
     def user_profile(self) -> Dict:
         # :return: basic info about the current user, including their roles
@@ -108,31 +109,61 @@ class DirectoryApi(BaseApi):
 
 
 class SearchApi(BaseApi):
+    PROVIDER = "onlinenews-mediacloud"
+
+    def _prep_default_params(self, query: str, start_date: dt.date, end_date: dt.date,
+                             collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],
+                             platform: Optional[str] = None):
+        params: Dict[Any, Any] = dict(start=start_date.isoformat(), end=end_date.isoformat(), q=query,
+                                      platform=self.PROVIDER)
+        if len(source_ids):
+            params['ss'] = ",".join([str(sid) for sid in source_ids]),
+        if len(collection_ids):
+            params['cs'] = ",".join([str(cid) for cid in collection_ids]),
+        return params
 
     def story_count(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
                     source_ids: Optional[List[int]] = [], platform: Optional[str] = None):
-        pass
+        params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
+        results = self._query('search/total-count', params)
+        return results['count']
 
     def story_count_over_time(self, query: str, start_date: dt.date, end_date: dt.date,
                               collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],
                               platform: Optional[str] = None):
-        pass
+        params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
+        results = self._query('search/count-over-time', params)
+        return results['count_over_time']['counts']
 
     def story_list(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
                    source_ids: Optional[List[int]] = [], platform: Optional[str] = None):
         pass
 
     def story(self, story_id: str):
-        pass
+        params = dict(storyId=story_id, platform=self.PROVIDER)
+        results = self._query('search/story', params)
+        return results['story']
 
-    def terms(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
-              source_ids: Optional[List[int]] = [], platform: Optional[str] = None):
-        pass
+    def words(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
+              source_ids: Optional[List[int]] = [], platform: Optional[str] = None, limit: Optional[int] = None):
+        params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
+        if limit:
+            params['limit'] = limit
+        results = self._query('search/words', params)
+        return results['words']
 
     def sources(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
-                source_ids: Optional[List[int]] = [], platform: Optional[str] = None):
-        pass
+                source_ids: Optional[List[int]] = [], platform: Optional[str] = None, limit: Optional[int] = None):
+        params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
+        if limit:
+            params['limit'] = limit
+        results = self._query('search/sources', params)
+        return results['sources']
 
     def languages(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
-                  source_ids: Optional[List[int]] = [], platform: Optional[str] = None):
-        pass
+                  source_ids: Optional[List[int]] = [], platform: Optional[str] = None, limit: Optional[int] = None):
+        params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
+        if limit:
+            params['limit'] = limit
+        results = self._query('search/languages', params)
+        return results['languages']
