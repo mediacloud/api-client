@@ -1,9 +1,9 @@
 MediaCloud Python API Client
 ============================
 
-🚧 Under construction 🚧  
+🚧 Under construction 🚧
 
-This is a python client for accessing the MediaCloud API v4. This allows you to perform cross-platform searches and 
+This is a python client for accessing the MediaCloud API v4. This allows you to perform cross-platform searches and
 also browse our collection/source/feed directory.
 
 ![pylint](https://github.com/mediacloud/api-client/actions/workflows/pylint.yml/badge.svg) ![pytest](https://github.com/mediacloud/api-client/actions/workflows/pytest.yml/badge.svg) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/mitmedialab/MediaCloud-API-Client/blob/master/LICENSE)
@@ -51,20 +51,17 @@ If you are interested in adding code to this module, first clone [the GitHub rep
 
 ### Installing
 
-`make install`
+* `flit install`
+* `pre-commit install`
 
 ### Testing
 
-`make test`
+`pytest`
 
 ### Distributing a New Version
 
-If you want to, setup [twin's keyring integration](https://pypi.org/project/twine/) to avoid typing your PyPI
-password over and over. 
-
-1. Run `make test` to make sure all the test pass
-2. Update the version number in `mediacloud/__init__.py`
-3. Make a brief note in the CHANGELOG.md about what changes
-4. Run `make build-release` to create an install package
-5. Run `make release-test` to upload it to PyPI's test platform
-6. Run `make release` to upload it to PyPI
+1. Run `pytest` to make sure all the test pass
+2. Update the version number in `pyproject.toml`
+3. Make a brief note in the `CHANGELOG.md` about what changes
+4. Run `flit build` to create an install package
+5. Run `flit publish` to upload it to PyPI
