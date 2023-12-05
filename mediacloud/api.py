@@ -1,6 +1,6 @@
 import datetime as dt
 import logging
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import requests
 
@@ -105,3 +105,34 @@ class DirectoryApi(BaseApi):
         epoch_param(modified_before, 'modified_before')
 
         return self._query('sources/feeds/', params)
+
+
+class SearchApi(BaseApi):
+
+    def story_count(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
+                    source_ids: Optional[List[int]] = [], platform: Optional[str] = None):
+        pass
+
+    def story_count_over_time(self, query: str, start_date: dt.date, end_date: dt.date,
+                              collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],
+                              platform: Optional[str] = None):
+        pass
+
+    def story_list(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
+                   source_ids: Optional[List[int]] = [], platform: Optional[str] = None):
+        pass
+
+    def story(self, story_id: str):
+        pass
+
+    def terms(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
+              source_ids: Optional[List[int]] = [], platform: Optional[str] = None):
+        pass
+
+    def sources(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
+                source_ids: Optional[List[int]] = [], platform: Optional[str] = None):
+        pass
+
+    def languages(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
+                  source_ids: Optional[List[int]] = [], platform: Optional[str] = None):
+        pass
