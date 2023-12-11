@@ -25,7 +25,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pre-commit", "flake8", "mypy", "isort", "types-urllib3", "types-requests"
+    "pre-commit", "flake8", "mypy", "isort", "types-urllib3", "types-requests", "python-dotenv"
 ]
 test = [
     "pytest"

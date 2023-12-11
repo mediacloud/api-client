@@ -40,7 +40,7 @@ class BaseApi:
         """
         return self._query('version')
 
-    def _query(self, endpoint: str, params: Optional[Dict] = None, method: str = 'GET'):
+    def _query(self, endpoint: str, params: Optional[Dict] = None, method: str = 'GET') -> Dict:
         """
         Centralize making the actual queries here for easy maintenance and testing of HTTP comms
         """
@@ -64,7 +64,7 @@ class DirectoryApi(BaseApi):
     PLATFORM_REDDIT = "reddit"
 
     def collection_list(self, platform: Optional[str] = None, name: Optional[str] = None,
-                        limit: Optional[int] = 0, offset: Optional[int] = 0):
+                        limit: Optional[int] = 0, offset: Optional[int] = 0) -> Dict:
         params: Dict[Any, Any] = dict(limit=limit, offset=offset)
         if name:
             params['name'] = name
@@ -74,7 +74,7 @@ class DirectoryApi(BaseApi):
 
     def source_list(self, platform: Optional[str] = None, name: Optional[str] = None,
                     collection_id: Optional[int] = None,
-                    limit: Optional[int] = 0, offset: Optional[int] = 0):
+                    limit: Optional[int] = 0, offset: Optional[int] = 0) -> Dict:
         params: Dict[Any, Any] = dict(limit=limit, offset=offset)
         if collection_id:
             params['collection_id'] = collection_id
@@ -87,7 +87,7 @@ class DirectoryApi(BaseApi):
     def feed_list(self, source_id: Optional[int] = None,
                   modified_since: Optional[Union[dt.datetime, int, float]] = None,
                   modified_before: Optional[Union[dt.datetime, int, float]] = None,
-                  limit: Optional[int] = 0, offset: Optional[int] = 0):
+                  limit: Optional[int] = 0, offset: Optional[int] = 0) -> Dict:
         params: Dict[Any, Any] = dict(limit=limit, offset=offset)
         if source_id:
             params['source_id'] = source_id
@@ -123,29 +123,45 @@ class SearchApi(BaseApi):
         return params
 
     def story_count(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
-                    source_ids: Optional[List[int]] = [], platform: Optional[str] = None):
+                    source_ids: Optional[List[int]] = [], platform: Optional[str] = None) -> Dict:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         results = self._query('search/total-count', params)
         return results['count']
 
     def story_count_over_time(self, query: str, start_date: dt.date, end_date: dt.date,
                               collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],
-                              platform: Optional[str] = None):
+                              platform: Optional[str] = None) -> List[Dict]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         results = self._query('search/count-over-time', params)
         return results['count_over_time']['counts']
 
     def story_list(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
-                   source_ids: Optional[List[int]] = [], platform: Optional[str] = None):
-        pass
+                   source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
+                   expanded: Optional[bool] = None, pagination_token: Optional[str] = None,
+                   sort_field: Optional[str] = None, sort_order: Optional[str] = None,
+                   page_size: Optional[int] = None) -> tuple[Dict, Optional[str]]:
+        params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
+        if expanded:
+            params['expanded'] = 1
+        if pagination_token:
+            params['pagination_token'] = pagination_token
+        if sort_field:
+            params['sort_field'] = sort_field
+        if sort_order:
+            params['sort_order'] = sort_order
+        if page_size:
+            params['page_size'] = page_size
+        results = self._query('search/story-list', params)
+        return results['stories'], results['pagination_token']
 
-    def story(self, story_id: str):
+    def story(self, story_id: str) -> Dict:
         params = dict(storyId=story_id, platform=self.PROVIDER)
         results = self._query('search/story', params)
         return results['story']
 
     def words(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
-              source_ids: Optional[List[int]] = [], platform: Optional[str] = None, limit: Optional[int] = None):
+              source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
+              limit: Optional[int] = None) -> List[Dict]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         if limit:
             params['limit'] = limit
@@ -153,7 +169,8 @@ class SearchApi(BaseApi):
         return results['words']
 
     def sources(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
-                source_ids: Optional[List[int]] = [], platform: Optional[str] = None, limit: Optional[int] = None):
+                source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
+                limit: Optional[int] = None) -> List[Dict]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         if limit:
             params['limit'] = limit
@@ -161,7 +178,8 @@ class SearchApi(BaseApi):
         return results['sources']
 
     def languages(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
-                  source_ids: Optional[List[int]] = [], platform: Optional[str] = None, limit: Optional[int] = None):
+                  source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
+                  limit: Optional[int] = None) -> List[Dict]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         if limit:
             params['limit'] = limit
