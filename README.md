@@ -1,9 +1,9 @@
 MediaCloud Python API Client
 ============================
 
-🚧 Under construction 🚧  
+🚧 Under construction 🚧
 
-This is a python client for accessing the MediaCloud API v4. This allows you to perform cross-platform searches and 
+This is a python client for accessing the MediaCloud API v4. This allows you to perform cross-platform searches and
 also browse our collection/source/feed directory.
 
 ![pylint](https://github.com/mediacloud/api-client/actions/workflows/pylint.yml/badge.svg) ![pytest](https://github.com/mediacloud/api-client/actions/workflows/pytest.yml/badge.svg) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/mitmedialab/MediaCloud-API-Client/blob/master/LICENSE)
@@ -22,13 +22,46 @@ Check `CHANGELOG.md` for a detailed history of changes.
 
 Take a look at the test in the `mediacloud/test/` module for more detailed examples.
 
+#### Count Stories Matching a Query
+
+```python
+import mediacloud.api
+US_NATIONAL_COLLECTION = 34412234
+mc_search = mediacloud.api.SearchAPI(YOUR_MC_API_KEY)
+all_stories = []
+pagination_token = None
+more_stories = True
+while more_stories:
+    page, pagination_token = mc_search.story_list('robots', start_date= , end_date= collection_ids=[US_NATIONAL_COLLECTION])
+    all_stories += page
+    more_stories = pagination_token is not None
+print(f"Retrived {len(all_stories)} matching stories")
+```
+
+#### Page Through Stories Matching a Query
+
+```python
+import mediacloud.api
+INDIA_NATIONAL_COLLECTION = 34412118
+mc_search = mediacloud.api.SearchAPI(YOUR_MC_API_KEY)
+all_stories = []
+pagination_token = None
+more_stories = True
+while more_stories:
+    page, pagination_token = mc_search.story_list('modi AND biden', collection_ids=[INDIA_NATIONAL_COLLECTION],
+                                                  pagination_token=pagination_token)
+    all_stories += page
+    more_stories = pagination_token is not None
+print(f"Retrived {len(all_stories)} matching stories")
+```
+
 #### Fetch all Sources in a Collection
 
 ```python
 import mediacloud.api
 INDIA_NATIONAL_COLLECTION = 34412118
 SOURCES_PER_PAGE = 100  # the number of sources retrieved per page
-mc_directory = mediacloud.api.DirectoryApi(MC_API_KEY)
+mc_directory = mediacloud.api.DirectoryApi(YOUR_MC_API_KEY)
 sources = []
 offset = 0   # offset for paging through
 while True:
@@ -51,20 +84,17 @@ If you are interested in adding code to this module, first clone [the GitHub rep
 
 ### Installing
 
-`make install`
+* `flit install`
+* `pre-commit install`
 
 ### Testing
 
-`make test`
+`pytest`
 
 ### Distributing a New Version
 
-If you want to, setup [twin's keyring integration](https://pypi.org/project/twine/) to avoid typing your PyPI
-password over and over. 
-
-1. Run `make test` to make sure all the test pass
-2. Update the version number in `mediacloud/__init__.py`
-3. Make a brief note in the CHANGELOG.md about what changes
-4. Run `make build-release` to create an install package
-5. Run `make release-test` to upload it to PyPI's test platform
-6. Run `make release` to upload it to PyPI
+1. Run `pytest` to make sure all the test pass
+2. Update the version number in `pyproject.toml`
+3. Make a brief note in the `CHANGELOG.md` about what changes
+4. Run `flit build` to create an install package
+5. Run `flit publish` to upload it to PyPI

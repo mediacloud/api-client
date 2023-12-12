@@ -1,6 +1,7 @@
-from unittest import TestCase
 import datetime as dt
 import os
+from unittest import TestCase
+
 import mediacloud.api
 
 TEST_COLLECTION_ID = 34412234  # US -National sources
@@ -8,7 +9,7 @@ TEST_SOURCE_ID = 1095  # cnn.com
 TEST_FEED_ID = 1
 
 
-class ApiDirectoryTest(TestCase):
+class DirectoryTest(TestCase):
 
     def setUp(self):
         self._mc_api_key = os.getenv("MC_API_TOKEN")

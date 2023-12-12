@@ -1,0 +1,36 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "mediacloud"
+version = "4.1.0"
+authors = [
+    {name = "Rahul Bhargava", email = "r.bhargava@northeastern.edu"},
+]
+description = "Media Cloud API Client Library"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+    "requests == 2.*",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit", "flake8", "mypy", "isort", "types-urllib3", "types-requests", "python-dotenv"
+]
+test = [
+    "pytest"
+]
+
+[project.urls]
+"Homepage" = "https://mediacloud.org"
+"Bug Tracker" = "https://github.com/mediacloud/api-client/issues"
