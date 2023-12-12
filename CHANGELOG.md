@@ -2,18 +2,19 @@ Version History
 ===============
 
 
-
 Version 4
 ---------
+
+### v4.1.0
+* created new SearchAPI module to support updated search API
 
 ### v4.0.1
 * added a "modified_before" parameter to DirectoryApi.feed_list for use by rss_fetcher
 
 ### v4.0.0
 
-* ⚠️ 🚧 Complete rewrite. This is first work on supporting new API for cross-platform search and directory of 
-collections/sources/feeds. This is an entirely new system we are building out. 
-
+* ⚠️ 🚧 Complete rewrite. This is first work on supporting new API for cross-platform search and directory of
+collections/sources/feeds. This is an entirely new system we are building out.
 
 
 Version 3
@@ -21,16 +22,16 @@ Version 3
 
 ### v3.13.0
 
-* add TIMEOUT_SECS property, defaulting to 30 seconds (configurable by user on `MediaCloud` object) 
+* add TIMEOUT_SECS property, defaulting to 30 seconds (configurable by user on `MediaCloud` object)
 
 ### v3.12.5
 
-* update MongoDB storage helper to use URI for connection (so it support user/pass authentication) 
+* update MongoDB storage helper to use URI for connection (so it support user/pass authentication)
 
 ### v3.12.4
 
-* prevent people from trying to page through randomly sorted `storyList` results - it doesn't work so we shouldn't 
-let them try 
+* prevent people from trying to page through randomly sorted `storyList` results - it doesn't work so we shouldn't
+let them try
 
 ### v3.12.3
 
@@ -47,12 +48,12 @@ big array of story ids (`storyRawCliffResults` and `storyRawNytThemeResults`)
 
 ### v3.12.0
 
-* deprecate `publish_date_query` - switch to `dates_as_query_clause` instead (defaults to inclusive, matching our web 
+* deprecate `publish_date_query` - switch to `dates_as_query_clause` instead (defaults to inclusive, matching our web
 tools and typical usage patterns)
 
 ### v3.11.3
 
-* support new topic story list sorting options 
+* support new topic story list sorting options
 
 ### v3.11.2
 
@@ -150,7 +151,7 @@ tools and typical usage patterns)
 
 ### v3.5.0
 
-* add new snapshots/create endpoint, and support passing in a snapshots_id to the topicSpider call 
+* add new snapshots/create endpoint, and support passing in a snapshots_id to the topicSpider call
 
 ### v3.4.4
 
@@ -167,15 +168,15 @@ tools and typical usage patterns)
 
 ### v3.4.1
 
-* setup for CI - added linting and automated release tasks via makefile  
+* setup for CI - added linting and automated release tasks via makefile
 
 ### v3.4.0
 
-* add more options to user update endpoint, and user deletion endpoint  
+* add more options to user update endpoint, and user deletion endpoint
 
 ### v3.3.1
 
-* add paging to user list endpoint 
+* add paging to user list endpoint
 
 ### v3.3.0
 
@@ -232,7 +233,6 @@ This release is not backwards-compatible.  You will likely need to update your c
 * adds support for specifying date range by time/day/week/month; default to `publish_day` searching
 * begins refactoring tests into individual modules by content type (story, sentence, tag, etc.)
 * begins removing references to specific content (by id) so we can test on non-production databases
-
 
 
 Version 2
