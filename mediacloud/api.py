@@ -152,6 +152,9 @@ class SearchApi(BaseApi):
         if page_size:
             params['page_size'] = page_size
         results = self._query('search/story-list', params)
+        for s in results['stories']:
+            s['publish_date'] = dt.date.fromisoformat(s['publish_date'][:10]) if s['publish_date'] else None
+            s['indexed_date'] = dt.date.fromisoformat(s['indexed_date'][:10]) if s['indexed_date'] else None
         return results['stories'], results['pagination_token']
 
     def story(self, story_id: str) -> Dict:

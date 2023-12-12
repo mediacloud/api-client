@@ -88,11 +88,13 @@ class DirectoryTest(TestCase):
 
     def test_story_list_paging(self):
         results1, next_page_token1 = self._search.story_list(query="weather", start_date=self.START_DATE,
-                                                             end_date=self.END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
+                                                             end_date=self.END_DATE,
+                                                             collection_ids=[COLLECTION_US_NATIONAL])
         assert len(results1) == 1000
         assert next_page_token1 is not None
         results2, next_page_token2 = self._search.story_list(query="weather", start_date=self.START_DATE,
-                                                             end_date=self.END_DATE, collection_ids=[COLLECTION_US_NATIONAL],
+                                                             end_date=self.END_DATE,
+                                                             collection_ids=[COLLECTION_US_NATIONAL],
                                                              pagination_token=next_page_token1)
         assert len(results2) == 1000
         assert next_page_token2 is not None
@@ -116,40 +118,36 @@ class DirectoryTest(TestCase):
                                           collection_ids=[COLLECTION_US_NATIONAL])
         last_pub_date = TOMORROW
         for story in page:
-            assert 'publication_date' in story
-            story_pub_date = dt.date.fromisoformat(story['publication_date'])
-            assert story_pub_date <= last_pub_date
-            last_pub_date = story_pub_date
+            assert 'publish_date' in story
+            assert story['publish_date'] <= last_pub_date
+            last_pub_date = story['publish_date']
         # asc
         page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
                                           collection_ids=[COLLECTION_US_NATIONAL], sort_order='asc')
         a_long_time_ago = dt.date(2000, 1, 1)
         last_pub_date = a_long_time_ago
         for story in page:
-            assert 'publication_date' in story
-            story_pub_date = dt.date.fromisoformat(story['publication_date'])
-            assert story_pub_date >= last_pub_date
-            last_pub_date = story_pub_date
+            assert 'publish_date' in story
+            assert story['publish_date'] >= last_pub_date
+            last_pub_date = story['publish_date']
 
     def test_story_list_sort_field(self):
-        # publication_date
+        # publish_date
         page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
                                           collection_ids=[COLLECTION_US_NATIONAL])
         last_date = TOMORROW
         for story in page:
-            assert 'publication_date' in story
-            story_date = dt.date.fromisoformat(story['publication_date'])
-            assert story_date <= last_date
-            last_date = story_date
+            assert 'publish_date' in story
+            assert story['publish_date'] <= last_date
+            last_date = story['publish_date']
         # indexed date
         page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
                                           collection_ids=[COLLECTION_US_NATIONAL], sort_field="indexed_date")
         last_date = TOMORROW
         for story in page:
             assert 'indexed_date' in story
-            story_date = dt.date.fromisoformat(story['indexed_date'])
-            assert story_date <= last_date
-            last_date = story_date
+            assert story['indexed_date'] <= last_date
+            last_date = story['indexed_date']
 
     def test_story_list_page_size(self):
         # test valid number

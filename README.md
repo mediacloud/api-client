@@ -22,13 +22,46 @@ Check `CHANGELOG.md` for a detailed history of changes.
 
 Take a look at the test in the `mediacloud/test/` module for more detailed examples.
 
+#### Count Stories Matching a Query
+
+```python
+import mediacloud.api
+US_NATIONAL_COLLECTION = 34412234
+mc_search = mediacloud.api.SearchAPI(YOUR_MC_API_KEY)
+all_stories = []
+pagination_token = None
+more_stories = True
+while more_stories:
+    page, pagination_token = mc_search.story_list('robots', start_date= , end_date= collection_ids=[US_NATIONAL_COLLECTION])
+    all_stories += page
+    more_stories = pagination_token is not None
+print(f"Retrived {len(all_stories)} matching stories")
+```
+
+#### Page Through Stories Matching a Query
+
+```python
+import mediacloud.api
+INDIA_NATIONAL_COLLECTION = 34412118
+mc_search = mediacloud.api.SearchAPI(YOUR_MC_API_KEY)
+all_stories = []
+pagination_token = None
+more_stories = True
+while more_stories:
+    page, pagination_token = mc_search.story_list('modi AND biden', collection_ids=[INDIA_NATIONAL_COLLECTION],
+                                                  pagination_token=pagination_token)
+    all_stories += page
+    more_stories = pagination_token is not None
+print(f"Retrived {len(all_stories)} matching stories")
+```
+
 #### Fetch all Sources in a Collection
 
 ```python
 import mediacloud.api
 INDIA_NATIONAL_COLLECTION = 34412118
 SOURCES_PER_PAGE = 100  # the number of sources retrieved per page
-mc_directory = mediacloud.api.DirectoryApi(MC_API_KEY)
+mc_directory = mediacloud.api.DirectoryApi(YOUR_MC_API_KEY)
 sources = []
 offset = 0   # offset for paging through
 while True:
