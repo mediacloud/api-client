@@ -133,6 +133,8 @@ class SearchApi(BaseApi):
                               platform: Optional[str] = None) -> List[Dict]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         results = self._query('search/count-over-time', params)
+        for d in results['count_over_time']['counts']:
+            d['date'] = dt.date.fromisoformat(d['date'][:10])
         return results['count_over_time']['counts']
 
     def story_list(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],

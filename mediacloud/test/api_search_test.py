@@ -33,6 +33,7 @@ class DirectoryTest(TestCase):
         assert len(results) == (self.END_DATE - self.START_DATE).days + 1
         for day in results:
             assert 'date' in day
+            assert isinstance(day['date'], dt.date)
             assert 'count' in day
             assert 'total_count' in day
             assert day['count'] <= day['total_count']
@@ -41,7 +42,7 @@ class DirectoryTest(TestCase):
 
     def test_story(self):
         # Note: Expected to fail right now
-        story_id = 'eebfb686618e34a9bc6e87e87e90c54b'  # not sure this is a valid id (got it by md5 hashing staging-news-search-query.tarbell.mediacloud.org)
+        story_id = 'eebfb686618e34a9bc6e87e87e90c54b'  # not sure this is a valid id
         story = self._search.story(story_id)
         assert 'id' in story
         assert story['id'] == story_id
