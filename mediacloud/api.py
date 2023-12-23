@@ -141,7 +141,7 @@ class SearchApi(BaseApi):
                    source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
                    expanded: Optional[bool] = None, pagination_token: Optional[str] = None,
                    sort_field: Optional[str] = None, sort_order: Optional[str] = None,
-                   page_size: Optional[int] = None) -> tuple[Dict, Optional[str]]:
+                   page_size: Optional[int] = None) -> tuple[List[Dict], Optional[str]]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         if expanded:
             params['expanded'] = 1
