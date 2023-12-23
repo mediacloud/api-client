@@ -5,6 +5,9 @@ Version History
 Version 4
 ---------
 
+### v4.1.2
+* return full indexed_date (not just date)
+
 ### v4.1.1
 * improve consistency of results by changing date from str to dt.date in count_over_time
 
