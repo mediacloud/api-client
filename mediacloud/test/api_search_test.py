@@ -7,6 +7,7 @@ import mediacloud.api
 COLLECTION_US_NATIONAL = 34412234
 AU_BROADCAST_COMPANY = 20775
 TOMORROW = dt.date.today() + dt.timedelta(days=1)
+TOMORROW_TIME = dt.datetime.today() + dt.timedelta(days=1)
 
 
 class DirectoryTest(TestCase):
@@ -144,7 +145,7 @@ class DirectoryTest(TestCase):
         # indexed date
         page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
                                           collection_ids=[COLLECTION_US_NATIONAL], sort_field="indexed_date")
-        last_date = TOMORROW
+        last_date = TOMORROW_TIME
         for story in page:
             assert 'indexed_date' in story
             assert story['indexed_date'] <= last_date
@@ -161,6 +162,16 @@ class DirectoryTest(TestCase):
         assert results1['total'] == results2['total']
         assert results1['relevant'] != results2['relevant']
         assert results1['relevant'] > results2['relevant']  # indexed_date clause sould be more narrow
+
+    def test_verify_story_time_formats(self):
+        # indexed_date should have time component
+        page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
+                                          collection_ids=[COLLECTION_US_NATIONAL], page_size=100)
+        for story in page:
+            assert 'publish_date' in story
+            assert isinstance(story['publish_date'], dt.date)
+            assert 'indexed_date' in story
+            assert isinstance(story['indexed_date'], dt.datetime)
 
     def test_story_list_page_size(self):
         # test valid number
