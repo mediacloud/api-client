@@ -150,6 +150,18 @@ class DirectoryTest(TestCase):
             assert story['indexed_date'] <= last_date
             last_date = story['indexed_date']
 
+    def test_search_by_indexed_date(self):
+        # compare results with indexed_date clause to those without it
+        results1 = self._search.story_count(query="weather", start_date=self.START_DATE, end_date=self.END_DATE)
+        assert results1['total'] > 0
+        results2 = self._search.story_count(query="weather and indexed_date:[{} TO {}]".format(
+            self.START_DATE.isoformat(), self.END_DATE.isoformat()),
+            start_date=self.START_DATE, end_date=self.END_DATE)
+        assert results2['total'] > 0
+        assert results1['total'] == results2['total']
+        assert results1['relevant'] != results2['relevant']
+        assert results1['relevant'] > results2['relevant']  # indexed_date clause sould be more narrow
+
     def test_story_list_page_size(self):
         # test valid number
         page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
