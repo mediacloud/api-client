@@ -178,3 +178,16 @@ class DirectoryTest(TestCase):
         page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
                                           collection_ids=[COLLECTION_US_NATIONAL], page_size=103)
         assert len(page) == 103
+
+    def test_source_filter(self):
+        results = self._search.sources(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
+                                       source_ids=[AU_BROADCAST_COMPANY])
+        assert len(results) == 1
+        assert results[0]['count'] > 0
+        assert results[0]['source'] == "abc.net.au"
+        results, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
+                                             source_ids=[AU_BROADCAST_COMPANY])
+        assert len(results) > 0
+        for s in results:
+            assert s['media_url'] == "abc.net.au"
+            assert s['media_name'] == "abc.net.au"
