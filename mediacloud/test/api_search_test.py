@@ -179,7 +179,7 @@ class DirectoryTest(TestCase):
                                           collection_ids=[COLLECTION_US_NATIONAL], page_size=103)
         assert len(page) == 103
 
-    def test_source_filter(self):
+    def test_source_ids_filter(self):
         results = self._search.sources(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
                                        source_ids=[AU_BROADCAST_COMPANY])
         assert len(results) == 1
@@ -191,3 +191,24 @@ class DirectoryTest(TestCase):
         for s in results:
             assert s['media_url'] == "abc.net.au"
             assert s['media_name'] == "abc.net.au"
+
+    def test_collection_ids_filter(self):
+        # first get all domains in collection
+        directory_api = mediacloud.api.DirectoryApi(self._mc_api_key)
+        limit = 1000
+        response = directory_api.source_list(collection_id=COLLECTION_US_NATIONAL, limit=limit)
+        sources_in_collection = response['results']
+        assert len(sources_in_collection) > 200
+        domains = [s['name'] for s in sources_in_collection]
+        assert len(domains) == len(sources_in_collection)
+        # now check sources to see they're all in collection list of domains
+        results = self._search.sources(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
+                                       collection_ids=[COLLECTION_US_NATIONAL])
+        for s in results:
+            assert s['source'] in domains
+        # now check urls for a page of matches and make sure they're all in collection list of domains
+        results, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
+                                             collection_ids=[COLLECTION_US_NATIONAL])
+        assert len(results) > 0
+        for s in results:
+            assert s['media_url'] in domains
