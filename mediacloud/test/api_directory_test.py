@@ -1,5 +1,6 @@
 import datetime as dt
 import os
+from typing import Dict, List
 from unittest import TestCase
 
 import mediacloud.api
@@ -34,19 +35,26 @@ class DirectoryTest(TestCase):
             assert c['platform'] == self._directory.PLATFORM_ONLINE_NEWS
         assert len(collections) > 0
 
-    def test_source_list(self):
+    def _sources_in_collection(self, collection_id: int, limit: int) -> List[Dict]:
         sources = []
-        limit = 100
         offset = 0
         while True:
-            response = self._directory.source_list(collection_id=TEST_COLLECTION_ID, limit=limit, offset=offset)
+            response = self._directory.source_list(collection_id=collection_id, limit=limit, offset=offset)
             assert response['count'] != 0
             assert len(response['results']) > 0
+            assert len(response['results']) <= limit
             sources += response['results']
             if response['next'] is None:
                 break
             offset += limit
-        assert len(sources) > 0
+        return sources
+
+    def test_source_list(self):
+        sources1 = self._sources_in_collection(TEST_COLLECTION_ID, 100)
+        assert len(sources1) > 0
+        sources2 = self._sources_in_collection(TEST_COLLECTION_ID, 202)
+        assert len(sources2) > 0
+        assert len(sources1) == len(sources2)
 
     def test_feed_list(self):
         feeds = []
