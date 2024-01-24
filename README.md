@@ -27,7 +27,7 @@ Take a look at the test in the `mediacloud/test/` module for more detailed examp
 ```python
 import mediacloud.api
 US_NATIONAL_COLLECTION = 34412234
-mc_search = mediacloud.api.SearchAPI(YOUR_MC_API_KEY)
+mc_search = mediacloud.api.SearchApi(YOUR_MC_API_KEY)
 all_stories = []
 pagination_token = None
 more_stories = True
@@ -43,7 +43,7 @@ print(f"Retrived {len(all_stories)} matching stories")
 ```python
 import mediacloud.api
 INDIA_NATIONAL_COLLECTION = 34412118
-mc_search = mediacloud.api.SearchAPI(YOUR_MC_API_KEY)
+mc_search = mediacloud.api.SearchApi(YOUR_MC_API_KEY)
 all_stories = []
 pagination_token = None
 more_stories = True
