@@ -263,7 +263,7 @@ class SearchSyntaxTest(TestCase):
         assert women_count > 0
         woman_count = self._count_query(query="woman")
         assert woman_count > 0
-        ord_count = self._count_query(query="woman OR women")
+        ord_count = self._count_query(query="(woman OR women)")  # NOTE: this needs parentheses
         assert ord_count >= women_count
         assert ord_count >= woman_count
 
