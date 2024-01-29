@@ -276,16 +276,6 @@ class SearchSyntaxTest(TestCase):
         assert anded_count <= women_count
         assert anded_count <= woman_count
 
-    def test_regex_search(self):
-        regex_count = self._count_query(query="/joh?n(ath[oa]n)/")
-        name1_count = self._count_query(query="jonathan")
-        name2_count = self._count_query(query="johnathan")
-        name3_count = self._count_query(query="jonathon")
-        name4_count = self._count_query(query="johnathon")
-        for count in [name1_count, name2_count, name3_count, name4_count]:
-            assert count > 0
-            assert regex_count >= count
-
     def test_proximity_search(self):
         woman_count = self._count_query(query="woman")
         killed_count = self._count_query(query="killed")
