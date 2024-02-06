@@ -156,7 +156,7 @@ class SearchApi(BaseApi):
         results = self._query('search/story-list', params)
         for s in results['stories']:
             s['publish_date'] = dt.date.fromisoformat(s['publish_date'][:10]) if s['publish_date'] else None
-            s['indexed_date'] = dt.datetime.strptime(s['indexed_date'], '%Y-%m-%d %H:%M:%S')\
+            s['indexed_date'] = dt.datetime.strptime(s['indexed_date'][:19], '%Y-%m-%d %H:%M:%S')\
                 if s['indexed_date'] else None
         return results['stories'], results['pagination_token']
 
