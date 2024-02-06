@@ -5,6 +5,9 @@ Version History
 Version 4
 ---------
 
+### v4.1.3
+* fix indexed date parsing to ignore millies, which might be there or not
+
 ### v4.1.2
 * return full indexed_date (not just date)
 
