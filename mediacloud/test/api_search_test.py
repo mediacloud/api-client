@@ -10,7 +10,7 @@ TOMORROW = dt.date.today() + dt.timedelta(days=1)
 TOMORROW_TIME = dt.datetime.today() + dt.timedelta(days=1)
 
 
-class DirectoryTest(TestCase):
+class SearchTest(TestCase):
 
     START_DATE = dt.date(2023, 11, 1)
     END_DATE = dt.date(2023, 12, 1)
@@ -212,3 +212,91 @@ class DirectoryTest(TestCase):
         assert len(results) > 0
         for s in results:
             assert s['media_url'] in domains
+
+
+class SearchSyntaxTest(TestCase):
+
+    START_DATE = dt.date(2024, 1, 1)
+    END_DATE = dt.date(2024, 1, 30)
+
+    def setUp(self):
+        self._mc_api_key = os.getenv("MC_API_TOKEN")
+        self._search = mediacloud.api.SearchApi(self._mc_api_key)
+
+    def _count_query(self, query: str) -> int:
+        return self._search.story_count(query=query, start_date=self.START_DATE, end_date=self.END_DATE,
+                                        collection_ids=[COLLECTION_US_NATIONAL])['relevant']
+
+    def test_title_search(self):
+        all_results = self._count_query(query="biden")
+        assert all_results > 0
+        title_results = self._count_query(query="article_title:biden")
+        assert title_results > 0
+        assert all_results >= title_results
+
+    def test_single_char_wildcard_search(self):
+        women_count = self._count_query(query="women")
+        assert women_count > 0
+        woman_count = self._count_query(query="woman")
+        assert woman_count > 0
+        wildcarded_count = self._count_query(query="wom?n")
+        assert wildcarded_count > 0
+        assert wildcarded_count >= women_count
+        assert wildcarded_count >= woman_count
+
+    def test_multiple_char_wildcard_search(self):
+        women_count = self._count_query(query="women")
+        assert women_count > 0
+        woman_count = self._count_query(query="woman")
+        assert woman_count > 0
+        wildcarded_count = self._count_query(query="wom*n")
+        assert wildcarded_count > 0
+        assert wildcarded_count >= women_count
+        assert wildcarded_count >= woman_count
+        wildcarded2_count = self._count_query(query="wom*")
+        assert wildcarded2_count > 0
+        assert wildcarded2_count >= women_count
+        assert wildcarded2_count >= woman_count
+
+    def test_or_search(self):
+        women_count = self._count_query(query="women")
+        assert women_count > 0
+        woman_count = self._count_query(query="woman")
+        assert woman_count > 0
+        ord_count = self._count_query(query="(woman OR women)")  # NOTE: this needs parentheses
+        assert ord_count >= women_count
+        assert ord_count >= woman_count
+
+    def test_and_search(self):
+        women_count = self._count_query(query="women")
+        assert women_count > 0
+        woman_count = self._count_query(query="woman")
+        assert woman_count > 0
+        anded_count = self._count_query(query="woman AND women")
+        assert anded_count <= women_count
+        assert anded_count <= woman_count
+
+    def test_proximity_search(self):
+        woman_count = self._count_query(query="woman")
+        killed_count = self._count_query(query="killed")
+        and_count = self._count_query(query="woman AND killed")
+        proximity_count = self._count_query(query='"woman killed"~10')
+        assert woman_count > and_count
+        assert killed_count > and_count
+        assert proximity_count < and_count
+
+    def test_default_search(self):
+        default_count = self._count_query(query="banana monkey")
+        and_count = self._count_query(query="banana AND monkey")
+        assert default_count > 0
+        assert and_count > 0
+        assert default_count == and_count
+
+    def test_negation_source(self):
+        all_count = self._count_query(query="gaza")
+        not_count = self._count_query(query="gaza NOT hamas")
+        minus_count = self._count_query(query="gaza -hamas")
+        assert all_count > 0
+        assert not_count > 0
+        assert not_count < all_count
+        assert minus_count == not_count
