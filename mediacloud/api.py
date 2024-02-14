@@ -1,6 +1,5 @@
 import datetime as dt
 import logging
-from multiprocessing.sharedctypes import Value
 from typing import Any, Dict, List, Optional, Union
 
 import requests
