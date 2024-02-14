@@ -6,7 +6,6 @@ import mediacloud.api
 
 COLLECTION_US_NATIONAL = 34412234
 AU_BROADCAST_COMPANY = 20775
-TOMORROW = dt.date.today() + dt.timedelta(days=1)
 TOMORROW_TIME = dt.datetime.today() + dt.timedelta(days=1)
 
 
@@ -118,37 +117,19 @@ class DirectoryTest(TestCase):
         # desc
         page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
                                           collection_ids=[COLLECTION_US_NATIONAL])
-        last_pub_date = TOMORROW
-        for story in page:
-            assert 'publish_date' in story
-            assert story['publish_date'] <= last_pub_date
-            last_pub_date = story['publish_date']
-        # asc
-        page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
-                                          collection_ids=[COLLECTION_US_NATIONAL], sort_order='asc')
-        a_long_time_ago = dt.date(2000, 1, 1)
-        last_pub_date = a_long_time_ago
-        for story in page:
-            assert 'publish_date' in story
-            assert story['publish_date'] >= last_pub_date
-            last_pub_date = story['publish_date']
-
-    def test_story_list_sort_field(self):
-        # publish_date
-        page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
-                                          collection_ids=[COLLECTION_US_NATIONAL])
-        last_date = TOMORROW
-        for story in page:
-            assert 'publish_date' in story
-            assert story['publish_date'] <= last_date
-            last_date = story['publish_date']
-        # indexed date
-        page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
-                                          collection_ids=[COLLECTION_US_NATIONAL], sort_field="indexed_date")
         last_date = TOMORROW_TIME
         for story in page:
             assert 'indexed_date' in story
             assert story['indexed_date'] <= last_date
+            last_date = story['indexed_date']
+        # asc
+        page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
+                                          collection_ids=[COLLECTION_US_NATIONAL], sort_order='asc')
+        a_long_time_ago = dt.datetime(2000, 1, 1, 0, 0, 0)
+        last_date = a_long_time_ago
+        for story in page:
+            assert 'indexed_date' in story
+            assert story['indexed_date'] >= last_date
             last_date = story['indexed_date']
 
     def test_search_by_indexed_date(self):
