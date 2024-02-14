@@ -1,5 +1,6 @@
 import datetime as dt
 import logging
+from multiprocessing.sharedctypes import Value
 from typing import Any, Dict, List, Optional, Union
 
 import requests
@@ -156,8 +157,13 @@ class SearchApi(BaseApi):
         results = self._query('search/story-list', params)
         for s in results['stories']:
             s['publish_date'] = dt.date.fromisoformat(s['publish_date'][:10]) if s['publish_date'] else None
-            s['indexed_date'] = dt.datetime.strptime(s['indexed_date'][:19], '%Y-%m-%d %H:%M:%S')\
-                if s['indexed_date'] else None
+            try:
+                s['indexed_date'] = dt.datetime.strptime(s['indexed_date'], '%Y-%m-%d %H:%M:%S.%f')\
+                    if s['indexed_date'] else None
+            # If indexed_date does not fit the %S.%f format, it will generate a ValueError
+            except ValueError:
+                s['indexed_date'] = dt.datetime.strptime(s['indexed_date'], '%Y-%m-%d %H:%M:%S')\
+                    if s['indexed_date'] else None
         return results['stories'], results['pagination_token']
 
     def story(self, story_id: str) -> Dict:
