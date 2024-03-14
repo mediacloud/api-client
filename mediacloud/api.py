@@ -115,7 +115,7 @@ class SearchApi(BaseApi):
                              collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],
                              platform: Optional[str] = None):
         params: Dict[Any, Any] = dict(start=start_date.isoformat(), end=end_date.isoformat(), q=query,
-                                      platform=self.PROVIDER)
+                                      platform=(platform or self.PROVIDER))
         if len(source_ids):
             params['ss'] = ",".join([str(sid) for sid in source_ids]),
         if len(collection_ids):
@@ -140,15 +140,13 @@ class SearchApi(BaseApi):
     def story_list(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
                    source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
                    expanded: Optional[bool] = None, pagination_token: Optional[str] = None,
-                   sort_field: Optional[str] = None, sort_order: Optional[str] = None,
+                   sort_order: Optional[str] = None,
                    page_size: Optional[int] = None) -> tuple[List[Dict], Optional[str]]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         if expanded:
             params['expanded'] = 1
         if pagination_token:
             params['pagination_token'] = pagination_token
-        if sort_field:
-            params['sort_field'] = sort_field
         if sort_order:
             params['sort_order'] = sort_order
         if page_size:
