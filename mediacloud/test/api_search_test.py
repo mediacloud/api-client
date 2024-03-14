@@ -17,6 +17,8 @@ class SearchTest(TestCase):
     def setUp(self):
         self._mc_api_key = os.getenv("MC_API_TOKEN")
         self._search = mediacloud.api.SearchApi(self._mc_api_key)
+        self._mc_api_admin_key = os.getenv("MC_API_ADMIN_TOKEN")
+        self._admin_search = mediacloud.api.SearchApi(self._mc_api_admin_key)
 
     def test_story_count(self):
         results = self._search.story_count(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
@@ -42,7 +44,7 @@ class SearchTest(TestCase):
 
     def test_story(self):
         # Note: Expected to fail right now
-        story_id = 'eebfb686618e34a9bc6e87e87e90c54b'  # not sure this is a valid id
+        story_id = '9f734354744a651e9b99e4fcd93ee9eaee12ed134ba74dcda13b30234f528535'
         story = self._search.story(story_id)
         assert 'id' in story
         assert story['id'] == story_id
@@ -103,12 +105,12 @@ class SearchTest(TestCase):
 
     def test_story_list_expanded(self):
         # note - requires staff API token
-        page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
-                                          collection_ids=[COLLECTION_US_NATIONAL])
+        page, _ = self._admin_search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
+                                                collection_ids=[COLLECTION_US_NATIONAL])
         for story in page:
             assert 'text' not in story
-        page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
-                                          expanded=True, collection_ids=[COLLECTION_US_NATIONAL])
+        page, _ = self._admin_search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
+                                                expanded=True, collection_ids=[COLLECTION_US_NATIONAL])
         for story in page:
             assert 'text' in story
             assert len(story['text']) > 0
