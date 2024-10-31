@@ -106,3 +106,13 @@ class DirectoryTest(TestCase):
                 break
             offset += limit
         assert len(feeds) > 0
+
+    def test_get_collection(self):
+        us_national_id = "34412234"
+        response = self._directory.collection(us_national_id)
+        assert response["name"] == "United States - National"
+
+    def test_get_source(self):
+        nyt_id = "1"
+        response = self._directory.source(nyt_id)
+        assert response["name"] == "nytimes.com"
