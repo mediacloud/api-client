@@ -1,7 +1,6 @@
 MediaCloud Python API Client
 ============================
 
-🚧 Under construction 🚧
 
 This is a python client for accessing the MediaCloud API v4. This allows you to perform cross-platform searches and
 also browse our collection/source/feed directory.
@@ -96,5 +95,5 @@ If you are interested in adding code to this module, first clone [the GitHub rep
 1. Run `pytest` to make sure all the test pass
 2. Update the version number in `pyproject.toml`
 3. Make a brief note in the `CHANGELOG.md` about what changes
-4. Run `flit build` to create an install package
-5. Run `flit publish` to upload it to PyPI
+4. Commit changes, and tag comimt with version number
+5. Push to main
