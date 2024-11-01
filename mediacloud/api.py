@@ -63,9 +63,9 @@ class DirectoryApi(BaseApi):
     PLATFORM_TWITTER = "twitter"
     PLATFORM_REDDIT = "reddit"
 
-    def collection(self, id_: int):
+    def collection(self, collection_id: int):
         
-        return self._query(f'sources/collections/{id_}/', None)
+        return self._query(f'sources/collections/{collection_id}/', None)
 
     def collection_list(self, platform: Optional[str] = None, name: Optional[str] = None,
                         limit: Optional[int] = 0, offset: Optional[int] = 0) -> Dict:
@@ -76,8 +76,8 @@ class DirectoryApi(BaseApi):
             params['platform'] = platform
         return self._query('sources/collections/', params)
 
-    def source(self, id_:int):
-        return self._query(f'sources/sources/{id_}/', None)
+    def source(self, source_id:int):
+        return self._query(f'sources/sources/{source_id}/', None)
 
     def source_list(self, platform: Optional[str] = None, name: Optional[str] = None,
                     collection_id: Optional[int] = None,
