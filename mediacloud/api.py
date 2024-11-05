@@ -113,7 +113,7 @@ class DirectoryApi(BaseApi):
         epoch_param(modified_before, 'modified_before')
         
         if return_details:
-            return self._query('sources/feeds/details/', params)
+            return {'results':self._query('sources/feeds/details/', params)['feeds']}
         
         return self._query('sources/feeds/', params)
 
