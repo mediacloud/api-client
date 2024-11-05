@@ -5,6 +5,9 @@ Version History
 Version 4
 ---------
 
+### v4.2.0
+* added new endpoint to retrieve individual collections and sources
+
 ### v4.1.3
 * fix indexed date parsing to ignore millies, which might be there or not
 
