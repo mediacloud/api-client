@@ -94,7 +94,7 @@ class DirectoryApi(BaseApi):
     def feed_list(self, source_id: Optional[int] = None,
                   modified_since: Optional[Union[dt.datetime, int, float]] = None,
                   modified_before: Optional[Union[dt.datetime, int, float]] = None,
-                  limit: Optional[int] = 0, offset: Optional[int] = 0) -> Dict:
+                  limit: Optional[int] = 0, offset: Optional[int] = 0, return_details=False) -> Dict:
         params: Dict[Any, Any] = dict(limit=limit, offset=offset)
         if source_id:
             params['source_id'] = source_id
@@ -111,7 +111,10 @@ class DirectoryApi(BaseApi):
 
         epoch_param(modified_since, 'modified_since')
         epoch_param(modified_before, 'modified_before')
-
+        
+        if return_details:
+            return self._query('sources/feeds/details/', params)
+        
         return self._query('sources/feeds/', params)
 
 
