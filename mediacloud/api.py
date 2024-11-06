@@ -68,12 +68,14 @@ class DirectoryApi(BaseApi):
         return self._query(f'sources/collections/{collection_id}/', None)
 
     def collection_list(self, platform: Optional[str] = None, name: Optional[str] = None,
-                        limit: Optional[int] = 0, offset: Optional[int] = 0) -> Dict:
+                        limit: Optional[int] = 0, offset: Optional[int] = 0, source_id: Optional[int] = None) -> Dict:
         params: Dict[Any, Any] = dict(limit=limit, offset=offset)
         if name:
             params['name'] = name
         if platform:
             params['platform'] = platform
+        if source_id:
+            params['source_id'] = source_id
         return self._query('sources/collections/', params)
 
     def source(self, source_id:int):
