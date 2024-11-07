@@ -5,6 +5,9 @@ Version History
 Version 4
 ---------
 
+### v4.3.0
+* extended collection_list and feed_list with more query options
+
 ### v4.2.0
 * added new endpoint to retrieve individual collections and sources
 
