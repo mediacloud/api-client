@@ -4,11 +4,18 @@ from typing import Any, Dict, List, Optional, Union
 
 import requests
 
+import importlib.metadata
+
 import mediacloud
 import mediacloud.error
 
 logger = logging.getLogger(__name__)
 
+##Identify the version of this package that's running
+try: 
+    VERSION = "v"+importlib.metadata.version('mediacloud')
+except importlib.metadata.PackageNotFoundError:
+    VERSION = "dev"
 
 class BaseApi:
 
@@ -19,6 +26,8 @@ class BaseApi:
 
     BASE_API_URL = "https://search.mediacloud.org/api/"
 
+    USER_AGENT_STRING = f"mediacloud {VERSION}"
+
     def __init__(self, auth_token: Optional[str] = None):
         if not auth_token:
             raise mediacloud.error.MCException("No api key set - nothing will work without this")
@@ -28,6 +37,8 @@ class BaseApi:
         self._session = requests.Session()
         self._session.headers.update({'Authorization': f'Token {self._auth_token}'})
         self._session.headers.update({'Accept': 'application/json'})
+        self._session.headers.update({"User-Agent":self.USER_AGENT_STRING})
+
 
     def user_profile(self) -> Dict:
         # :return: basic info about the current user, including their roles
