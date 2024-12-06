@@ -1,10 +1,10 @@
 import datetime as dt
+import importlib.metadata
 import logging
 from typing import Any, Dict, List, Optional, Union
 
 import requests
 
-import importlib.metadata
 
 import mediacloud
 import mediacloud.error
