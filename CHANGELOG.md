@@ -5,6 +5,9 @@ Version History
 Version 4
 ---------
 
+### v4.3.1
+* dependency upgrades, added USER_AGENT_STRING default
+
 ### v4.3.0
 * extended collection_list and feed_list with more query options
 
