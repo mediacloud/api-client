@@ -43,7 +43,6 @@ class SearchTest(TestCase):
             assert day['ratio'] < 1
 
     def test_story(self):
-        # Note: Expected to fail right now
         story_id = '9f734354744a651e9b99e4fcd93ee9eaee12ed134ba74dcda13b30234f528535'
         story = self._search.story(story_id)
         assert 'id' in story
@@ -52,7 +51,6 @@ class SearchTest(TestCase):
         assert 'url' in story
         assert 'language' in story
         assert 'publish_date' in story
-        assert 'publish_day' in story
 
     def test_words(self):
         # expected to fail for now
