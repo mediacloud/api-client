@@ -117,20 +117,22 @@ class SearchTest(TestCase):
         # desc
         page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
                                           collection_ids=[COLLECTION_US_NATIONAL])
-        last_date = TOMORROW_TIME
+        last_date = TOMORROW_TIME.replace(tzinfo=None)
         for story in page:
-            assert 'indexed_date' in story
-            assert story['indexed_date'] <= last_date
-            last_date = story['indexed_date']
+            assert 'indexed_date' in story, "indexed_date not in story"
+            indexed_date = story['indexed_date'].replace(tzinfo=None)  # Ensure offset-naive
+            assert indexed_date <= last_date, "indexed_date not in descending order"
+            last_date = indexed_date
         # asc
         page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
                                           collection_ids=[COLLECTION_US_NATIONAL], sort_order='asc')
         a_long_time_ago = dt.datetime(2000, 1, 1, 0, 0, 0)
-        last_date = a_long_time_ago
+        last_date = a_long_time_ago.replace(tzinfo=None)
         for story in page:
             assert 'indexed_date' in story
-            assert story['indexed_date'] >= last_date
-            last_date = story['indexed_date']
+            indexed_date = story['indexed_date'].replace(tzinfo=None)  # Ensure offset-naive
+            assert indexed_date >= last_date
+            last_date = indexed_date
 
     def test_search_by_indexed_date(self):
         # compare results with indexed_date clause to those without it
