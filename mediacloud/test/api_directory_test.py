@@ -1,5 +1,6 @@
 import datetime as dt
 import os
+import time
 from typing import Dict, List
 from unittest import TestCase
 
@@ -15,6 +16,7 @@ class DirectoryTest(TestCase):
     def setUp(self):
         self._mc_api_key = os.getenv("MC_API_TOKEN")
         self._directory = mediacloud.api.DirectoryApi(self._mc_api_key)
+        time.sleep(1)
 
     def test_collection_list_search(self):
         name_search = 'nigeria'
