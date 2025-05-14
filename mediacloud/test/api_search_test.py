@@ -19,7 +19,7 @@ class BaseSearchTest(TestCase):
         self._search = mediacloud.api.SearchApi(self._mc_api_key)
         self._mc_api_admin_key = os.getenv("MC_API_ADMIN_TOKEN")
         self._admin_search = mediacloud.api.SearchApi(self._mc_api_admin_key)
-        time.sleep(4)
+        time.sleep(30)
 
 
 class SearchAttentionTest(BaseSearchTest):
@@ -101,7 +101,7 @@ class SearchStoriesTest(BaseSearchTest):
         results1, next_page_token1 = self._search.story_list(query="weather", start_date=START_DATE,
                                                              end_date=END_DATE,
                                                              collection_ids=[COLLECTION_US_NATIONAL])
-        time.sleep(2)
+        time.sleep(31)
         assert len(results1) == 1000
         assert next_page_token1 is not None
         results2, next_page_token2 = self._search.story_list(query="weather", start_date=START_DATE,
@@ -118,6 +118,7 @@ class SearchStoriesTest(BaseSearchTest):
                                                 collection_ids=[COLLECTION_US_NATIONAL])
         for story in page:
             assert 'text' not in story
+        time.sleep(25)
         page, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
                                                 expanded=True, collection_ids=[COLLECTION_US_NATIONAL])
         for story in page:
@@ -135,7 +136,7 @@ class SearchStoriesTest(BaseSearchTest):
             assert indexed_date <= last_date, "indexed_date not in descending order"
             last_date = indexed_date
         # asc
-        time.sleep(2)
+        time.sleep(31)
         page, _ = self._search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
                                           collection_ids=[COLLECTION_US_NATIONAL], sort_order='asc')
         a_long_time_ago = dt.datetime(2000, 1, 1, 0, 0, 0)
