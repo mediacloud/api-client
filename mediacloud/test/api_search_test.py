@@ -103,6 +103,22 @@ class SearchTest(TestCase):
         assert next_page_token2 is not None
         assert next_page_token1 != next_page_token2
 
+    def test_random_sample(self):
+        sample_size = 10
+        # get sample
+        sample_results = self._search.story_sample(query="weather", start_date=self.START_DATE, limit=sample_size,
+                                                   end_date=self.END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
+        assert len(sample_results) == sample_size  # default length
+        # get regular results
+        list_results, _ = self._search.story_list(query="weather", start_date=self.START_DATE, page_size=sample_size,
+                                                  end_date=self.END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
+        assert len(list_results) == sample_size
+        # compare to assure difference
+        sample_ids = [s['id'] for s in sample_results]
+        list_ids = [s['id'] for s in list_results]
+        common_ids = set(sample_ids) & set(list_ids)
+        assert len(common_ids) < (float(sample_size) * 0.1)  # reasonable threshold just in case there is overlap
+
     def test_story_list_expanded(self):
         # note - requires staff API token
         page, _ = self._admin_search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
