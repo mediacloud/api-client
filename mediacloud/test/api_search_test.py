@@ -98,16 +98,16 @@ class SearchStoriesTest(BaseSearchTest):
             last_count = s['count']
 
     def test_story_list_paging(self):
-        results1, next_page_token1 = self._search.story_list(query="weather", start_date=START_DATE,
-                                                             end_date=END_DATE,
-                                                             collection_ids=[COLLECTION_US_NATIONAL])
+        results1, next_page_token1 = self._admin_search.story_list(query="weather", start_date=START_DATE,
+                                                                   end_date=END_DATE,
+                                                                   collection_ids=[COLLECTION_US_NATIONAL])
         time.sleep(31)
         assert len(results1) == 1000
         assert next_page_token1 is not None
-        results2, next_page_token2 = self._search.story_list(query="weather", start_date=START_DATE,
-                                                             end_date=END_DATE,
-                                                             collection_ids=[COLLECTION_US_NATIONAL],
-                                                             pagination_token=next_page_token1)
+        results2, next_page_token2 = self._admin_search.story_list(query="weather", start_date=START_DATE,
+                                                                   end_date=END_DATE,
+                                                                   collection_ids=[COLLECTION_US_NATIONAL],
+                                                                   pagination_token=next_page_token1)
         assert len(results2) == 1000
         assert next_page_token2 is not None
         assert next_page_token1 != next_page_token2
@@ -127,8 +127,8 @@ class SearchStoriesTest(BaseSearchTest):
 
     def test_story_list_sort_order(self):
         # desc
-        page, _ = self._search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
-                                          collection_ids=[COLLECTION_US_NATIONAL])
+        page, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
+                                                collection_ids=[COLLECTION_US_NATIONAL])
         last_date = TOMORROW_TIME.replace(tzinfo=None)
         for story in page:
             assert 'indexed_date' in story, "indexed_date not in story"
@@ -137,8 +137,8 @@ class SearchStoriesTest(BaseSearchTest):
             last_date = indexed_date
         # asc
         time.sleep(31)
-        page, _ = self._search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
-                                          collection_ids=[COLLECTION_US_NATIONAL], sort_order='asc')
+        page, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
+                                                collection_ids=[COLLECTION_US_NATIONAL], sort_order='asc')
         a_long_time_ago = dt.datetime(2000, 1, 1, 0, 0, 0)
         last_date = a_long_time_ago.replace(tzinfo=None)
         for story in page:
