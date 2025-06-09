@@ -185,11 +185,13 @@ class SearchApi(BaseApi):
 
     def story_sample(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
                      source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
-                     limit: Optional[int] = None) -> List[Dict]:
-        fields = ['indexed_date', 'publish_date', 'id', 'language', 'media_name', 'media_url', 'title', 'url', 'text']
+                     limit: Optional[int] = None, expanded=False) -> List[Dict]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         if limit:
             params['limit'] = limit
+        fields = ['indexed_date', 'publish_date', 'id', 'language', 'media_name', 'media_url', 'title', 'url']
+        if expanded:  # STILL UNSUPPORTED: admins can query full text if they choose to
+            fields.append('text')
         params['fields'] = fields  # gets passed down to ES in MC client
         results = self._query('search/sample', params)
         self._dates_str2objects(results['sample'])
