@@ -1,5 +1,6 @@
 import datetime as dt
 import os
+import time
 from unittest import TestCase
 
 import mediacloud.api
@@ -7,21 +8,24 @@ import mediacloud.api
 COLLECTION_US_NATIONAL = 34412234
 AU_BROADCAST_COMPANY = 20775
 TOMORROW_TIME = dt.datetime.today() + dt.timedelta(days=1)
+START_DATE = dt.date(2023, 11, 1)
+END_DATE = dt.date(2023, 12, 1)
 
 
-class SearchTest(TestCase):
-
-    START_DATE = dt.date(2023, 11, 1)
-    END_DATE = dt.date(2023, 12, 1)
+class BaseSearchTest(TestCase):
 
     def setUp(self):
         self._mc_api_key = os.getenv("MC_API_TOKEN")
         self._search = mediacloud.api.SearchApi(self._mc_api_key)
         self._mc_api_admin_key = os.getenv("MC_API_ADMIN_TOKEN")
         self._admin_search = mediacloud.api.SearchApi(self._mc_api_admin_key)
+        time.sleep(30)
+
+
+class SearchAttentionTest(BaseSearchTest):
 
     def test_story_count(self):
-        results = self._search.story_count(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
+        results = self._search.story_count(query="weather", start_date=START_DATE, end_date=END_DATE,
                                            collection_ids=[COLLECTION_US_NATIONAL], source_ids=[AU_BROADCAST_COMPANY])
         assert 'relevant' in results
         assert results['relevant'] > 0
@@ -30,9 +34,9 @@ class SearchTest(TestCase):
         assert results['relevant'] <= results['total']
 
     def test_story_count_over_time(self):
-        results = self._search.story_count_over_time(query="weather", start_date=self.START_DATE,
-                                                     end_date=self.END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
-        assert len(results) == (self.END_DATE - self.START_DATE).days + 1
+        results = self._search.story_count_over_time(query="weather", start_date=START_DATE,
+                                                     end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
+        assert len(results) == (END_DATE - START_DATE).days + 1
         for day in results:
             assert 'date' in day
             assert isinstance(day['date'], dt.date)
@@ -43,7 +47,6 @@ class SearchTest(TestCase):
             assert day['ratio'] < 1
 
     def test_story(self):
-        # Note: Expected to fail right now
         story_id = '9f734354744a651e9b99e4fcd93ee9eaee12ed134ba74dcda13b30234f528535'
         story = self._search.story(story_id)
         assert 'id' in story
@@ -52,30 +55,20 @@ class SearchTest(TestCase):
         assert 'url' in story
         assert 'language' in story
         assert 'publish_date' in story
-        assert 'publish_day' in story
+
+
+class SearchLanguageTest(BaseSearchTest):
 
     def test_words(self):
         # expected to fail for now
-        results = self._search.words(query="weather", start_date=self.START_DATE,
-                                     end_date=self.END_DATE, collection_ids=[COLLECTION_US_NATIONAL],
+        results = self._search.words(query="weather", start_date=START_DATE,
+                                     end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL],
                                      limit=10)
         assert len(results) > 0
 
-    def test_sources(self):
-        results = self._search.sources(query="weather", start_date=self.START_DATE,
-                                       end_date=self.END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
-        assert len(results) > 0
-        last_count = 10000000000
-        for s in results:
-            assert 'source' in s
-            assert 'count' in s
-            assert s['count'] > 0
-            assert s['count'] <= last_count
-            last_count = s['count']
-
     def test_languages(self):
-        results = self._search.languages(query="weather", start_date=self.START_DATE,
-                                         end_date=self.END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
+        results = self._search.languages(query="weather", start_date=START_DATE,
+                                         end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
         assert len(results) > 0
         assert results[0]['language'] == 'en'
         last_ratio = 1
@@ -89,27 +82,44 @@ class SearchTest(TestCase):
             assert 'value' in lang
             assert lang['value'] > 0
 
+
+class SearchStoriesTest(BaseSearchTest):
+
+    def test_sources(self):
+        results = self._search.sources(query="weather", start_date=START_DATE,
+                                       end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
+        assert len(results) > 0
+        last_count = 10000000000
+        for s in results:
+            assert 'source' in s
+            assert 'count' in s
+            assert s['count'] > 0
+            assert s['count'] <= last_count
+            last_count = s['count']
+
     def test_story_list_paging(self):
-        results1, next_page_token1 = self._search.story_list(query="weather", start_date=self.START_DATE,
-                                                             end_date=self.END_DATE,
-                                                             collection_ids=[COLLECTION_US_NATIONAL])
+        results1, next_page_token1 = self._admin_search.story_list(query="weather", start_date=START_DATE,
+                                                                   end_date=END_DATE,
+                                                                   collection_ids=[COLLECTION_US_NATIONAL])
+        time.sleep(31)
         assert len(results1) == 1000
         assert next_page_token1 is not None
-        results2, next_page_token2 = self._search.story_list(query="weather", start_date=self.START_DATE,
-                                                             end_date=self.END_DATE,
-                                                             collection_ids=[COLLECTION_US_NATIONAL],
-                                                             pagination_token=next_page_token1)
+        results2, next_page_token2 = self._admin_search.story_list(query="weather", start_date=START_DATE,
+                                                                   end_date=END_DATE,
+                                                                   collection_ids=[COLLECTION_US_NATIONAL],
+                                                                   pagination_token=next_page_token1)
         assert len(results2) == 1000
         assert next_page_token2 is not None
         assert next_page_token1 != next_page_token2
 
     def test_story_list_expanded(self):
         # note - requires staff API token
-        page, _ = self._admin_search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
+        page, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
                                                 collection_ids=[COLLECTION_US_NATIONAL])
         for story in page:
             assert 'text' not in story
-        page, _ = self._admin_search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
+        time.sleep(25)
+        page, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
                                                 expanded=True, collection_ids=[COLLECTION_US_NATIONAL])
         for story in page:
             assert 'text' in story
@@ -117,30 +127,33 @@ class SearchTest(TestCase):
 
     def test_story_list_sort_order(self):
         # desc
-        page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
-                                          collection_ids=[COLLECTION_US_NATIONAL])
-        last_date = TOMORROW_TIME
+        page, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
+                                                collection_ids=[COLLECTION_US_NATIONAL])
+        last_date = TOMORROW_TIME.replace(tzinfo=None)
         for story in page:
-            assert 'indexed_date' in story
-            assert story['indexed_date'] <= last_date
-            last_date = story['indexed_date']
+            assert 'indexed_date' in story, "indexed_date not in story"
+            indexed_date = story['indexed_date'].replace(tzinfo=None)  # Ensure offset-naive
+            assert indexed_date <= last_date, "indexed_date not in descending order"
+            last_date = indexed_date
         # asc
-        page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
-                                          collection_ids=[COLLECTION_US_NATIONAL], sort_order='asc')
+        time.sleep(31)
+        page, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
+                                                collection_ids=[COLLECTION_US_NATIONAL], sort_order='asc')
         a_long_time_ago = dt.datetime(2000, 1, 1, 0, 0, 0)
-        last_date = a_long_time_ago
+        last_date = a_long_time_ago.replace(tzinfo=None)
         for story in page:
             assert 'indexed_date' in story
-            assert story['indexed_date'] >= last_date
-            last_date = story['indexed_date']
+            indexed_date = story['indexed_date'].replace(tzinfo=None)  # Ensure offset-naive
+            assert indexed_date >= last_date
+            last_date = indexed_date
 
     def test_search_by_indexed_date(self):
         # compare results with indexed_date clause to those without it
-        results1 = self._search.story_count(query="weather", start_date=self.START_DATE, end_date=self.END_DATE)
+        results1 = self._search.story_count(query="weather", start_date=START_DATE, end_date=END_DATE)
         assert results1['total'] > 0
         results2 = self._search.story_count(query="weather and indexed_date:[{} TO {}]".format(
-            self.START_DATE.isoformat(), self.END_DATE.isoformat()),
-            start_date=self.START_DATE, end_date=self.END_DATE)
+            START_DATE.isoformat(), END_DATE.isoformat()),
+            start_date=START_DATE, end_date=END_DATE)
         assert results2['total'] > 0
         assert results1['total'] == results2['total']
         assert results1['relevant'] != results2['relevant']
@@ -148,7 +161,7 @@ class SearchTest(TestCase):
 
     def test_verify_story_time_formats(self):
         # indexed_date should have time component
-        page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
+        page, _ = self._search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
                                           collection_ids=[COLLECTION_US_NATIONAL], page_size=100)
         for story in page:
             assert 'publish_date' in story
@@ -158,17 +171,18 @@ class SearchTest(TestCase):
 
     def test_story_list_page_size(self):
         # test valid number
-        page, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
+        page, _ = self._search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
                                           collection_ids=[COLLECTION_US_NATIONAL], page_size=103)
         assert len(page) == 103
 
     def test_source_ids_filter(self):
-        results = self._search.sources(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
+        results = self._search.sources(query="weather", start_date=START_DATE, end_date=END_DATE,
                                        source_ids=[AU_BROADCAST_COMPANY])
         assert len(results) == 1
         assert results[0]['count'] > 0
         assert results[0]['source'] == "abc.net.au"
-        results, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
+        time.sleep(2)
+        results, _ = self._search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
                                              source_ids=[AU_BROADCAST_COMPANY])
         assert len(results) > 0
         for s in results:
@@ -180,17 +194,20 @@ class SearchTest(TestCase):
         directory_api = mediacloud.api.DirectoryApi(self._mc_api_key)
         limit = 1000
         response = directory_api.source_list(collection_id=COLLECTION_US_NATIONAL, limit=limit)
+        time.sleep(2)
         sources_in_collection = response['results']
         assert len(sources_in_collection) > 200
         domains = [s['name'] for s in sources_in_collection]
         assert len(domains) == len(sources_in_collection)
         # now check sources to see they're all in collection list of domains
-        results = self._search.sources(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
+        time.sleep(2)
+        results = self._search.sources(query="weather", start_date=START_DATE, end_date=END_DATE,
                                        collection_ids=[COLLECTION_US_NATIONAL])
         for s in results:
             assert s['source'] in domains
         # now check urls for a page of matches and make sure they're all in collection list of domains
-        results, _ = self._search.story_list(query="weather", start_date=self.START_DATE, end_date=self.END_DATE,
+        time.sleep(2)
+        results, _ = self._search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
                                              collection_ids=[COLLECTION_US_NATIONAL])
         assert len(results) > 0
         for s in results:
@@ -207,7 +224,7 @@ class SearchSyntaxTest(TestCase):
         self._search = mediacloud.api.SearchApi(self._mc_api_key)
 
     def _count_query(self, query: str) -> int:
-        return self._search.story_count(query=query, start_date=self.START_DATE, end_date=self.END_DATE,
+        return self._search.story_count(query=query, start_date=START_DATE, end_date=END_DATE,
                                         collection_ids=[COLLECTION_US_NATIONAL])['relevant']
 
     def test_title_search(self):

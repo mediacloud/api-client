@@ -29,6 +29,7 @@ jobs:
         flit install
     - name: Test with pytest
       env:
+        MC_API_ADMIN_TOKEN: ${{ secrets.MC_API_ADMIN_TOKEN }}
         MC_API_TOKEN: ${{ secrets.MC_API_TOKEN }}
       run: |
         pytest
