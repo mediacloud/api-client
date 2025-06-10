@@ -118,6 +118,7 @@ class SearchStoriesTest(BaseSearchTest):
             sample_results = self._search.story_sample(query="weather", start_date=START_DATE, limit=sample_size,
                                                        end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
             assert len(sample_results) == sample_size  # default length
+            time.sleep(31)
             # get regular results
             list_results, _ = self._search.story_list(query="weather", start_date=START_DATE, page_size=sample_size,
                                                       end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
