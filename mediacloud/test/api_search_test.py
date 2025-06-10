@@ -112,6 +112,29 @@ class SearchStoriesTest(BaseSearchTest):
         assert next_page_token2 is not None
         assert next_page_token1 != next_page_token2
 
+    def test_random_sample(self):
+        def _test_random_sample(sample_size: int):
+            # get sample
+            sample_results = self._admin_search.story_sample(query="weather", start_date=START_DATE, limit=sample_size,
+                                                             end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
+            assert len(sample_results) == sample_size  # default length
+            # time.sleep(31)
+            # get regular results
+            list_results, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, page_size=sample_size,
+                                                            end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
+            assert len(list_results) == sample_size
+            # compare to assure difference
+            sample_ids = [s['id'] for s in sample_results]
+            list_ids = [s['id'] for s in list_results]
+            common_ids = set(sample_ids) & set(list_ids)
+            assert len(common_ids) < (float(sample_size) * 0.1)  # reasonable threshold just in case there is overlap
+            for s in sample_results:
+                assert 'title' in s.keys()
+                assert 'text' not in s.keys()
+        _test_random_sample(934)
+        _test_random_sample(123)
+        # TO DO: add admin test that passed in `expanded=True` and verifies `text` is in returned item properties
+
     def test_story_list_expanded(self):
         # note - requires staff API token
         page, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,

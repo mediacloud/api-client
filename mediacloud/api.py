@@ -5,17 +5,17 @@ from typing import Any, Dict, List, Optional, Union
 
 import requests
 
-
 import mediacloud
 import mediacloud.error
 
 logger = logging.getLogger(__name__)
 
-##Identify the version of this package that's running
-try: 
-    VERSION = "v"+importlib.metadata.version('mediacloud')
+# Identify the version of this package that's running
+try:
+    VERSION = "v" + importlib.metadata.version('mediacloud')
 except importlib.metadata.PackageNotFoundError:
     VERSION = "dev"
+
 
 class BaseApi:
 
@@ -37,8 +37,7 @@ class BaseApi:
         self._session = requests.Session()
         self._session.headers.update({'Authorization': f'Token {self._auth_token}'})
         self._session.headers.update({'Accept': 'application/json'})
-        self._session.headers.update({"User-Agent":self.USER_AGENT_STRING})
-
+        self._session.headers.update({"User-Agent": self.USER_AGENT_STRING})
 
     def user_profile(self) -> Dict:
         # :return: basic info about the current user, including their roles
@@ -75,7 +74,7 @@ class DirectoryApi(BaseApi):
     PLATFORM_REDDIT = "reddit"
 
     def collection(self, collection_id: int):
-        
+
         return self._query(f'sources/collections/{collection_id}/', None)
 
     def collection_list(self, platform: Optional[str] = None, name: Optional[str] = None,
@@ -89,7 +88,7 @@ class DirectoryApi(BaseApi):
             params['source_id'] = source_id
         return self._query('sources/collections/', params)
 
-    def source(self, source_id:int):
+    def source(self, source_id: int):
         return self._query(f'sources/sources/{source_id}/', None)
 
     def source_list(self, platform: Optional[str] = None, name: Optional[str] = None,
@@ -124,10 +123,10 @@ class DirectoryApi(BaseApi):
 
         epoch_param(modified_since, 'modified_since')
         epoch_param(modified_before, 'modified_before')
-        
+
         if return_details:
-            return {'results':self._query('sources/feeds/details/', params)['feeds']}
-        
+            return {'results': self._query('sources/feeds/details/', params)['feeds']}
+
         return self._query('sources/feeds/', params)
 
 
@@ -175,10 +174,28 @@ class SearchApi(BaseApi):
         if page_size:
             params['page_size'] = page_size
         results = self._query('search/story-list', params)
-        for s in results['stories']:
+        self._dates_str2objects(results['stories'])
+        return results['stories'], results['pagination_token']
+
+    def _dates_str2objects(self, stories: List[Dict]):
+        # _in place_ translation from ES date str to python data/datetime objects to save memory
+        for s in stories:
             s['publish_date'] = dt.date.fromisoformat(s['publish_date'][:10]) if s['publish_date'] else None
             s['indexed_date'] = dt.datetime.fromisoformat(s['indexed_date']) if s['indexed_date'] else None
-        return results['stories'], results['pagination_token']
+
+    def story_sample(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
+                     source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
+                     limit: Optional[int] = None, expanded=False) -> List[Dict]:
+        params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
+        if limit:
+            params['limit'] = limit
+        fields = ['indexed_date', 'publish_date', 'id', 'language', 'media_name', 'media_url', 'title', 'url']
+        if expanded:  # STILL UNSUPPORTED: admins can query full text if they choose to
+            fields.append('text')
+        params['fields'] = fields  # gets passed down to ES in MC client
+        results = self._query('search/sample', params)
+        self._dates_str2objects(results['sample'])
+        return results['sample']
 
     def story(self, story_id: str) -> Dict:
         params = dict(storyId=story_id, platform=self.PROVIDER)
