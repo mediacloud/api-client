@@ -5,6 +5,9 @@ Version History
 Version 4
 ---------
 
+### v4.4.0
+* support new story_sample endpoint for retrieving up to 1000 random stories matching a query
+
 ### v4.3.1
 * dependency upgrades, added USER_AGENT_STRING default
 

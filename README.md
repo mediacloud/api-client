@@ -95,5 +95,5 @@ If you are interested in adding code to this module, first clone [the GitHub rep
 1. Run `pytest` to make sure all the test pass
 2. Update the version number in `pyproject.toml`
 3. Make a brief note in the `CHANGELOG.md` about what changes
-4. Commit changes, and tag comimt with version number
+4. Commit changes, and tag commit with version number
 5. Push to main
