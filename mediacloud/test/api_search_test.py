@@ -115,13 +115,13 @@ class SearchStoriesTest(BaseSearchTest):
     def test_random_sample(self):
         def _test_random_sample(sample_size: int):
             # get sample
-            sample_results = self._search.story_sample(query="weather", start_date=START_DATE, limit=sample_size,
-                                                       end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
+            sample_results = self._admin_search.story_sample(query="weather", start_date=START_DATE, limit=sample_size,
+                                                             end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
             assert len(sample_results) == sample_size  # default length
-            time.sleep(31)
+            # time.sleep(31)
             # get regular results
-            list_results, _ = self._search.story_list(query="weather", start_date=START_DATE, page_size=sample_size,
-                                                      end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
+            list_results, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, page_size=sample_size,
+                                                            end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
             assert len(list_results) == sample_size
             # compare to assure difference
             sample_ids = [s['id'] for s in sample_results]
