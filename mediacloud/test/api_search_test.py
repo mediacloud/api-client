@@ -2,7 +2,7 @@ import datetime as dt
 import os
 import time
 from unittest import TestCase
-
+import pytest
 import mediacloud.api
 
 COLLECTION_US_NATIONAL = 34412234
@@ -323,3 +323,26 @@ class SearchSyntaxTest(TestCase):
         assert not_count > 0
         assert not_count < all_count
         assert minus_count == not_count
+
+class SearchErrorHandlingTest(TestCase):
+    #New test cases for how the api handles bad input and errors from the server. 
+
+    START_DATE = dt.date(2024, 1, 1)
+    END_DATE = dt.date(2024, 1, 30)
+    START_DATETIME = dt.datetime(2024, 1, 1)
+    END_DATETIME = dt.datetime(2024, 1, 30)
+
+    def setUp(self):
+        self._mc_api_key = os.getenv("MC_API_TOKEN")
+        self._search = mediacloud.api.SearchApi(self._mc_api_key)
+
+    def test_datetime(self):
+        query = "biden"
+        result_via_date = self._search.story_count(query=query, start_date=self.START_DATE, end_date=self.END_DATE,
+                                        collection_ids=[COLLECTION_US_NATIONAL])['relevant']
+
+        with pytest.warns(UserWarning):
+            result_via_datetime = self._search.story_count(query=query, start_date=self.START_DATETIME, end_date=self.END_DATETIME,
+                                            collection_ids=[COLLECTION_US_NATIONAL])['relevant']
+
+        assert result_via_date == result_via_datetime
