@@ -2,7 +2,7 @@ import datetime as dt
 import importlib.metadata
 import logging
 from typing import Any, Dict, List, Optional, Union
-import warning  
+import warnings
 
 import requests
 
@@ -140,11 +140,11 @@ class SearchApi(BaseApi):
 
         if isinstance(start_date, dt.datetime):
             start_date = start_date.date()
-            warning.warn("start_date was passed as datetime, but expected as date, and has been recast")
+            warnings.warn("start_date was passed as datetime, but expected as date, and has been recast")
 
         if isinstance(end_date, dt.datetime):
             end_date = end_date.date()
-            warning.warn("end_date was passed as datetime, but expected as date, and has been recast")
+            warnings.warn("end_date was passed as datetime, but expected as date, and has been recast")
 
 
         params: Dict[Any, Any] = dict(start=start_date.isoformat(), end=end_date.isoformat(), q=query,
