@@ -62,9 +62,11 @@ class BaseApi:
             r = self._session.post(endpoint_url, json=params, timeout=self.TIMEOUT_SECS)
         else:
             raise RuntimeError(f"Unsupported method of '{method}'")
-        if r.status_code != 200:
-            raise RuntimeError(f"API Server Error {r.status_code}. Params: {params}")
+        if r.status_code != 200: 
+            message = r.json()["note"]
+            raise RuntimeError(f"API Server Error {r.status_code}. MESSAGE: {message}. PARAMS: {params}")
         return r.json()
+
 
 
 class DirectoryApi(BaseApi):
