@@ -7,6 +7,12 @@ class MCException(Exception):
         self.message = message
         self.status_code = status_code
 
+class APIResponseError(RuntimeError):
+    def __init__(self, response, params, data):
+        self.response = response
+        self.params = params
+        self.data = data
+        super().__init__(f"API Server Error {response.status_code}. MESSAGE: {data.get('note')}. PARAMS: {params}")
 
 def deprecated(func):
     # This is a decorator which can be used to mark functions as deprecated. It will result in a

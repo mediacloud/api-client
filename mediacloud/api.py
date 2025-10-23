@@ -63,8 +63,8 @@ class BaseApi:
         else:
             raise RuntimeError(f"Unsupported method of '{method}'")
         if r.status_code != 200: 
-            message = r.json()["note"]
-            raise RuntimeError(f"API Server Error {r.status_code}. MESSAGE: {message}. PARAMS: {params}")
+            raise mediacloud.error.APIResponseError(r, params, r.json())
+            
         return r.json()
 
 
