@@ -2,6 +2,7 @@ import datetime as dt
 import importlib.metadata
 import logging
 from typing import Any, Dict, List, Optional, Union
+import warnings
 
 import requests
 
@@ -61,9 +62,11 @@ class BaseApi:
             r = self._session.post(endpoint_url, json=params, timeout=self.TIMEOUT_SECS)
         else:
             raise RuntimeError(f"Unsupported method of '{method}'")
-        if r.status_code != 200:
-            raise RuntimeError(f"API Server Error {r.status_code}. Params: {params}")
+        if r.status_code != 200: 
+            raise mediacloud.error.APIResponseError(r, params, r.json())
+            
         return r.json()
+
 
 
 class DirectoryApi(BaseApi):
@@ -136,6 +139,16 @@ class SearchApi(BaseApi):
     def _prep_default_params(self, query: str, start_date: dt.date, end_date: dt.date,
                              collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],
                              platform: Optional[str] = None):
+
+        if isinstance(start_date, dt.datetime):
+            start_date = start_date.date()
+            warnings.warn("start_date was passed as datetime, but expected as date, and has been recast")
+
+        if isinstance(end_date, dt.datetime):
+            end_date = end_date.date()
+            warnings.warn("end_date was passed as datetime, but expected as date, and has been recast")
+
+
         params: Dict[Any, Any] = dict(start=start_date.isoformat(), end=end_date.isoformat(), q=query,
                                       platform=(platform or self.PROVIDER))
         if len(source_ids):
