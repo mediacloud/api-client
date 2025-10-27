@@ -5,6 +5,9 @@ Version History
 Version 4
 ---------
 
+### v4.5.0
+* Utilize new sever features to show detailed error messages on 400 responses, automatically recast datetimes where relevant
+
 ### v4.4.0
 * support new story_sample endpoint for retrieving up to 1000 random stories matching a query
 
