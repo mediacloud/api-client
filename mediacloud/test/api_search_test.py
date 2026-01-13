@@ -2,7 +2,9 @@ import datetime as dt
 import os
 import time
 from unittest import TestCase
+
 import pytest
+
 import mediacloud.api
 
 COLLECTION_US_NATIONAL = 34412234
@@ -236,6 +238,19 @@ class SearchStoriesTest(BaseSearchTest):
         for s in results:
             assert s['media_url'] in domains
 
+    def test_stories_by_source_week(self):
+        results = self._search.stories_by_source_week(query="tariff AND Trump",
+                                                      start_date=dt.date(2025, 1, 1),
+                                                      end_date=dt.date(2025, 12, 31),
+                                                      collection_ids=[262985236])
+        assert len(results) > 0
+        for entry in results:
+            assert 'media_name' in entry
+            assert 'week' in entry
+            assert 'matching_stories' in entry
+            assert 'total_stories' in entry
+            assert 'ratio' in entry
+
 
 class SearchSyntaxTest(TestCase):
 
@@ -324,8 +339,9 @@ class SearchSyntaxTest(TestCase):
         assert not_count < all_count
         assert minus_count == not_count
 
+
 class SearchErrorHandlingTest(TestCase):
-    #New test cases for how the api handles bad input and errors from the server. 
+    # New test cases for how the api handles bad input and errors from the server.
 
     START_DATE = dt.date(2024, 1, 1)
     END_DATE = dt.date(2024, 1, 30)
@@ -339,10 +355,10 @@ class SearchErrorHandlingTest(TestCase):
     def test_datetime(self):
         query = "biden"
         result_via_date = self._search.story_count(query=query, start_date=self.START_DATE, end_date=self.END_DATE,
-                                        collection_ids=[COLLECTION_US_NATIONAL])['relevant']
+                                                   collection_ids=[COLLECTION_US_NATIONAL])['relevant']
 
         with pytest.warns(UserWarning):
             result_via_datetime = self._search.story_count(query=query, start_date=self.START_DATETIME, end_date=self.END_DATETIME,
-                                            collection_ids=[COLLECTION_US_NATIONAL])['relevant']
+                                                           collection_ids=[COLLECTION_US_NATIONAL])['relevant']
 
         assert result_via_date == result_via_datetime

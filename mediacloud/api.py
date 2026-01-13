@@ -1,8 +1,8 @@
 import datetime as dt
 import importlib.metadata
 import logging
-from typing import Any, Dict, List, Optional, Union
 import warnings
+from typing import Any, Dict, List, Optional, Union
 
 import requests
 
@@ -62,11 +62,10 @@ class BaseApi:
             r = self._session.post(endpoint_url, json=params, timeout=self.TIMEOUT_SECS)
         else:
             raise RuntimeError(f"Unsupported method of '{method}'")
-        if r.status_code != 200: 
+        if r.status_code != 200:
             raise mediacloud.error.APIResponseError(r, params, r.json())
-            
-        return r.json()
 
+        return r.json()
 
 
 class DirectoryApi(BaseApi):
@@ -148,7 +147,6 @@ class SearchApi(BaseApi):
             end_date = end_date.date()
             warnings.warn("end_date was passed as datetime, but expected as date, and has been recast")
 
-
         params: Dict[Any, Any] = dict(start=start_date.isoformat(), end=end_date.isoformat(), q=query,
                                       platform=(platform or self.PROVIDER))
         if len(source_ids):
@@ -171,6 +169,13 @@ class SearchApi(BaseApi):
         for d in results['count_over_time']['counts']:
             d['date'] = dt.date.fromisoformat(d['date'][:10])
         return results['count_over_time']['counts']
+
+    def stories_by_source_week(self, query: str, start_date: dt.date, end_date: dt.date,
+                               collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],
+                               platform: Optional[str] = None) -> List[Dict]:
+        params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
+        results = self._query('search/count-by-source-week', params)
+        return results['source-week-attention']
 
     def story_list(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
                    source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
