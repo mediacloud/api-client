@@ -5,6 +5,9 @@ Version History
 Version 4
 ---------
 
+### v4.6.0
+* Add support for new stories_by_source_week 2d aggregation endpoint
+
 ### v4.5.0
 * Utilize new sever features to show detailed error messages on 400 responses, automatically recast datetimes where relevant
 
