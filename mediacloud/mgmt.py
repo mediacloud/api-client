@@ -44,7 +44,7 @@ class DirectoryManagementApi(BaseApi):  # XXX maybe extend DirectoryApi???
         helper for collection_{create,update}
         """
         return self._params("collection", kws,
-                            ['name', 'note', 'public', 'featured', 'managed', 'monitored'])
+                            ['name', 'notes', 'public', 'featured', 'managed', 'monitored'])
 
     def collection_create(self, **kwargs) -> dict:
         params = self._collection_params(kwargs)
@@ -52,8 +52,15 @@ class DirectoryManagementApi(BaseApi):  # XXX maybe extend DirectoryApi???
             raise ValueError("collection_create must have 'name'")
         return self._query('sources/collections/', params, "POST")
 
+    def collection_copy(self, *, collection_id: int, name: str) -> dict:
+        # name defaults to "original name (copy)", but be fussy:
+        if not name:
+            raise ValueError("collection_copy must have 'name'")
+        params = {'collection_id': collection_id, 'name': name}
+        return self._query('sources/collections/copy-collection/', params, "POST")
+
     def collection_update(self, *, collection_id: int, **kwargs) -> dict:
-        params = self._collection_params(**kwargs)
+        params = self._collection_params(kwargs)
         if not params:
             raise ValueError("no parameters for collection_update?")
         return self._query(f'sources/collections/{collection_id}/', params, "PATCH")
@@ -61,6 +68,15 @@ class DirectoryManagementApi(BaseApi):  # XXX maybe extend DirectoryApi???
     # for testing/cleanup:
     def collection_delete(self, collection_id: int) -> dict:
         return self._query(f'sources/collections/{collection_id}/', None, "DELETE")
+
+    def collection_source_list(self, *, collection_id: int) -> list[dict]:
+        """
+        returns list of source objects for a collection
+        """
+        # XXX should do pagination!!!!!!!
+        ret = self._query(f'sources/sources/?collection_id={collection_id}', None, "GET")
+        # returns {'count': n, 'next': ..., 'previous': ..., 'results': [{...}, ...]}
+        return ret['results']
 
     ################ SourcesViewSet
 
@@ -84,6 +100,10 @@ class DirectoryManagementApi(BaseApi):  # XXX maybe extend DirectoryApi???
         params = self._source_params(kwargs)
         if not params:
             raise ValueError("no parameters for source_update?")
+        params['id'] = source_id
+        # currently causes Internal Server Error and <Response [500]> returned with body:
+        # {"detail":"{'homepage': [ErrorDetail(string='This field is required.', code='required')]}"}
+        # which isn't what I expect from "PATCH"!!!
         return self._query(f'sources/sources/{source_id}/', params, "PATCH")
 
     # for testing/cleanup:
@@ -92,16 +112,12 @@ class DirectoryManagementApi(BaseApi):  # XXX maybe extend DirectoryApi???
 
     ################ SourcesCollectionsViewSet
 
-    def source_collection_list(self, *,
-                               source_id: int | None = None,
-                               collection_id: int | None = None) -> dict:
-        if source_id and collection_id:
-            raise ValueError("source_collection_list got both source_id and collection_id")
-        if source_id:
-            endpoint = f'sources/sources-collections/{source_id}/'
-        else:
-            endpoint = f'sources/sources-collections/{collection_id}/?collection=1'  # XXX untested
-        return self._query(endpoint, None, "GET")
+    def source_collection_list(self, *, source_id: int) -> list[dict]:
+        """
+        returns list of collection objects for a source
+        """
+        ret = self._query(f'sources/sources-collections/{source_id}/', None, "GET")
+        return ret['collections']
 
     # mcweb sourcesCollectionsApi.js calls this createSourceCollectionAssociation
     def source_collection_create(self, *, source_id: int, collection_id: int) -> dict:

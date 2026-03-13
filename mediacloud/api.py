@@ -66,7 +66,7 @@ class BaseApi:
             return self._session.patch(endpoint_url, json=params, timeout=self.TIMEOUT_SECS)
         else:
             raise RuntimeError(f"Unsupported method of '{method}'")
-        if r.status_code // 100 != 2:
+        if r.status_code // 100 != 2:  # create operations return 201
             raise mediacloud.error.APIResponseError(r, params, r.json())
 
         return r.json()
