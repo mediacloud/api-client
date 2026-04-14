@@ -128,4 +128,8 @@ class DirectoryManagementApi(BaseApi):  # XXX maybe extend DirectoryApi???
     # XXX endpoint seems to take collection=bool query parameter??
     # (if not set to true, expects collection_id parameter??)
     def source_collection_delete(self, *, source_id: int, collection_id: int) -> dict:
-        return self._query(f'sources/sources-collections/{source_id}/?collection_id={collection_id}', "DELETE")
+        return self._query(
+            f'sources/sources-collections/{source_id}/?collection_id={collection_id}',
+            None,
+            "DELETE",
+        )
