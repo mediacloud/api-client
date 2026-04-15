@@ -8,6 +8,20 @@ import requests
 
 import mediacloud
 import mediacloud.error
+from mediacloud.types import (
+    Collection,
+    CountOverTimePoint,
+    JSONObj,
+    LanguageCount,
+    OffsetPage,
+    PaginationToken,
+    Source,
+    SourceCount,
+    SourceWeekAttention,
+    Story,
+    StoryCount,
+    VersionInfo,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -40,18 +54,18 @@ class BaseApi:
         self._session.headers.update({'Accept': 'application/json'})
         self._session.headers.update({"User-Agent": self.USER_AGENT_STRING})
 
-    def user_profile(self) -> Dict:
+    def user_profile(self) -> JSONObj:
         # :return: basic info about the current user, including their roles
         return self._query('auth/profile')
 
-    def version(self) -> Dict:
+    def version(self) -> VersionInfo:
         """
         returns dict with (at least):
         GIT_REV, now (float epoch time), version
         """
         return self._query('version')
 
-    def _query(self, endpoint: str, params: Optional[Dict] = None, method: str = 'GET') -> Dict:
+    def _query(self, endpoint: str, params: Optional[Dict] = None, method: str = 'GET') -> JSONObj:
         """
         Centralize making the actual queries here for easy maintenance and testing of HTTP comms
         """
@@ -75,12 +89,12 @@ class DirectoryApi(BaseApi):
     PLATFORM_TWITTER = "twitter"
     PLATFORM_REDDIT = "reddit"
 
-    def collection(self, collection_id: int):
+    def collection(self, collection_id: int) -> Collection:
 
         return self._query(f'sources/collections/{collection_id}/', None)
 
     def collection_list(self, platform: Optional[str] = None, name: Optional[str] = None,
-                        limit: Optional[int] = 0, offset: Optional[int] = 0, source_id: Optional[int] = None) -> Dict:
+                        limit: Optional[int] = 0, offset: Optional[int] = 0, source_id: Optional[int] = None) -> OffsetPage:
         params: Dict[Any, Any] = dict(limit=limit, offset=offset)
         if name:
             params['name'] = name
@@ -90,12 +104,12 @@ class DirectoryApi(BaseApi):
             params['source_id'] = source_id
         return self._query('sources/collections/', params)
 
-    def source(self, source_id: int):
+    def source(self, source_id: int) -> Source:
         return self._query(f'sources/sources/{source_id}/', None)
 
     def source_list(self, platform: Optional[str] = None, name: Optional[str] = None,
                     collection_id: Optional[int] = None,
-                    limit: Optional[int] = 0, offset: Optional[int] = 0) -> Dict:
+                    limit: Optional[int] = 0, offset: Optional[int] = 0) -> OffsetPage:
         params: Dict[Any, Any] = dict(limit=limit, offset=offset)
         if collection_id:
             params['collection_id'] = collection_id
@@ -108,7 +122,7 @@ class DirectoryApi(BaseApi):
     def feed_list(self, source_id: Optional[int] = None,
                   modified_since: Optional[Union[dt.datetime, int, float]] = None,
                   modified_before: Optional[Union[dt.datetime, int, float]] = None,
-                  limit: Optional[int] = 0, offset: Optional[int] = 0, return_details: bool = False) -> Dict:
+                  limit: Optional[int] = 0, offset: Optional[int] = 0, return_details: bool = False) -> JSONObj:
         params: Dict[Any, Any] = dict(limit=limit, offset=offset)
         if source_id:
             params['source_id'] = source_id
@@ -156,14 +170,14 @@ class SearchApi(BaseApi):
         return params
 
     def story_count(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
-                    source_ids: Optional[List[int]] = [], platform: Optional[str] = None) -> Dict:
+                    source_ids: Optional[List[int]] = [], platform: Optional[str] = None) -> StoryCount:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         results = self._query('search/total-count', params)
         return results['count']
 
     def story_count_over_time(self, query: str, start_date: dt.date, end_date: dt.date,
                               collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],
-                              platform: Optional[str] = None) -> List[Dict]:
+                              platform: Optional[str] = None) -> List[CountOverTimePoint]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         results = self._query('search/count-over-time', params)
         for d in results['count_over_time']['counts']:
@@ -172,7 +186,7 @@ class SearchApi(BaseApi):
 
     def stories_by_source_week(self, query: str, start_date: dt.date, end_date: dt.date,
                                collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],
-                               platform: Optional[str] = None) -> List[Dict]:
+                               platform: Optional[str] = None) -> List[SourceWeekAttention]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         results = self._query('search/count-by-source-week', params)
         return results['source-week-attention']
@@ -181,7 +195,7 @@ class SearchApi(BaseApi):
                    source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
                    expanded: Optional[bool] = None, pagination_token: Optional[str] = None,
                    sort_order: Optional[str] = None,
-                   page_size: Optional[int] = None) -> tuple[List[Dict], Optional[str]]:
+                   page_size: Optional[int] = None) -> tuple[List[Story], PaginationToken]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         if expanded:
             params['expanded'] = 1
@@ -195,7 +209,7 @@ class SearchApi(BaseApi):
         self._dates_str2objects(results['stories'])
         return results['stories'], results['pagination_token']
 
-    def _dates_str2objects(self, stories: List[Dict]):
+    def _dates_str2objects(self, stories: List[Story]):
         # _in place_ translation from ES date str to python data/datetime objects to save memory
         for s in stories:
             s['publish_date'] = dt.date.fromisoformat(s['publish_date'][:10]) if s['publish_date'] else None
@@ -203,7 +217,7 @@ class SearchApi(BaseApi):
 
     def story_sample(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
                      source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
-                     limit: Optional[int] = None, expanded=False) -> List[Dict]:
+                     limit: Optional[int] = None, expanded=False) -> List[Story]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         if limit:
             params['limit'] = limit
@@ -215,14 +229,14 @@ class SearchApi(BaseApi):
         self._dates_str2objects(results['sample'])
         return results['sample']
 
-    def story(self, story_id: str) -> Dict:
+    def story(self, story_id: str) -> Story:
         params = dict(storyId=story_id, platform=self.PROVIDER)
         results = self._query('search/story', params)
         return results['story']
 
     def words(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
               source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
-              limit: Optional[int] = None) -> List[Dict]:
+              limit: Optional[int] = None) -> List[JSONObj]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         if limit:
             params['limit'] = limit
@@ -231,7 +245,7 @@ class SearchApi(BaseApi):
 
     def sources(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
                 source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
-                limit: Optional[int] = None) -> List[Dict]:
+                limit: Optional[int] = None) -> List[SourceCount]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         if limit:
             params['limit'] = limit
@@ -240,7 +254,7 @@ class SearchApi(BaseApi):
 
     def languages(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
                   source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
-                  limit: Optional[int] = None) -> List[Dict]:
+                  limit: Optional[int] = None) -> List[LanguageCount]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         if limit:
             params['limit'] = limit
