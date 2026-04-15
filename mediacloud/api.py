@@ -177,6 +177,15 @@ class SearchApi(BaseApi):
         results = self._query('search/count-by-source-week', params)
         return results['source-week-attention']
 
+    def stories_by_source_over_interval(self, query: str, start_date: dt.date, end_date: dt.date,
+                                    collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],
+                                    platform: Optional[str] = None, interval: Optional[str] = None) -> List[Dict]:
+        params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
+        if interval:
+            params['interval'] = interval
+        results = self._query('search/count-by-source-over-interval', params)
+        return results['source-interval-attention']
+
     def story_list(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
                    source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
                    expanded: Optional[bool] = None, pagination_token: Optional[str] = None,
