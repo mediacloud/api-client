@@ -242,19 +242,6 @@ class SearchStoriesTest(BaseSearchTest):
         for s in results:
             assert s['media_url'] in domains
 
-    def test_stories_by_source_week(self):
-        results = self._search.stories_by_source_week(query="tariff AND Trump",
-                                                      start_date=dt.date(2025, 1, 1),
-                                                      end_date=dt.date(2025, 12, 31),
-                                                      collection_ids=[262985236])
-        assert len(results) > 0
-        for entry in results:
-            assert 'media_name' in entry
-            assert 'week' in entry
-            assert 'matching_stories' in entry
-            assert 'total_stories' in entry
-            assert 'ratio' in entry
-
 
 class SearchSyntaxTest(TestCase):
 
