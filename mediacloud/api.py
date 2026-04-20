@@ -76,9 +76,9 @@ class BaseApi:
         elif method == 'POST':
             r = self._session.post(endpoint_url, json=params, timeout=self.TIMEOUT_SECS)
         elif method == "DELETE":
-            return self._session.delete(endpoint_url, params=params, timeout=self.TIMEOUT_SECS)
+            r = self._session.delete(endpoint_url, params=params, timeout=self.TIMEOUT_SECS)
         elif method == "PATCH":
-            return self._session.patch(endpoint_url, json=params, timeout=self.TIMEOUT_SECS)
+            r = self._session.patch(endpoint_url, json=params, timeout=self.TIMEOUT_SECS)
         else:
             raise RuntimeError(f"Unsupported method of '{method}'")
         if r.status_code // 100 != 2:  # create operations return 201

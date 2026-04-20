@@ -1,6 +1,13 @@
 Version History
 ===============
 
+Version 5
+--------- 
+
+### v5.0.0
+* Depreciate stores_by_source_week 2d aggregation endpoint, replace with stories_by_source_over_interval
+* Add mgmt package for create/edit/delete operations on collections
+* Add types.py module for better downstream tooling
 
 Version 4
 ---------
