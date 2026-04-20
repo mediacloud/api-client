@@ -49,6 +49,15 @@ class SourceWeekAttention(TypedDict, total=False):
     ratio: float
 
 
+class SourceIntervalAttention(TypedDict, total=False):
+    media_name: str
+    interval: str
+    bucket: str
+    matching_stories: int
+    total_stories: int
+    ratio: float
+
+
 class Collection(TypedDict, total=False):
     id: int
     name: str

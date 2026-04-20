@@ -16,6 +16,7 @@ from mediacloud.types import (
     OffsetPage,
     PaginationToken,
     Source,
+    SourceIntervalAttention,
     SourceCount,
     SourceWeekAttention,
     Story,
@@ -197,7 +198,7 @@ class SearchApi(BaseApi):
 
     def stories_by_source_over_interval(self, query: str, start_date: dt.date, end_date: dt.date,
                                     collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],
-                                    platform: Optional[str] = None, interval: Optional[str] = None) -> List[Dict]:
+                                    platform: Optional[str] = None, interval: Optional[str] = None) -> List[SourceIntervalAttention]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         if interval:
             params['interval'] = interval
