@@ -2,6 +2,7 @@ import datetime as dt
 import os
 import time
 from unittest import TestCase
+from unittest.mock import patch
 
 import pytest
 
@@ -12,6 +13,9 @@ AU_BROADCAST_COMPANY = 20775
 TOMORROW_TIME = dt.datetime.today() + dt.timedelta(days=1)
 START_DATE = dt.date(2023, 11, 1)
 END_DATE = dt.date(2023, 12, 1)
+
+#Optionally override the target instance when testing, for staging/dev cases
+mediacloud.api.BaseApi.BASE_API_URL = os.getenv("MC_API_BASE_URL", "https://search.mediacloud.org/api/")
 
 
 class BaseSearchTest(TestCase):
@@ -362,3 +366,70 @@ class SearchErrorHandlingTest(TestCase):
                                                            collection_ids=[COLLECTION_US_NATIONAL])['relevant']
 
         assert result_via_date == result_via_datetime
+
+    def test_stories_by_source_over_interval_day(self):
+        expected = [{
+            "media_name": "example.com",
+            "interval": "day",
+            "bucket": "2025-01-01",
+            "matching_stories": 10,
+            "total_stories": 100,
+            "ratio": 0.1,
+        }]
+        with patch.object(self._search, "_query", return_value={"source-interval-attention": expected}) as mock_query:
+            result = self._search.stories_by_source_over_interval(
+                query="tariff AND Trump",
+                start_date=self.START_DATE,
+                end_date=self.END_DATE,
+                collection_ids=[COLLECTION_US_NATIONAL],
+                interval="day",
+            )
+        assert result == expected
+        endpoint, params = mock_query.call_args.args
+        assert endpoint == "search/count-by-source-over-interval"
+        assert params["interval"] == "day"
+
+    def test_stories_by_source_over_interval_week(self):
+        expected = [{
+            "media_name": "example.com",
+            "interval": "week",
+            "bucket": "2025-W01",
+            "matching_stories": 5,
+            "total_stories": 50,
+            "ratio": 0.1,
+        }]
+        with patch.object(self._search, "_query", return_value={"source-interval-attention": expected}) as mock_query:
+            result = self._search.stories_by_source_over_interval(
+                query="tariff AND Trump",
+                start_date=self.START_DATE,
+                end_date=self.END_DATE,
+                interval="week",
+            )
+        assert result == expected
+        endpoint, params = mock_query.call_args.args
+        assert endpoint == "search/count-by-source-over-interval"
+        assert params["interval"] == "week"
+
+    def test_stories_by_source_over_interval_default_omits_interval(self):
+        with patch.object(self._search, "_query", return_value={"source-interval-attention": []}) as mock_query:
+            self._search.stories_by_source_over_interval(
+                query="tariff AND Trump",
+                start_date=self.START_DATE,
+                end_date=self.END_DATE,
+            )
+        _, params = mock_query.call_args.args
+        assert "interval" not in params
+
+    def test_stories_by_source_over_interval_propagates_api_error(self):
+        with patch.object(self._search, "_query", side_effect=mediacloud.error.APIResponseError(
+            response=type("Resp", (), {"status_code": 400})(),
+            params={"interval": "bad"},
+            data={"note": "invalid interval"},
+        )):
+            with pytest.raises(mediacloud.error.APIResponseError):
+                self._search.stories_by_source_over_interval(
+                    query="tariff AND Trump",
+                    start_date=self.START_DATE,
+                    end_date=self.END_DATE,
+                    interval="bad",
+                )

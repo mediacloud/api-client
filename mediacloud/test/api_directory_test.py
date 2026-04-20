@@ -9,6 +9,7 @@ import mediacloud.api
 TEST_COLLECTION_ID = 34412234  # US -National sources
 TEST_SOURCE_ID = 1095  # cnn.com
 TEST_FEED_ID = 1
+mediacloud.api.BaseApi.BASE_API_URL = os.getenv("MC_API_BASE_URL", "https://search.mediacloud.org/api/")
 
 
 class DirectoryTest(TestCase):

@@ -4,6 +4,7 @@ from unittest import TestCase
 import mediacloud.api
 from mediacloud.error import MCException
 
+mediacloud.api.BaseApi.BASE_API_URL = os.getenv("MC_API_BASE_URL", "https://search.mediacloud.org/api/")
 
 class BaseApiTest(TestCase):
 
