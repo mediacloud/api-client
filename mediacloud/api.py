@@ -8,21 +8,11 @@ import requests
 
 import mediacloud
 import mediacloud.error
-from mediacloud.types import (
-    Collection,
-    CountOverTimePoint,
-    JSONObj,
-    LanguageCount,
-    OffsetPage,
-    PaginationToken,
-    Source,
-    SourceIntervalAttention,
-    SourceCount,
-    SourceWeekAttention,
-    Story,
-    StoryCount,
-    VersionInfo,
-)
+from mediacloud.types import (Collection, CountOverTimePoint, JSONObj,
+                              LanguageCount, OffsetPage, PaginationToken,
+                              Source, SourceCount, SourceIntervalAttention,
+                              SourceWeekAttention, Story, StoryCount,
+                              VersionInfo)
 
 logger = logging.getLogger(__name__)
 
@@ -168,6 +158,10 @@ class SearchApi(BaseApi):
 
         params: Dict[Any, Any] = dict(start=start_date.isoformat(), end=end_date.isoformat(), q=query,
                                       platform=(platform or self.PROVIDER))
+
+        if (len(source_ids) + len(collection_ids)) == 0:
+            warnings.warn("No sources or collections specified. This is a *BAD IDEA*. Pick a collection.")
+
         if len(source_ids):
             params['ss'] = ",".join([str(sid) for sid in source_ids]),
         if len(collection_ids):
@@ -197,8 +191,8 @@ class SearchApi(BaseApi):
         return results['source-week-attention']
 
     def stories_by_source_over_interval(self, query: str, start_date: dt.date, end_date: dt.date,
-                                    collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],
-                                    platform: Optional[str] = None, interval: Optional[str] = None) -> List[SourceIntervalAttention]:
+                                        collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],
+                                        platform: Optional[str] = None, interval: Optional[str] = None) -> List[SourceIntervalAttention]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         if interval:
             params['interval'] = interval
