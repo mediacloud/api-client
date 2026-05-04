@@ -4,25 +4,15 @@ import logging
 import warnings
 from typing import Any, Dict, List, Optional, Union
 
-import requests
+from requests_ratelimiter import LimiterSession
 
 import mediacloud
 import mediacloud.error
-from mediacloud.types import (
-    Collection,
-    CountOverTimePoint,
-    JSONObj,
-    LanguageCount,
-    OffsetPage,
-    PaginationToken,
-    Source,
-    SourceIntervalAttention,
-    SourceCount,
-    SourceWeekAttention,
-    Story,
-    StoryCount,
-    VersionInfo,
-)
+from mediacloud.types import (Collection, CountOverTimePoint, JSONObj,
+                              LanguageCount, OffsetPage, PaginationToken,
+                              Source, SourceCount, SourceIntervalAttention,
+                              SourceWeekAttention, Story, StoryCount,
+                              VersionInfo)
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +30,10 @@ class BaseApi:
     # running queries
     TIMEOUT_SECS = 60
 
+    # Default rate limit for API requests. Admins with higher rate limits can
+    # override this on their subclass or instance before creating the session.
+    RATE_LIMIT_PER_MINUTE = 2
+
     BASE_API_URL = "https://search.mediacloud.org/api/"
 
     USER_AGENT_STRING = f"mediacloud {VERSION}"
@@ -49,8 +43,8 @@ class BaseApi:
             raise mediacloud.error.MCException("No api key set - nothing will work without this")
         # Specify the auth_token to use for all future requests
         self._auth_token = auth_token
-        # better performance to put all HTTP through this one object
-        self._session = requests.Session()
+        # better performance to put all HTTP through this one object;
+        self._session = LimiterSession(per_minute=self.RATE_LIMIT_PER_MINUTE)
         self._session.headers.update({'Authorization': f'Token {self._auth_token}'})
         self._session.headers.update({'Accept': 'application/json'})
         self._session.headers.update({"User-Agent": self.USER_AGENT_STRING})
@@ -197,8 +191,8 @@ class SearchApi(BaseApi):
         return results['source-week-attention']
 
     def stories_by_source_over_interval(self, query: str, start_date: dt.date, end_date: dt.date,
-                                    collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],
-                                    platform: Optional[str] = None, interval: Optional[str] = None) -> List[SourceIntervalAttention]:
+                                        collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],
+                                        platform: Optional[str] = None, interval: Optional[str] = None) -> List[SourceIntervalAttention]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         if interval:
             params['interval'] = interval
