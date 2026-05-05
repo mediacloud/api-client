@@ -14,7 +14,7 @@ TOMORROW_TIME = dt.datetime.today() + dt.timedelta(days=1)
 START_DATE = dt.date(2023, 11, 1)
 END_DATE = dt.date(2023, 12, 1)
 
-#Optionally override the target instance when testing, for staging/dev cases
+# Optionally override the target instance when testing, for staging/dev cases
 mediacloud.api.BaseApi.BASE_API_URL = os.getenv("MC_API_BASE_URL", "https://search.mediacloud.org/api/")
 
 
@@ -353,6 +353,17 @@ class SearchErrorHandlingTest(TestCase):
                                                            collection_ids=[COLLECTION_US_NATIONAL])['relevant']
 
         assert result_via_date == result_via_datetime
+
+    def test_warnings(self):
+        with patch.object(self._search, "_query", return_value={"count": {}}):
+            with pytest.warns(UserWarning, match="start_date was passed as datetime"):
+                self._search.story_count(query="biden", start_date=self.START_DATETIME, end_date=self.END_DATE,
+                                         collection_ids=[COLLECTION_US_NATIONAL])
+            with pytest.warns(UserWarning, match="end_date was passed as datetime"):
+                self._search.story_count(query="biden", start_date=self.START_DATE, end_date=self.END_DATETIME,
+                                         collection_ids=[COLLECTION_US_NATIONAL])
+            with pytest.warns(UserWarning, match="No sources or collections specified"):
+                self._search.story_count(query="biden", start_date=self.START_DATE, end_date=self.END_DATE)
 
     def test_stories_by_source_over_interval_day(self):
         expected = [{
