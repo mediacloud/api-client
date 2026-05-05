@@ -4,7 +4,7 @@ import logging
 import warnings
 from typing import Any, Dict, List, Optional, Union
 
-import requests
+from requests_ratelimiter import LimiterSession
 
 import mediacloud
 import mediacloud.error
@@ -30,6 +30,10 @@ class BaseApi:
     # running queries
     TIMEOUT_SECS = 60
 
+    # Default rate limit for API requests. Admins with higher rate limits can
+    # override this on their subclass or instance before creating the session.
+    RATE_LIMIT_PER_MINUTE = 2
+
     BASE_API_URL = "https://search.mediacloud.org/api/"
 
     USER_AGENT_STRING = f"mediacloud {VERSION}"
@@ -39,8 +43,8 @@ class BaseApi:
             raise mediacloud.error.MCException("No api key set - nothing will work without this")
         # Specify the auth_token to use for all future requests
         self._auth_token = auth_token
-        # better performance to put all HTTP through this one object
-        self._session = requests.Session()
+        # better performance to put all HTTP through this one object;
+        self._session = LimiterSession(per_minute=self.RATE_LIMIT_PER_MINUTE)
         self._session.headers.update({'Authorization': f'Token {self._auth_token}'})
         self._session.headers.update({'Accept': 'application/json'})
         self._session.headers.update({"User-Agent": self.USER_AGENT_STRING})
