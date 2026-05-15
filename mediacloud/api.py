@@ -205,12 +205,14 @@ class SearchApi(BaseApi):
 
     def story_list(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
                    source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
-                   expanded: Optional[bool] = None, pagination_token: Optional[str] = None,
-                   sort_order: Optional[str] = None,
-                   page_size: Optional[int] = None) -> tuple[List[Story], PaginationToken]:
+                   expanded: bool = False, pagination_token: Optional[str] = None,
+                   sort_order: Optional[str] = None, page_size: Optional[int] = None,
+                   randomized: bool = False) -> tuple[List[Story], PaginationToken]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         if expanded:
             params['expanded'] = 1
+        if randomized:
+            params['randomize'] = 1
         if pagination_token:
             params['pagination_token'] = pagination_token
         if sort_order:

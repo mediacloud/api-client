@@ -6,6 +6,7 @@ from mediacloud.error import MCException
 
 mediacloud.api.BaseApi.BASE_API_URL = os.getenv("MC_API_BASE_URL", "https://search.mediacloud.org/api/")
 
+
 class BaseApiTest(TestCase):
 
     @staticmethod
@@ -32,5 +33,4 @@ class BaseApiTest(TestCase):
         mc_api_key = os.getenv("MC_API_TOKEN")
         client = mediacloud.api.DirectoryApi(mc_api_key)
         _ = client.user_profile()
-        print(_)
         assert True

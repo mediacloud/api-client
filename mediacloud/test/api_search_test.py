@@ -117,6 +117,44 @@ class SearchStoriesTest(BaseSearchTest):
         assert len(results2) == 1000
         assert next_page_token2 is not None
         assert next_page_token1 != next_page_token2
+        page1_ids = [s['id'] for s in results1]
+        page2_ids = [s['id'] for s in results2]
+        common_ids = set(page1_ids) & set(page2_ids)
+        self.assertEqual(len(common_ids), 0)
+
+    def test_story_list_randomized(self):
+        # make sure ids in results differ from standard call when randomized sent in
+        results_sorted, _ = self._admin_search.story_list(query="weather", start_date=START_DATE,
+                                                          end_date=END_DATE,
+                                                          collection_ids=[COLLECTION_US_NATIONAL])
+        results_random, _ = self._admin_search.story_list(query="weather", start_date=START_DATE,
+                                                          end_date=END_DATE, randomized=True,
+                                                          collection_ids=[COLLECTION_US_NATIONAL])
+        self.assertEqual(len(results_sorted), len(results_random))
+        # make sure the id values in the two lsts are different
+        sorted_ids = [s['id'] for s in results_sorted]
+        random_ids = [s['id'] for s in results_random]
+        self.assertEqual(len(sorted_ids), len(random_ids))
+        self.assertNotEqual(sorted_ids, random_ids)
+
+    def test_story_list_paging_randomizedd(self):
+        results1, next_page_token1 = self._admin_search.story_list(query="weather", start_date=START_DATE,
+                                                                   end_date=END_DATE, randomized=True,
+                                                                   collection_ids=[COLLECTION_US_NATIONAL])
+        time.sleep(31)
+        assert len(results1) == 1000
+        assert next_page_token1 is not None
+        results2, next_page_token2 = self._admin_search.story_list(query="weather", start_date=START_DATE,
+                                                                   end_date=END_DATE, randomized=True,
+                                                                   collection_ids=[COLLECTION_US_NATIONAL],
+                                                                   pagination_token=next_page_token1)
+        assert len(results2) == 1000
+        assert next_page_token2 is not None
+        assert next_page_token1 != next_page_token2
+        page1_ids = [s['id'] for s in results1]
+        page2_ids = [s['id'] for s in results2]
+        common_ids = set(page1_ids) & set(page2_ids)
+        self.assertEqual(len(common_ids), 0)
 
     def test_random_sample(self):
         def _test_random_sample(sample_size: int):
@@ -139,7 +177,20 @@ class SearchStoriesTest(BaseSearchTest):
                 assert 'text' not in s.keys()
         _test_random_sample(934)
         _test_random_sample(123)
-        # TO DO: add admin test that passed in `expanded=True` and verifies `text` is in returned item properties
+
+    def test_story_list_random_expanded(self):
+        # note - requires staff API token
+        page, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
+                                                collection_ids=[COLLECTION_US_NATIONAL], randomized=True)
+        for story in page:
+            assert 'text' not in story
+        time.sleep(25)
+        page, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
+                                                expanded=True, collection_ids=[COLLECTION_US_NATIONAL],
+                                                randomized=True)
+        for story in page:
+            assert 'text' in story
+            assert len(story['text']) > 0
 
     def test_story_list_expanded(self):
         # note - requires staff API token
