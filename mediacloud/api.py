@@ -207,11 +207,11 @@ class SearchApi(BaseApi):
                    source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
                    expanded: Optional[bool] = None, pagination_token: Optional[str] = None,
                    sort_order: Optional[str] = None, page_size: Optional[int] = None,
-                   randomize: Optional[bool] = None) -> tuple[List[Story], PaginationToken]:
+                   randomized: Optional[bool] = None) -> tuple[List[Story], PaginationToken]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         if expanded:
             params['expanded'] = 1
-        if randomize:
+        if randomized:
             params['randomize'] = 1
         if pagination_token:
             params['pagination_token'] = pagination_token
