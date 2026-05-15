@@ -229,11 +229,13 @@ class SearchStoriesTest(BaseSearchTest):
 
     def test_search_by_indexed_date(self):
         # compare results with indexed_date clause to those without it
-        results1 = self._search.story_count(query="weather", start_date=START_DATE, end_date=END_DATE)
+        results1 = self._search.story_count(query="weather", start_date=START_DATE, end_date=END_DATE,
+                                            collection_ids=[COLLECTION_US_NATIONAL])
         assert results1['total'] > 0
         results2 = self._search.story_count(query="weather and indexed_date:[{} TO {}]".format(
             START_DATE.isoformat(), END_DATE.isoformat()),
-            start_date=START_DATE, end_date=END_DATE)
+            start_date=START_DATE, end_date=END_DATE,
+            collection_ids=[COLLECTION_US_NATIONAL])
         assert results2['total'] > 0
         assert results1['total'] == results2['total']
         assert results1['relevant'] != results2['relevant']
