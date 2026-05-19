@@ -2,7 +2,12 @@ Version History
 ===============
 
 Version 5
---------- 
+---------
+
+### v5.1.0
+* add rate-limiting to produce better default behavior, in line with Media Cloud usage policies
+* warn user if making a call with no sources or collections because this isn't recommended usage
+* (ADMIN ONLY) add new `randomized` option to page through story lists in random order (for sampling purposes)
 
 ### v5.0.0
 * Depreciate stores_by_source_week 2d aggregation endpoint, replace with stories_by_source_over_interval

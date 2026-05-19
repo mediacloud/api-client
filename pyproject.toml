@@ -7,7 +7,7 @@ include = ["mediacloud/py.typed"]
 
 [project]
 name = "mediacloud"
-version = "5.0.0"
+version = "5.1.0"
 authors = [
     {name = "Rahul Bhargava", email = "r.bhargava@northeastern.edu"},
 ]
