@@ -75,10 +75,30 @@ class BaseApi:
             r = self._session.patch(endpoint_url, json=params, timeout=self.TIMEOUT_SECS)
         else:
             raise RuntimeError(f"Unsupported method of '{method}'")
-        if r.status_code // 100 != 2:  # create operations return 201
-            raise mediacloud.error.APIResponseError(r, params, r.json())
 
-        return r.json()
+        status_class = r.status_code // 100
+        if r.text:
+            try:
+                j = r.json()
+            except:
+                # here with non/bad json response
+                j = {
+                    "status": "bad-response",
+                    "note": f"bad JSON: {r.text}" # for APIResponseError
+                }
+                status_class = 99
+        else:
+            # Here with 429 error from older servers
+            j = {
+                "status": "empty",
+                "note": "empty-response" # for APIResponseError
+            }
+            status_class = 99
+
+        if status_class != 2:  # create operations return 201
+            raise mediacloud.error.APIResponseError(r, params, j)
+
+        return j
 
 
 class DirectoryApi(BaseApi):
