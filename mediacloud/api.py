@@ -55,7 +55,7 @@ class BaseApi:
         # saved rate limit used to create _session,
         self._per_minute = -1                # initially not valid
 
-    def _make_session(self):
+    def _make_session(self) -> None:
         """
         make session object on demand, to allow user manipulation of
         BASE_API_URL and RATE_LIMIT_PER_MINUTE after instantiation but
@@ -204,11 +204,11 @@ class DirectoryApi(BaseApi):
                   modified_since: Optional[Union[dt.datetime, int, float]] = None,
                   modified_before: Optional[Union[dt.datetime, int, float]] = None,
                   limit: Optional[int] = 0, offset: Optional[int] = 0, return_details: bool = False) -> JSONObj:
-        params: Dict[Any, Any] = dict(limit=limit, offset=offset)
+        params: Dict[str, Any] = dict(limit=limit, offset=offset)
         if source_id:
             params['source_id'] = source_id
 
-        def epoch_param(t, param):
+        def epoch_param(t: Union[dt.datetime, int, float], param: str) -> None:
             if t is None:
                 return        # parameter not set
             if isinstance(t, dt.datetime):
@@ -232,7 +232,7 @@ class SearchApi(BaseApi):
 
     def _prep_default_params(self, query: str, start_date: dt.date, end_date: dt.date,
                              collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],
-                             platform: Optional[str] = None):
+                             platform: Optional[str] = None) -> Dict[str, Any]:
 
         if isinstance(start_date, dt.datetime):
             start_date = start_date.date()
@@ -242,7 +242,7 @@ class SearchApi(BaseApi):
             end_date = end_date.date()
             warnings.warn("end_date was passed as datetime, but expected as date, and has been recast")
 
-        params: Dict[Any, Any] = dict(start=start_date.isoformat(), end=end_date.isoformat(), q=query,
+        params: Dict[str, Any] = dict(start=start_date.isoformat(), end=end_date.isoformat(), q=query,
                                       platform=(platform or self.PROVIDER))
 
         if (len(source_ids) + len(collection_ids)) == 0:
@@ -305,7 +305,7 @@ class SearchApi(BaseApi):
         self._dates_str2objects(results['stories'])
         return results['stories'], results['pagination_token']
 
-    def _dates_str2objects(self, stories: List[Story]):
+    def _dates_str2objects(self, stories: List[Story]) -> None:
         # _in place_ translation from ES date str to python data/datetime objects to save memory
         for s in stories:
             s['publish_date'] = dt.date.fromisoformat(s['publish_date'][:10]) if s['publish_date'] else None
@@ -313,7 +313,7 @@ class SearchApi(BaseApi):
 
     def story_sample(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
                      source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
-                     limit: Optional[int] = None, expanded=False) -> List[Story]:
+                     limit: Optional[int] = None, expanded: bool = False) -> List[Story]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         if limit:
             params['limit'] = limit
