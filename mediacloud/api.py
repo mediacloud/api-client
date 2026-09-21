@@ -52,7 +52,7 @@ class BaseApi:
         # better performance to put all HTTP through this one object;
         self._session: Session | None = None  # made on demand
 
-        # saved copies of URL and rate limit used to create _session,
+        # saved rate limit used to create _session,
         self._per_minute = -1                # initially not valid
 
     def _make_session(self):
@@ -76,6 +76,7 @@ class BaseApi:
         self._session.close()
         self._session = LimiterSession(per_minute=per_minute)
         self._session.headers.update(self._headers)
+        self._per_minute = per_minute
 
     def _parse_rate_limit(self, raw: JSONObj) -> int:
         # :return: rate limit in requests per minute
