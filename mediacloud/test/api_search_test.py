@@ -18,40 +18,40 @@ END_DATE = dt.date(2023, 12, 1)
 mediacloud.api.BaseApi.BASE_API_URL = os.getenv("MC_API_BASE_URL", "https://search.mediacloud.org/api/")
 mediacloud.api.BaseApi.RATE_LIMIT_PER_MINUTE = 60 # upper bound
 
-# EXPERIMENT: make global Api sessions, so that local library rate limiting
-# state kept between tests, avoiding the need for explicit sleeps
+# global API sessions, so that local library rate limiting state kept
+# between tests, avoiding the need for explicit sleeps to avoid the
+# server throwing 429's.  This reduces test isolation, but new API
+# objects for each test isn't necessarily realistic either.
 
 _mc_api_key = os.getenv("MC_API_TOKEN")
-_search = mediacloud.api.SearchApi(_mc_api_key)
+_user_search = mediacloud.api.SearchApi(_mc_api_key)
 _mc_api_admin_key = os.getenv("MC_API_ADMIN_TOKEN")
 _admin_search = mediacloud.api.SearchApi(_mc_api_admin_key)
+
+# MOST tests can be run with either flavor of token;
+# allow itchy fingered developers to run tests faster (as admin),
+# but default to regular user token.  Global for use in skipif decorators.
+# On 2026-09-23: runs 19 minutes w/o FAST; 22 seconds with.
+_fast = os.getenv('MC_API_TEST_FAST', None) # can be used in .skipif
+
 
 class BaseSearchTest(TestCase):
 
     def setUp(self):
-        # EXPERIMENT: use global API instances, without changing tests for now:
-        self._mc_api_key = _mc_api_key
-        self._search = _search
+        # just picking up globals, to avoid mashing the file
+        if _fast:
+            self._search = _admin_search
+        else:
+            self._search = _user_search
         self._admin_search = _admin_search
-
-
+        self._user_search = _user_search
+        self._mc_api_key = _mc_api_key # used for DirectoryAPI
 
 class SearchAttentionTest(BaseSearchTest):
 
     def test_story_count(self):
-        results = self._admin_search.story_count(query="weather", start_date=START_DATE, end_date=END_DATE,
-                                                 collection_ids=[COLLECTION_US_NATIONAL], source_ids=[AU_BROADCAST_COMPANY])
-        assert 'relevant' in results
-        assert results['relevant'] > 0
-        assert 'total' in results
-        assert results['total'] > 0
-        assert results['relevant'] <= results['total']
-
-    def test_warning_no_sources(self):
-        # test that query with no sources/collections give warning
-        with pytest.warns(UserWarning):
-            results = self._admin_search.story_count(query="weather", start_date=START_DATE, end_date=END_DATE)
-
+        results = self._search.story_count(query="weather", start_date=START_DATE, end_date=END_DATE,
+                                           collection_ids=[COLLECTION_US_NATIONAL], source_ids=[AU_BROADCAST_COMPANY])
         assert 'relevant' in results
         assert results['relevant'] > 0
         assert 'total' in results
@@ -59,8 +59,8 @@ class SearchAttentionTest(BaseSearchTest):
         assert results['relevant'] <= results['total']
 
     def test_story_count_over_time(self):
-        results = self._admin_search.story_count_over_time(query="weather", start_date=START_DATE,
-                                                           end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
+        results = self._search.story_count_over_time(query="weather", start_date=START_DATE,
+                                                     end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
         assert len(results) == (END_DATE - START_DATE).days + 1
         for day in results:
             assert 'date' in day
@@ -73,18 +73,18 @@ class SearchAttentionTest(BaseSearchTest):
 
     def test_story(self):
         story_id = '9f734354744a651e9b99e4fcd93ee9eaee12ed134ba74dcda13b30234f528535'
-        story = self._search.story(story_id)
+        story = self._user_search.story(story_id) # regular user
         assert 'id' in story
         assert story['id'] == story_id
         assert 'title' in story
         assert 'url' in story
         assert 'language' in story
         assert 'publish_date' in story
-        assert 'text' not in story # regular user
+        assert 'text' not in story  # regular user
 
     def test_story_admin(self):
         story_id = '9f734354744a651e9b99e4fcd93ee9eaee12ed134ba74dcda13b30234f528535'
-        story = self._admin_search.story(story_id)
+        story = _admin_search.story(story_id) # NOTE! Admin token.
         assert 'id' in story
         assert story['id'] == story_id
         assert 'title' in story
@@ -97,14 +97,14 @@ class SearchLanguageTest(BaseSearchTest):
 
     def test_words(self):
         # expected to fail for now
-        results = self._admin_search.words(query="weather", start_date=START_DATE,
-                                           end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL],
-                                           limit=10)
+        results = self._search.words(query="weather", start_date=START_DATE,
+                                     end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL],
+                                     limit=10)
         assert len(results) > 0
 
     def test_languages(self):
-        results = self._admin_search.languages(query="weather", start_date=START_DATE,
-                                               end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
+        results = self._search.languages(query="weather", start_date=START_DATE,
+                                         end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
         assert len(results) > 0
         assert results[0]['language'] == 'en'
         last_ratio = 1
@@ -122,8 +122,8 @@ class SearchLanguageTest(BaseSearchTest):
 class SearchStoriesTest(BaseSearchTest):
 
     def test_sources(self):
-        results = self._admin_search.sources(query="weather", start_date=START_DATE,
-                                             end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
+        results = self._search.sources(query="weather", start_date=START_DATE,
+                                       end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
         assert len(results) > 0
         last_count = 10000000000
         for s in results:
@@ -253,10 +253,10 @@ class SearchStoriesTest(BaseSearchTest):
 
     def test_search_by_indexed_date(self):
         # compare results with indexed_date clause to those without it
-        results1 = self._admin_search.story_count(query="weather", start_date=START_DATE, end_date=END_DATE,
-                                                  collection_ids=[COLLECTION_US_NATIONAL])
+        results1 = self._search.story_count(query="weather", start_date=START_DATE, end_date=END_DATE,
+                                            collection_ids=[COLLECTION_US_NATIONAL])
         assert results1['total'] > 0
-        results2 = self._admin_search.story_count(query="weather and indexed_date:[{} TO {}]".format(
+        results2 = self._search.story_count(query="weather and indexed_date:[{} TO {}]".format(
             START_DATE.isoformat(), END_DATE.isoformat()),
             start_date=START_DATE, end_date=END_DATE,
             collection_ids=[COLLECTION_US_NATIONAL])
@@ -267,8 +267,8 @@ class SearchStoriesTest(BaseSearchTest):
 
     def test_verify_story_time_formats(self):
         # indexed_date should have time component
-        page, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
-                                                collection_ids=[COLLECTION_US_NATIONAL], page_size=100)
+        page, _ = self._search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
+                                          collection_ids=[COLLECTION_US_NATIONAL], page_size=100)
         for story in page:
             assert 'publish_date' in story
             assert isinstance(story['publish_date'], dt.date)
@@ -277,18 +277,18 @@ class SearchStoriesTest(BaseSearchTest):
 
     def test_story_list_page_size(self):
         # test valid number
-        page, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
-                                                collection_ids=[COLLECTION_US_NATIONAL], page_size=103)
+        page, _ = self._search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
+                                          collection_ids=[COLLECTION_US_NATIONAL], page_size=103)
         assert len(page) == 103
 
     def test_source_ids_filter(self):
-        results = self._admin_search.sources(query="weather", start_date=START_DATE, end_date=END_DATE,
-                                             source_ids=[AU_BROADCAST_COMPANY])
+        results = self._search.sources(query="weather", start_date=START_DATE, end_date=END_DATE,
+                                       source_ids=[AU_BROADCAST_COMPANY])
         assert len(results) == 1
         assert results[0]['count'] > 0
         assert results[0]['source'] == "abc.net.au"
-        results, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
-                                                   source_ids=[AU_BROADCAST_COMPANY])
+        results, _ = self._search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
+                                             source_ids=[AU_BROADCAST_COMPANY])
         assert len(results) > 0
         for s in results:
             assert s['media_url'] == "abc.net.au"
@@ -304,13 +304,13 @@ class SearchStoriesTest(BaseSearchTest):
         domains = [s['name'] for s in sources_in_collection]
         assert len(domains) == len(sources_in_collection)
         # now check sources to see they're all in collection list of domains
-        results = self._admin_search.sources(query="weather", start_date=START_DATE, end_date=END_DATE,
-                                             collection_ids=[COLLECTION_US_NATIONAL])
+        results = self._search.sources(query="weather", start_date=START_DATE, end_date=END_DATE,
+                                       collection_ids=[COLLECTION_US_NATIONAL])
         for s in results:
             assert s['source'] in domains
         # now check urls for a page of matches and make sure they're all in collection list of domains
-        results, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
-                                                   collection_ids=[COLLECTION_US_NATIONAL])
+        results, _ = self._search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
+                                             collection_ids=[COLLECTION_US_NATIONAL])
         assert len(results) > 0
         for s in results:
             assert s['media_url'] in domains
@@ -319,11 +319,11 @@ class SearchStoriesTest(BaseSearchTest):
 class SearchSyntaxTest(BaseSearchTest):
 
     START_DATE = dt.date(2024, 1, 1)
-    END_DATE = dt.date(2024, 1, 2)
+    END_DATE = dt.date(2024, 1, 30)
 
     def _count_query(self, query: str) -> int:
-        return self._admin_search.story_count(query=query, start_date=START_DATE, end_date=END_DATE,
-                                              collection_ids=[COLLECTION_US_NATIONAL])['relevant']
+        return self._search.story_count(query=query, start_date=START_DATE, end_date=END_DATE,
+                                        collection_ids=[COLLECTION_US_NATIONAL])['relevant']
 
     def test_title_search(self):
         all_results = self._count_query(query="biden")
@@ -410,25 +410,25 @@ class SearchErrorHandlingTest(BaseSearchTest):
 
     def test_datetime(self):
         query = "biden"
-        result_via_date = self._admin_search.story_count(query=query, start_date=self.START_DATE, end_date=self.END_DATE,
+        result_via_date = self._search.story_count(query=query, start_date=self.START_DATE, end_date=self.END_DATE,
                                                    collection_ids=[COLLECTION_US_NATIONAL])['relevant']
 
         with pytest.warns(UserWarning):
-            result_via_datetime = self._admin_search.story_count(query=query, start_date=self.START_DATETIME, end_date=self.END_DATETIME,
+            result_via_datetime = self._search.story_count(query=query, start_date=self.START_DATETIME, end_date=self.END_DATETIME,
                                                            collection_ids=[COLLECTION_US_NATIONAL])['relevant']
 
         assert result_via_date == result_via_datetime
 
     def test_warnings(self):
-        with patch.object(self._admin_search, "_query", return_value={"count": {}}):
+        with patch.object(self._search, "_query", return_value={"count": {}}):
             with pytest.warns(UserWarning, match="start_date was passed as datetime"):
-                self._admin_search.story_count(query="biden", start_date=self.START_DATETIME, end_date=self.END_DATE,
+                self._search.story_count(query="biden", start_date=self.START_DATETIME, end_date=self.END_DATE,
                                          collection_ids=[COLLECTION_US_NATIONAL])
             with pytest.warns(UserWarning, match="end_date was passed as datetime"):
-                self._admin_search.story_count(query="biden", start_date=self.START_DATE, end_date=self.END_DATETIME,
+                self._search.story_count(query="biden", start_date=self.START_DATE, end_date=self.END_DATETIME,
                                          collection_ids=[COLLECTION_US_NATIONAL])
             with pytest.warns(UserWarning, match="No sources or collections specified"):
-                self._admin_search.story_count(query="biden", start_date=self.START_DATE, end_date=self.END_DATE)
+                self._search.story_count(query="biden", start_date=self.START_DATE, end_date=self.END_DATE)
 
     def test_stories_by_source_over_interval_day(self):
         expected = [{
@@ -439,8 +439,8 @@ class SearchErrorHandlingTest(BaseSearchTest):
             "total_stories": 100,
             "ratio": 0.1,
         }]
-        with patch.object(self._admin_search, "_query", return_value={"source-interval-attention": expected}) as mock_query:
-            result = self._admin_search.stories_by_source_over_interval(
+        with patch.object(self._search, "_query", return_value={"source-interval-attention": expected}) as mock_query:
+            result = self._search.stories_by_source_over_interval(
                 query="tariff AND Trump",
                 start_date=self.START_DATE,
                 end_date=self.END_DATE,
@@ -461,8 +461,8 @@ class SearchErrorHandlingTest(BaseSearchTest):
             "total_stories": 50,
             "ratio": 0.1,
         }]
-        with patch.object(self._admin_search, "_query", return_value={"source-interval-attention": expected}) as mock_query:
-            result = self._admin_search.stories_by_source_over_interval(
+        with patch.object(self._search, "_query", return_value={"source-interval-attention": expected}) as mock_query:
+            result = self._search.stories_by_source_over_interval(
                 query="tariff AND Trump",
                 start_date=self.START_DATE,
                 end_date=self.END_DATE,
@@ -475,8 +475,8 @@ class SearchErrorHandlingTest(BaseSearchTest):
         assert params["interval"] == "week"
 
     def test_stories_by_source_over_interval_default_omits_interval(self):
-        with patch.object(self._admin_search, "_query", return_value={"source-interval-attention": []}) as mock_query:
-            self._admin_search.stories_by_source_over_interval(
+        with patch.object(self._search, "_query", return_value={"source-interval-attention": []}) as mock_query:
+            self._search.stories_by_source_over_interval(
                 query="tariff AND Trump",
                 start_date=self.START_DATE,
                 end_date=self.END_DATE,
@@ -486,13 +486,13 @@ class SearchErrorHandlingTest(BaseSearchTest):
         assert "interval" not in params
 
     def test_stories_by_source_over_interval_propagates_api_error(self):
-        with patch.object(self._admin_search, "_query", side_effect=mediacloud.error.APIResponseError(
+        with patch.object(self._search, "_query", side_effect=mediacloud.error.APIResponseError(
             response=type("Resp", (), {"status_code": 400})(),
             params={"interval": "bad"},
             data={"note": "invalid interval"},
         )):
             with pytest.raises(mediacloud.error.APIResponseError):
-                self._admin_search.stories_by_source_over_interval(
+                self._search.stories_by_source_over_interval(
                     query="tariff AND Trump",
                     start_date=self.START_DATE,
                     end_date=self.END_DATE,
