@@ -7,6 +7,7 @@ from unittest.mock import patch
 import pytest
 
 import mediacloud.api
+from mediacloud.test.opts import Opts
 
 COLLECTION_US_NATIONAL = 34412234
 AU_BROADCAST_COMPANY = 20775
@@ -32,8 +33,9 @@ _admin_search = mediacloud.api.SearchApi(_mc_api_admin_key)
 # allow itchy fingered developers to run tests faster (as admin),
 # but default to regular user token.  Global for use in skipif decorators.
 # On 2026-09-23: runs 19 minutes w/o FAST; 22 seconds with.
-_fast = os.getenv('MC_API_TEST_FAST', None) # can be used in .skipif
-
+# Enable by setting MC_API_TEST_FAST environment variable to a non-null value,
+# or invoking pytest with --fast
+_fast = Opts.is_set(Opts.MC_API_TEST_FAST)
 
 class BaseSearchTest(TestCase):
 
