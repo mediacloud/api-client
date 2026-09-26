@@ -41,14 +41,6 @@ class LanguageCount(TypedDict, total=False):
     value: int
 
 
-class SourceWeekAttention(TypedDict, total=False):
-    media_name: str
-    week: str
-    matching_stories: int
-    total_stories: int
-    ratio: float
-
-
 class SourceIntervalAttention(TypedDict, total=False):
     media_name: str
     interval: str
@@ -100,3 +92,31 @@ class VersionInfo(TypedDict, total=False):
     GIT_REV: str
     now: float
     version: str
+
+
+class QuotaDict(TypedDict, total=False):
+    provider: str
+    hits: int                   # usage this week
+    week: str                   # YYYY-MM-DD
+    limit: int                  # weekly quota
+
+
+class UserProfile(TypedDict, total=False):
+    id: int
+    username: str
+    is_staff: bool
+    is_superuser: bool
+    groups: list[str]
+    quota: QuotaDict
+
+
+ApiParams = TypedDict(
+    'ApiParams',
+    {
+        # suggested Python client version
+        "api-python-client": "str",
+        # user's actual query rate limit (digits/m)
+        "query-rate": "str",
+    },
+    total=False
+)

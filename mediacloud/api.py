@@ -12,8 +12,8 @@ import mediacloud.error
 from mediacloud.types import (Collection, CountOverTimePoint, JSONObj,
                               LanguageCount, OffsetPage, PaginationToken,
                               Source, SourceCount, SourceIntervalAttention,
-                              SourceWeekAttention, Story, StoryCount,
-                              VersionInfo)
+                              Story, StoryCount, VersionInfo,
+                              ApiParams, UserProfile)
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ class BaseApi:
 
         try:
             raw = self.api_params()
-            per_minute = self._parse_rate_limit(raw)
+            per_minute = self._parse_api_params(raw)
         except:
             per_minute = 2      # old default
 
@@ -78,11 +78,10 @@ class BaseApi:
         self._session.headers.update(self._headers)
         self._per_minute = per_minute
 
-    def _parse_rate_limit(self, raw: JSONObj) -> int:
+    def _parse_api_params(self, params: ApiParams) -> int:
         # :return: rate limit in requests per minute
         # tries not to crash, and to handle bad data gracefully
-        pp = raw.get('params', {})
-        if VERSION[0] == 'v' and (apc := pp.get('api-python-client')):
+        if VERSION[0] == 'v' and (apc := params.get('api-python-client')):
             try:
                 apci = [int(x) for x in apc.split('.')]
                 vers = [int(x) for x in VERSION[1:].split('.')]
@@ -96,14 +95,14 @@ class BaseApi:
         # only support per minute: per hour rates would allow LARGE bursts
         # django-ratelimit allows 10/5m, but django-smart-ratelimit may not??
         per_minute = self.RATE_LIMIT_PER_MINUTE
-        if (qr := pp.get('query-rate')) and isinstance(qr, str):
+        if (qr := params.get('query-rate')) and isinstance(qr, str):
             sr = qr.split('/')  # split rate
             if len(sr) == 2 and sr[0].isdigit() and sr[1] == 'm':
                 # use RATE_LIMIT_PER_MINUTE as upper bound
                 per_minute = min(int(sr[0]), per_minute)
         return per_minute
 
-    def user_profile(self) -> JSONObj:
+    def user_profile(self) -> UserProfile:
         # :return: basic info about the current user, including their roles
         return self._query('auth/profile')
 
@@ -158,9 +157,10 @@ class BaseApi:
 
         return j
 
-    def api_params(self) -> JSONObj:
+    def api_params(self) -> ApiParams:
         # :return: api parameters from server
-        return self._query('search/api-params')
+        results = self._query('search/api-params')
+        return results['params']
 
 
 class DirectoryApi(BaseApi):
@@ -176,6 +176,7 @@ class DirectoryApi(BaseApi):
 
     def collection_list(self, platform: Optional[str] = None, name: Optional[str] = None,
                         limit: Optional[int] = 0, offset: Optional[int] = 0, source_id: Optional[int] = None) -> OffsetPage:
+
         params: Dict[Any, Any] = dict(limit=limit, offset=offset)
         if name:
             params['name'] = name
@@ -268,13 +269,6 @@ class SearchApi(BaseApi):
         for d in results['count_over_time']['counts']:
             d['date'] = dt.date.fromisoformat(d['date'][:10])
         return results['count_over_time']['counts']
-
-    def stories_by_source_week(self, query: str, start_date: dt.date, end_date: dt.date,
-                               collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],
-                               platform: Optional[str] = None) -> List[SourceWeekAttention]:
-        params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
-        results = self._query('search/count-by-source-week', params)
-        return results['source-week-attention']
 
     def stories_by_source_over_interval(self, query: str, start_date: dt.date, end_date: dt.date,
                                         collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],

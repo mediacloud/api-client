@@ -1,6 +1,16 @@
 Version History
 ===============
 
+Version 6
+---------
+
+### v6.0.0
+* use new server api-params endpoint to warn users of new library and to acquire actual user rate limit
+* remove stores_by_source_week (should have been removed in 5.0.0)
+* add pytest --fast option for quick fire testing by impatient admin developers
+* add typing for user_profile
+* add Repository to pyproject.toml
+
 Version 5
 ---------
 
