@@ -5,7 +5,7 @@ from typing import Dict, List
 from unittest import TestCase
 
 import mediacloud.api
-from mediacloud.types import JSONObj
+from mediacloud.types import ApiParams
 
 TEST_COLLECTION_ID = 34412234  # US -National sources
 TEST_SOURCE_ID = 1095  # cnn.com
@@ -15,7 +15,7 @@ class MyDirectoryApi(mediacloud.api.DirectoryApi):
     BASE_API_URL = os.getenv("MC_API_BASE_URL", "https://search.mediacloud.org/api/")
     RATE_LIMIT_PER_MINUTE = 60  # upper bound
 
-    def _parse_rate_limit(self, raw: JSONObj) -> int:
+    def _parse_api_params(self, raw: ApiParams) -> int:
         # ignore data from api-params call
         # (rates only enforced for searches anyway!)
         return self.RATE_LIMIT_PER_MINUTE
