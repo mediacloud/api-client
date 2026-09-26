@@ -4,6 +4,7 @@ import logging
 import warnings
 from typing import Any, Dict, List, Optional, Union
 
+from requests import Session
 from requests_ratelimiter import LimiterSession
 
 import mediacloud
@@ -32,8 +33,10 @@ class BaseApi:
 
     # Default rate limit for API requests. Admins with higher rate limits can
     # override this on their subclass or instance before creating the session.
-    RATE_LIMIT_PER_MINUTE = 2
+    # This is only an upper bound on the value returned by the api_params method.
+    RATE_LIMIT_PER_MINUTE = 10
 
+    # tests honor MC_API_BASE_URL environment variable
     BASE_API_URL = "https://search.mediacloud.org/api/"
 
     USER_AGENT_STRING = f"mediacloud {VERSION}"
@@ -41,13 +44,64 @@ class BaseApi:
     def __init__(self, auth_token: Optional[str] = None):
         if not auth_token:
             raise mediacloud.error.MCException("No api key set - nothing will work without this")
-        # Specify the auth_token to use for all future requests
-        self._auth_token = auth_token
+        self._headers = {
+            'Authorization': f'Token {auth_token}',
+            'Accept': 'application/json',
+            "User-Agent": self.USER_AGENT_STRING,
+        }
         # better performance to put all HTTP through this one object;
-        self._session = LimiterSession(per_minute=self.RATE_LIMIT_PER_MINUTE)
-        self._session.headers.update({'Authorization': f'Token {self._auth_token}'})
-        self._session.headers.update({'Accept': 'application/json'})
-        self._session.headers.update({"User-Agent": self.USER_AGENT_STRING})
+        self._session: Session | None = None  # made on demand
+
+        # saved rate limit used to create _session,
+        self._per_minute = -1                # initially not valid
+
+    def _make_session(self) -> None:
+        """
+        make session object on demand, to allow user manipulation of
+        BASE_API_URL and RATE_LIMIT_PER_MINUTE after instantiation but
+        before first call.  COULD check for changes BASE_API_URL and
+        RATE_LIMIT_PER_MINUTE after the fact (by saving the values
+        used to create the current session, but that seems a bit much)
+        """
+        # make temporary Session object for api_params call
+        self._session = Session()
+        self._session.headers.update(self._headers)
+
+        try:
+            raw = self.api_params()
+            per_minute = self._parse_rate_limit(raw)
+        except:
+            per_minute = 2      # old default
+
+        self._session.close()
+        self._session = LimiterSession(per_minute=per_minute)
+        self._session.headers.update(self._headers)
+        self._per_minute = per_minute
+
+    def _parse_rate_limit(self, raw: JSONObj) -> int:
+        # :return: rate limit in requests per minute
+        # tries not to crash, and to handle bad data gracefully
+        pp = raw.get('params', {})
+        if VERSION[0] == 'v' and (apc := pp.get('api-python-client')):
+            try:
+                apci = [int(x) for x in apc.split('.')]
+                vers = [int(x) for x in VERSION[1:].split('.')]
+                # maybe only compare first two parts (ignore fixes)??
+                if apci > vers:
+                    warnings.warn(
+                        f"New mediacloud.api library version available: {apc}")
+            except ValueError:
+                pass
+
+        # only support per minute: per hour rates would allow LARGE bursts
+        # django-ratelimit allows 10/5m, but django-smart-ratelimit may not??
+        per_minute = self.RATE_LIMIT_PER_MINUTE
+        if (qr := pp.get('query-rate')) and isinstance(qr, str):
+            sr = qr.split('/')  # split rate
+            if len(sr) == 2 and sr[0].isdigit() and sr[1] == 'm':
+                # use RATE_LIMIT_PER_MINUTE as upper bound
+                per_minute = min(int(sr[0]), per_minute)
+        return per_minute
 
     def user_profile(self) -> JSONObj:
         # :return: basic info about the current user, including their roles
@@ -64,6 +118,10 @@ class BaseApi:
         """
         Centralize making the actual queries here for easy maintenance and testing of HTTP comms
         """
+        if not self._session:
+            self._make_session()  # create on first call
+            assert self._session  # to quiet mypy
+
         endpoint_url = self.BASE_API_URL + endpoint
         if method == 'GET':
             r = self._session.get(endpoint_url, params=params, timeout=self.TIMEOUT_SECS)
@@ -99,6 +157,10 @@ class BaseApi:
             raise mediacloud.error.APIResponseError(r, params, j)
 
         return j
+
+    def api_params(self) -> JSONObj:
+        # :return: api parameters from server
+        return self._query('search/api-params')
 
 
 class DirectoryApi(BaseApi):
@@ -142,11 +204,11 @@ class DirectoryApi(BaseApi):
                   modified_since: Optional[Union[dt.datetime, int, float]] = None,
                   modified_before: Optional[Union[dt.datetime, int, float]] = None,
                   limit: Optional[int] = 0, offset: Optional[int] = 0, return_details: bool = False) -> JSONObj:
-        params: Dict[Any, Any] = dict(limit=limit, offset=offset)
+        params: Dict[str, Any] = dict(limit=limit, offset=offset)
         if source_id:
             params['source_id'] = source_id
 
-        def epoch_param(t, param):
+        def epoch_param(t: Union[dt.datetime, int, float], param: str) -> None:
             if t is None:
                 return        # parameter not set
             if isinstance(t, dt.datetime):
@@ -170,7 +232,7 @@ class SearchApi(BaseApi):
 
     def _prep_default_params(self, query: str, start_date: dt.date, end_date: dt.date,
                              collection_ids: Optional[List[int]] = [], source_ids: Optional[List[int]] = [],
-                             platform: Optional[str] = None):
+                             platform: Optional[str] = None) -> Dict[str, Any]:
 
         if isinstance(start_date, dt.datetime):
             start_date = start_date.date()
@@ -180,7 +242,7 @@ class SearchApi(BaseApi):
             end_date = end_date.date()
             warnings.warn("end_date was passed as datetime, but expected as date, and has been recast")
 
-        params: Dict[Any, Any] = dict(start=start_date.isoformat(), end=end_date.isoformat(), q=query,
+        params: Dict[str, Any] = dict(start=start_date.isoformat(), end=end_date.isoformat(), q=query,
                                       platform=(platform or self.PROVIDER))
 
         if (len(source_ids) + len(collection_ids)) == 0:
@@ -243,7 +305,7 @@ class SearchApi(BaseApi):
         self._dates_str2objects(results['stories'])
         return results['stories'], results['pagination_token']
 
-    def _dates_str2objects(self, stories: List[Story]):
+    def _dates_str2objects(self, stories: List[Story]) -> None:
         # _in place_ translation from ES date str to python data/datetime objects to save memory
         for s in stories:
             s['publish_date'] = dt.date.fromisoformat(s['publish_date'][:10]) if s['publish_date'] else None
@@ -251,7 +313,7 @@ class SearchApi(BaseApi):
 
     def story_sample(self, query: str, start_date: dt.date, end_date: dt.date, collection_ids: Optional[List[int]] = [],
                      source_ids: Optional[List[int]] = [], platform: Optional[str] = None,
-                     limit: Optional[int] = None, expanded=False) -> List[Story]:
+                     limit: Optional[int] = None, expanded: bool = False) -> List[Story]:
         params = self._prep_default_params(query, start_date, end_date, collection_ids, source_ids, platform)
         if limit:
             params['limit'] = limit

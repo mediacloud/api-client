@@ -7,6 +7,7 @@ from unittest.mock import patch
 import pytest
 
 import mediacloud.api
+from mediacloud.test.opts import Opts
 
 COLLECTION_US_NATIONAL = 34412234
 AU_BROADCAST_COMPANY = 20775
@@ -16,17 +17,37 @@ END_DATE = dt.date(2023, 12, 1)
 
 # Optionally override the target instance when testing, for staging/dev cases
 mediacloud.api.BaseApi.BASE_API_URL = os.getenv("MC_API_BASE_URL", "https://search.mediacloud.org/api/")
+mediacloud.api.BaseApi.RATE_LIMIT_PER_MINUTE = 60 # upper bound
 
+# global API sessions, so that local library rate limiting state kept
+# between tests, avoiding the need for explicit sleeps to avoid the
+# server throwing 429's.  This reduces test isolation, but new API
+# objects for each test isn't necessarily realistic either.
+
+_mc_api_key = os.getenv("MC_API_TOKEN")
+_user_search = mediacloud.api.SearchApi(_mc_api_key)
+_mc_api_admin_key = os.getenv("MC_API_ADMIN_TOKEN")
+_admin_search = mediacloud.api.SearchApi(_mc_api_admin_key)
+
+# MOST tests can be run with either flavor of token;
+# allow itchy fingered developers to run tests faster (as admin),
+# but default to regular user token.  Global for use in skipif decorators.
+# On 2026-09-23: runs 19 minutes w/o FAST; 22 seconds with.
+# Enable by setting MC_API_TEST_FAST environment variable to a non-null value,
+# or invoking pytest with --fast
+_fast = Opts.is_set(Opts.MC_API_TEST_FAST)
 
 class BaseSearchTest(TestCase):
 
     def setUp(self):
-        self._mc_api_key = os.getenv("MC_API_TOKEN")
-        self._search = mediacloud.api.SearchApi(self._mc_api_key)
-        self._mc_api_admin_key = os.getenv("MC_API_ADMIN_TOKEN")
-        self._admin_search = mediacloud.api.SearchApi(self._mc_api_admin_key)
-        time.sleep(30)
-
+        # just picking up globals, to avoid mashing the file
+        if _fast:
+            self._search = _admin_search
+        else:
+            self._search = _user_search
+        self._admin_search = _admin_search
+        self._user_search = _user_search
+        self._mc_api_key = _mc_api_key # used for DirectoryAPI
 
 class SearchAttentionTest(BaseSearchTest):
 
@@ -54,14 +75,25 @@ class SearchAttentionTest(BaseSearchTest):
 
     def test_story(self):
         story_id = '9f734354744a651e9b99e4fcd93ee9eaee12ed134ba74dcda13b30234f528535'
-        story = self._search.story(story_id)
+        story = self._user_search.story(story_id) # regular user
         assert 'id' in story
         assert story['id'] == story_id
         assert 'title' in story
         assert 'url' in story
         assert 'language' in story
         assert 'publish_date' in story
+        assert 'text' not in story  # regular user
 
+    def test_story_admin(self):
+        story_id = '9f734354744a651e9b99e4fcd93ee9eaee12ed134ba74dcda13b30234f528535'
+        story = _admin_search.story(story_id) # NOTE! Admin token.
+        assert 'id' in story
+        assert story['id'] == story_id
+        assert 'title' in story
+        assert 'url' in story
+        assert 'language' in story
+        assert 'publish_date' in story
+        assert 'text' in story  # admin user
 
 class SearchLanguageTest(BaseSearchTest):
 
@@ -107,7 +139,6 @@ class SearchStoriesTest(BaseSearchTest):
         results1, next_page_token1 = self._admin_search.story_list(query="weather", start_date=START_DATE,
                                                                    end_date=END_DATE,
                                                                    collection_ids=[COLLECTION_US_NATIONAL])
-        time.sleep(31)
         assert len(results1) == 1000
         assert next_page_token1 is not None
         results2, next_page_token2 = self._admin_search.story_list(query="weather", start_date=START_DATE,
@@ -141,7 +172,6 @@ class SearchStoriesTest(BaseSearchTest):
         results1, next_page_token1 = self._admin_search.story_list(query="weather", start_date=START_DATE,
                                                                    end_date=END_DATE, randomized=True,
                                                                    collection_ids=[COLLECTION_US_NATIONAL])
-        time.sleep(31)
         assert len(results1) == 1000
         assert next_page_token1 is not None
         results2, next_page_token2 = self._admin_search.story_list(query="weather", start_date=START_DATE,
@@ -162,7 +192,6 @@ class SearchStoriesTest(BaseSearchTest):
             sample_results = self._admin_search.story_sample(query="weather", start_date=START_DATE, limit=sample_size,
                                                              end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
             assert len(sample_results) == sample_size  # default length
-            # time.sleep(31)
             # get regular results
             list_results, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, page_size=sample_size,
                                                             end_date=END_DATE, collection_ids=[COLLECTION_US_NATIONAL])
@@ -184,7 +213,6 @@ class SearchStoriesTest(BaseSearchTest):
                                                 collection_ids=[COLLECTION_US_NATIONAL], randomized=True)
         for story in page:
             assert 'text' not in story
-        time.sleep(25)
         page, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
                                                 expanded=True, collection_ids=[COLLECTION_US_NATIONAL],
                                                 randomized=True)
@@ -198,7 +226,6 @@ class SearchStoriesTest(BaseSearchTest):
                                                 collection_ids=[COLLECTION_US_NATIONAL])
         for story in page:
             assert 'text' not in story
-        time.sleep(25)
         page, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
                                                 expanded=True, collection_ids=[COLLECTION_US_NATIONAL])
         for story in page:
@@ -216,7 +243,6 @@ class SearchStoriesTest(BaseSearchTest):
             assert indexed_date <= last_date, "indexed_date not in descending order"
             last_date = indexed_date
         # asc
-        time.sleep(31)
         page, _ = self._admin_search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
                                                 collection_ids=[COLLECTION_US_NATIONAL], sort_order='asc')
         a_long_time_ago = dt.datetime(2000, 1, 1, 0, 0, 0)
@@ -263,7 +289,6 @@ class SearchStoriesTest(BaseSearchTest):
         assert len(results) == 1
         assert results[0]['count'] > 0
         assert results[0]['source'] == "abc.net.au"
-        time.sleep(2)
         results, _ = self._search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
                                              source_ids=[AU_BROADCAST_COMPANY])
         assert len(results) > 0
@@ -276,19 +301,16 @@ class SearchStoriesTest(BaseSearchTest):
         directory_api = mediacloud.api.DirectoryApi(self._mc_api_key)
         limit = 1000
         response = directory_api.source_list(collection_id=COLLECTION_US_NATIONAL, limit=limit)
-        time.sleep(2)
         sources_in_collection = response['results']
         assert len(sources_in_collection) > 200
         domains = [s['name'] for s in sources_in_collection]
         assert len(domains) == len(sources_in_collection)
         # now check sources to see they're all in collection list of domains
-        time.sleep(2)
         results = self._search.sources(query="weather", start_date=START_DATE, end_date=END_DATE,
                                        collection_ids=[COLLECTION_US_NATIONAL])
         for s in results:
             assert s['source'] in domains
         # now check urls for a page of matches and make sure they're all in collection list of domains
-        time.sleep(2)
         results, _ = self._search.story_list(query="weather", start_date=START_DATE, end_date=END_DATE,
                                              collection_ids=[COLLECTION_US_NATIONAL])
         assert len(results) > 0
@@ -296,14 +318,10 @@ class SearchStoriesTest(BaseSearchTest):
             assert s['media_url'] in domains
 
 
-class SearchSyntaxTest(TestCase):
+class SearchSyntaxTest(BaseSearchTest):
 
     START_DATE = dt.date(2024, 1, 1)
     END_DATE = dt.date(2024, 1, 30)
-
-    def setUp(self):
-        self._mc_api_key = os.getenv("MC_API_TOKEN")
-        self._search = mediacloud.api.SearchApi(self._mc_api_key)
 
     def _count_query(self, query: str) -> int:
         return self._search.story_count(query=query, start_date=START_DATE, end_date=END_DATE,
@@ -384,17 +402,13 @@ class SearchSyntaxTest(TestCase):
         assert minus_count == not_count
 
 
-class SearchErrorHandlingTest(TestCase):
+class SearchErrorHandlingTest(BaseSearchTest):
     # New test cases for how the api handles bad input and errors from the server.
 
     START_DATE = dt.date(2024, 1, 1)
     END_DATE = dt.date(2024, 1, 30)
     START_DATETIME = dt.datetime(2024, 1, 1)
     END_DATETIME = dt.datetime(2024, 1, 30)
-
-    def setUp(self):
-        self._mc_api_key = os.getenv("MC_API_TOKEN")
-        self._search = mediacloud.api.SearchApi(self._mc_api_key)
 
     def test_datetime(self):
         query = "biden"
@@ -454,6 +468,7 @@ class SearchErrorHandlingTest(TestCase):
                 query="tariff AND Trump",
                 start_date=self.START_DATE,
                 end_date=self.END_DATE,
+                collection_ids=[COLLECTION_US_NATIONAL],
                 interval="week",
             )
         assert result == expected
@@ -467,6 +482,7 @@ class SearchErrorHandlingTest(TestCase):
                 query="tariff AND Trump",
                 start_date=self.START_DATE,
                 end_date=self.END_DATE,
+                collection_ids=[COLLECTION_US_NATIONAL],
             )
         _, params = mock_query.call_args.args
         assert "interval" not in params
@@ -482,5 +498,6 @@ class SearchErrorHandlingTest(TestCase):
                     query="tariff AND Trump",
                     start_date=self.START_DATE,
                     end_date=self.END_DATE,
+                    collection_ids=[COLLECTION_US_NATIONAL],
                     interval="bad",
                 )

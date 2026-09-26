@@ -38,3 +38,14 @@ test = [
 [project.urls]
 "Homepage" = "https://mediacloud.org"
 "Bug Tracker" = "https://github.com/mediacloud/api-client/issues"
+
+[tool.mypy]
+# from story-indexer,
+# from https://blog.wolt.com/engineering/2021/09/30/professional-grade-mypy-configuration/
+disallow_untyped_defs = true
+disallow_any_unimported = true
+no_implicit_optional = true
+check_untyped_defs = true
+warn_return_any = true
+warn_unused_ignores = true
+show_error_codes = true

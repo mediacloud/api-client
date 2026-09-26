@@ -79,7 +79,7 @@ print("India National Collection has {} sources".format(len(sources)))
 Development
 -----------
 
-If you are interested in adding code to this module, first clone [the GitHub repository](https://github.com/c4fcm/MediaCloud-API-Client).
+If you are interested in adding code to this module, first clone [the GitHub repository](https://github.com/mediacloud/api-client).
 
 ### Installing
 
@@ -97,3 +97,19 @@ If you are interested in adding code to this module, first clone [the GitHub rep
 3. Make a brief note in the `CHANGELOG.md` about what changes
 4. Commit changes, and tag commit with version number
 5. Push to main
+
+When client improvements are of great benefit (major new
+functionality, speed/rate improvements) update web-search
+API_PYTHON_CLIENT config/default so that library users see a (once a
+run) warning message that a newer version is available.
+
+Reminder: This library does not currently detect older than expected
+versions of the server, so if changes here depend on a newer
+web-search server running, delay release of this library until the new
+server version is in production, which means a three-step process:
+
+1. New server in production
+2. Release new client
+3. Update server API_PYTHON_CLIENT to new client version
+
+Doing this out of order with any delay may annoy users!
