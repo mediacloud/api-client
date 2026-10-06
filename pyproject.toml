@@ -7,9 +7,11 @@ include = ["mediacloud/py.typed"]
 
 [project]
 name = "mediacloud"
-version = "5.1.0"
+version = "5.2.0"
 authors = [
     {name = "Rahul Bhargava", email = "r.bhargava@northeastern.edu"},
+    {name = "Paige Gulley"},
+    {name = "Phil Budne"},
 ]
 description = "Media Cloud API Client Library"
 readme = "README.md"
@@ -38,6 +40,7 @@ test = [
 [project.urls]
 "Homepage" = "https://mediacloud.org"
 "Bug Tracker" = "https://github.com/mediacloud/api-client/issues"
+"Source Code" = "https://github.com/mediacloud/api-client"
 
 [tool.mypy]
 # from story-indexer,

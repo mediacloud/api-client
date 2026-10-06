@@ -4,6 +4,14 @@ Version History
 Version 5
 ---------
 
+### v5.2.0
+* Add api_params call, and use to determine rate limit, warn user if better library available.
+* Use single session for search tests, remove sleeps
+* Add "--fast" option to pytest
+* Handle response JSON parse errors
+* Typing tweaks
+* Add Source Code link in pyproject.toml
+
 ### v5.1.0
 * add rate-limiting to produce better default behavior, in line with Media Cloud usage policies
 * warn user if making a call with no sources or collections because this isn't recommended usage
